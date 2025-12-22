@@ -20,24 +20,27 @@
 
 .command-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
 }
 
 .command-button {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 12px;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 6px 8px;
   background-color: #2d2d2d;
   border: 1px solid #3d3d3d;
   border-radius: 4px;
   color: #d4d4d4;
-  font-size: 12px;
+  font-size: 11px;
   font-family: inherit;
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .command-button:hover {
@@ -51,10 +54,13 @@
 }
 
 .command-icon {
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .command-name {
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
