@@ -18,7 +18,10 @@ export type HotkeyAction =
   | { type: 'app'; action: AppAction }
 
 export type AppAction =
-  | 'toggleSidebar'
+  | 'toggleLeftPanel'
+  | 'toggleRightPanel'
+  | 'toggleTopPanel'
+  | 'toggleBottomPanel'
   | 'focusTerminal'
   | 'openSettings'
   | 'newSession'
@@ -33,7 +36,10 @@ export const DEFAULT_HOTKEYS: Record<string, string> = {
   help: 'CommandOrControl+Shift+H',
 
   // App actions
-  toggleSidebar: 'CommandOrControl+B',
+  toggleLeftPanel: 'CommandOrControl+[',
+  toggleRightPanel: 'CommandOrControl+]',
+  toggleBottomPanel: 'CommandOrControl+J',
+  toggleTopPanel: 'CommandOrControl+Shift+J',
   focusTerminal: 'CommandOrControl+`',
   openSettings: 'CommandOrControl+,',
   newSession: 'CommandOrControl+Shift+N',
@@ -57,7 +63,10 @@ export const HOTKEY_DESCRIPTIONS: Record<string, string> = {
   compact: 'Send /compact to terminal',
   clear: 'Send /clear to terminal',
   help: 'Send /help to terminal',
-  toggleSidebar: 'Toggle sidebar visibility',
+  toggleLeftPanel: 'Toggle left panel',
+  toggleRightPanel: 'Toggle right panel',
+  toggleTopPanel: 'Toggle top panel',
+  toggleBottomPanel: 'Toggle bottom panel',
   focusTerminal: 'Focus terminal',
   openSettings: 'Open settings',
   newSession: 'Start new terminal session',
@@ -79,7 +88,10 @@ const HOTKEY_ACTIONS: Record<string, HotkeyAction> = {
   compact: { type: 'command', command: '/compact\n' },
   clear: { type: 'command', command: '/clear\n' },
   help: { type: 'command', command: '/help\n' },
-  toggleSidebar: { type: 'app', action: 'toggleSidebar' },
+  toggleLeftPanel: { type: 'app', action: 'toggleLeftPanel' },
+  toggleRightPanel: { type: 'app', action: 'toggleRightPanel' },
+  toggleTopPanel: { type: 'app', action: 'toggleTopPanel' },
+  toggleBottomPanel: { type: 'app', action: 'toggleBottomPanel' },
   focusTerminal: { type: 'app', action: 'focusTerminal' },
   openSettings: { type: 'app', action: 'openSettings' },
   newSession: { type: 'app', action: 'newSession' },

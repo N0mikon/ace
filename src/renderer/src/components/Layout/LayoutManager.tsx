@@ -68,9 +68,17 @@ export function LayoutManager(): JSX.Element {
 
         case 'app':
           switch (data.action.action) {
-            case 'toggleSidebar':
-              // Toggle left panel area
+            case 'toggleLeftPanel':
               toggleAreaCollapsed('left')
+              break
+            case 'toggleRightPanel':
+              toggleAreaCollapsed('right')
+              break
+            case 'toggleTopPanel':
+              toggleAreaCollapsed('top')
+              break
+            case 'toggleBottomPanel':
+              toggleAreaCollapsed('bottom')
               break
             case 'focusTerminal':
               // Focus is handled by Terminal component

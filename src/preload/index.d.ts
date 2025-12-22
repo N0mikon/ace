@@ -140,7 +140,10 @@ export interface AgentAPI {
 export type HotkeyActionType = 'command' | 'agent' | 'app'
 
 export type AppAction =
-  | 'toggleSidebar'
+  | 'toggleLeftPanel'
+  | 'toggleRightPanel'
+  | 'toggleTopPanel'
+  | 'toggleBottomPanel'
   | 'focusTerminal'
   | 'openSettings'
   | 'newSession'
