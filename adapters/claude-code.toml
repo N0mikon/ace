@@ -1,0 +1,51 @@
+# Claude Code Adapter
+# Default tool adapter for Claude Code CLI
+
+[adapter]
+name = "Claude Code"
+version = "1.0.0"
+description = "Anthropic's official CLI for Claude"
+launch_command = "claude"
+detect_pattern = "Claude Code"  # String in output indicating tool is running
+
+[commands]
+# Built-in slash commands
+exit = "/exit"
+compact = "/compact"
+clear = "/clear"
+help = "/help"
+cost = "/cost"
+retry = "/retry"
+resume = "/resume"
+review = "/review"
+init = "/init"
+doctor = "/doctor"
+memory = "/memory"
+config = "/config"
+permissions = "/permissions"
+mcp = "/mcp"
+vim = "/vim"
+
+[flags]
+# CLI flags for launching
+resume = "--resume"
+continue = "--continue"
+print_mode = "--print"
+verbose = "--verbose"
+dangerously_skip_permissions = "--dangerously-skip-permissions"
+model = "--model"
+
+[patterns]
+# Patterns for detecting tool state (regex)
+prompt_ready = "^>"                    # Ready for input
+thinking = "Thinking\\.\\.\\."         # Currently processing
+tool_use = "Using tool:"               # Using a tool
+error = "^Error:"                      # Error occurred
+cost_display = "Total cost:"           # Cost information shown
+
+[shortcuts]
+# Suggested keyboard shortcuts for this tool
+new_session = "Ctrl+Shift+N"
+resume_session = "Ctrl+Shift+R"
+exit_tool = "Ctrl+Shift+E"
+compact_context = "Ctrl+Shift+C"

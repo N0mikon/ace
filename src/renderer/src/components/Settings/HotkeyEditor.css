@@ -1,0 +1,142 @@
+.hotkey-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hotkey-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hotkey-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #d4d4d4;
+}
+
+.reset-all-button {
+  padding: 4px 12px;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid #3d3d3d;
+  background-color: #2d2d2d;
+  color: #888888;
+}
+
+.reset-all-button:hover {
+  background-color: #3d3d3d;
+  color: #d4d4d4;
+}
+
+.hotkey-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888888;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #3d3d3d;
+}
+
+.hotkey-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hotkey-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background-color: #252525;
+  border-radius: 4px;
+}
+
+.hotkey-description {
+  flex: 1;
+  font-size: 12px;
+  color: #d4d4d4;
+}
+
+.hotkey-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hotkey-input {
+  width: 160px;
+  padding: 6px 8px;
+  background-color: #1e1e1e;
+  border: 1px solid #3d3d3d;
+  border-radius: 3px;
+  color: #d4d4d4;
+  font-size: 12px;
+  font-family: monospace;
+  text-align: center;
+}
+
+.hotkey-input:focus {
+  outline: none;
+  border-color: #007acc;
+}
+
+.hotkey-input.recording {
+  border-color: #ff9800;
+  background-color: #2d2520;
+}
+
+.hotkey-input.error {
+  border-color: #f44747;
+}
+
+.hotkey-input.modified {
+  border-color: #4ec9b0;
+}
+
+.hotkey-reset-button {
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid #3d3d3d;
+  background-color: transparent;
+  color: #888888;
+}
+
+.hotkey-reset-button:hover {
+  background-color: #3d3d3d;
+  color: #d4d4d4;
+}
+
+.hotkey-reset-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hotkey-error {
+  font-size: 11px;
+  color: #f44747;
+  margin-top: 2px;
+}
+
+.recording-hint {
+  font-size: 11px;
+  color: #ff9800;
+  text-align: center;
+  padding: 8px;
+  background-color: #2d2520;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
