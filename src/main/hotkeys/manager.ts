@@ -99,7 +99,6 @@ class HotkeyManager {
   private bindings: Map<string, HotkeyBinding> = new Map()
   private customBindings: Record<string, string> = {}
   private mainWindow: BrowserWindow | null = null
-  private enabled: boolean = true
   private initialized: boolean = false
 
   /**
@@ -300,7 +299,6 @@ class HotkeyManager {
    * Enable/disable all hotkeys
    */
   setEnabled(enabled: boolean): void {
-    this.enabled = enabled
     if (enabled) {
       this.registerAll()
     } else {

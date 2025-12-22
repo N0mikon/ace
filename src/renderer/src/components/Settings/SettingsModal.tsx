@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type { AceConfig } from '../../../../preload/index.d'
 import { HotkeyEditor } from './HotkeyEditor'
+import { LayoutSettings } from './LayoutSettings'
 import './SettingsModal.css'
 
 interface SettingsModalProps {
@@ -13,7 +14,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps): JSX.Elem
   const [configPaths, setConfigPaths] = useState<{ configDir: string; configFile: string } | null>(
     null
   )
-  const [activeTab, setActiveTab] = useState<'general' | 'terminal' | 'claude' | 'hotkeys' | 'paths'>('general')
+  const [activeTab, setActiveTab] = useState<'general' | 'terminal' | 'claude' | 'hotkeys' | 'paths' | 'layout'>('general')
   const [hasChanges, setHasChanges] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
 
@@ -124,6 +125,12 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps): JSX.Elem
             onClick={() => setActiveTab('paths')}
           >
             Paths
+          </button>
+          <button
+            className={`tab ${activeTab === 'layout' ? 'active' : ''}`}
+            onClick={() => setActiveTab('layout')}
+          >
+            Layout
           </button>
         </div>
 
@@ -255,6 +262,12 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps): JSX.Elem
                   onChange={(e) => handleChange('agents.globalDirectory', e.target.value)}
                 />
               </div>
+            </div>
+          )}
+
+          {activeTab === 'layout' && (
+            <div className="settings-section">
+              <LayoutSettings />
             </div>
           )}
         </div>

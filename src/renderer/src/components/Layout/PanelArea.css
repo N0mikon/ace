@@ -1,0 +1,116 @@
+/**
+ * Panel Area Styles
+ */
+
+.panel-area {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--bg-secondary, #252526);
+  overflow: hidden;
+}
+
+.panel-area.empty {
+  display: none;
+}
+
+.panel-area-content {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+
+/* Ensure panel components fill their container */
+.panel-area-content > * {
+  width: 100%;
+  height: 100%;
+}
+
+/* Override fixed widths from panel components */
+.panel-area .agent-panel,
+.panel-area .session-panel,
+.panel-area .mcp-panel,
+.panel-area .project-panel,
+.panel-area .command-panel {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Hide redundant panel headers - tabs already show the name */
+.panel-area .panel-header {
+  display: none;
+}
+
+/* ===== Horizontal layout for top/bottom panels ===== */
+.panel-area-top .panel-area-content,
+.panel-area-bottom .panel-area-content {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Make panel content flow horizontally in top/bottom areas */
+.panel-area-top .agent-list,
+.panel-area-bottom .agent-list,
+.panel-area-top .session-list,
+.panel-area-bottom .session-list,
+.panel-area-top .mcp-list,
+.panel-area-bottom .mcp-list,
+.panel-area-top .command-grid,
+.panel-area-bottom .command-grid {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Constrain item widths in horizontal layout */
+.panel-area-top .agent-item,
+.panel-area-bottom .agent-item,
+.panel-area-top .session-item,
+.panel-area-bottom .session-item,
+.panel-area-top .mcp-item,
+.panel-area-bottom .mcp-item {
+  min-width: 200px;
+  max-width: 300px;
+  flex-shrink: 0;
+}
+
+/* Adjust panel headers for horizontal areas */
+.panel-area-top .panel-header,
+.panel-area-bottom .panel-header {
+  flex-shrink: 0;
+}
+
+/* Make the panel itself horizontal */
+.panel-area-top .agent-panel,
+.panel-area-bottom .agent-panel,
+.panel-area-top .session-panel,
+.panel-area-bottom .session-panel,
+.panel-area-top .mcp-panel,
+.panel-area-bottom .mcp-panel,
+.panel-area-top .command-panel,
+.panel-area-bottom .command-panel,
+.panel-area-top .project-panel,
+.panel-area-bottom .project-panel {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 16px;
+  padding: 8px;
+  overflow-x: auto;
+}
+
+/* List takes remaining space and scrolls horizontally */
+.panel-area-top .agent-panel > .agent-list,
+.panel-area-bottom .agent-panel > .agent-list,
+.panel-area-top .session-panel > .session-list,
+.panel-area-bottom .session-panel > .session-list,
+.panel-area-top .mcp-panel > .mcp-list,
+.panel-area-bottom .mcp-panel > .mcp-list {
+  flex: 1;
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 8px;
+}

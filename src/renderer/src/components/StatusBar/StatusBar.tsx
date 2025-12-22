@@ -4,9 +4,10 @@ import './StatusBar.css'
 interface StatusBarProps {
   terminalReady: boolean
   sidebarCollapsed?: boolean
+  onOpenSettings?: () => void
 }
 
-export function StatusBar({ terminalReady, sidebarCollapsed }: StatusBarProps): JSX.Element {
+export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: StatusBarProps): JSX.Element {
   const [sessionTime, setSessionTime] = useState('00:00:00')
   const [startTime] = useState(Date.now())
   const [sessionId, setSessionId] = useState<number | null>(null)
@@ -115,6 +116,16 @@ export function StatusBar({ terminalReady, sidebarCollapsed }: StatusBarProps): 
       <div className="status-right">
         {sidebarCollapsed && (
           <span className="status-hint">Ctrl+B to show sidebar</span>
+        )}
+        {onOpenSettings && (
+          <button
+            className="status-settings-btn"
+            onClick={onOpenSettings}
+            title="Settings (Ctrl+,)"
+            aria-label="Open Settings"
+          >
+            &#9881;
+          </button>
         )}
         <span className="status-brand">ACE</span>
         <span className="status-version">v0.1.0</span>

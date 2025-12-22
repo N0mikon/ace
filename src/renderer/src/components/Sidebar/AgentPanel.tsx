@@ -147,7 +147,7 @@ export function AgentPanel({ onInjectPrompt }: AgentPanelProps): JSX.Element {
         <div className="agent-empty">No agents yet. Click + to create one.</div>
       ) : (
         <div className="agent-list" role="list">
-          {agents.map((agent, index) => (
+          {agents.map((agent) => (
             <div
               key={agent.id}
               className="agent-item"
