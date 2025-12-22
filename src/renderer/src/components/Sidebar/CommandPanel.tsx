@@ -86,7 +86,8 @@ export function CommandPanel({
   categories = COMMAND_CATEGORIES
 }: CommandPanelProps): JSX.Element {
   const handleClick = (command: string): void => {
-    onCommand(command + '\n')
+    // Use \r (carriage return) to simulate pressing Enter in terminal
+    onCommand(command + '\r')
   }
 
   return (

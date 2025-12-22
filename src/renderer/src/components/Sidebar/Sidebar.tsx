@@ -16,9 +16,9 @@ export function Sidebar({
   onOpenSettings,
   collapsed = false
 }: SidebarProps): JSX.Element {
-  // Handle agent prompt injection - write to terminal
+  // Handle agent prompt injection - write to terminal with carriage return to execute
   const handleInjectPrompt = (prompt: string): void => {
-    window.terminal?.write(prompt + '\n')
+    window.terminal?.write(prompt + '\r')
   }
 
   return (

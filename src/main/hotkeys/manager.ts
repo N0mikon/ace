@@ -84,10 +84,10 @@ export const HOTKEY_DESCRIPTIONS: Record<string, string> = {
 
 // Map hotkey IDs to their actions
 const HOTKEY_ACTIONS: Record<string, HotkeyAction> = {
-  exit: { type: 'command', command: '/exit\n' },
-  compact: { type: 'command', command: '/compact\n' },
-  clear: { type: 'command', command: '/clear\n' },
-  help: { type: 'command', command: '/help\n' },
+  exit: { type: 'command', command: '/exit\r' },
+  compact: { type: 'command', command: '/compact\r' },
+  clear: { type: 'command', command: '/clear\r' },
+  help: { type: 'command', command: '/help\r' },
   toggleLeftPanel: { type: 'app', action: 'toggleLeftPanel' },
   toggleRightPanel: { type: 'app', action: 'toggleRightPanel' },
   toggleTopPanel: { type: 'app', action: 'toggleTopPanel' },

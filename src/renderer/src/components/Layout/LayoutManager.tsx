@@ -106,7 +106,7 @@ export function LayoutManager(): JSX.Element {
             const index = parseInt(data.action.agentId) - 1
             const agent = agentsRef.current[index]
             if (agent) {
-              window.terminal?.write(agent.prompt.text + '\n')
+              window.terminal?.write(agent.prompt.text + '\r')
             }
           }
           break

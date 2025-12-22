@@ -21,9 +21,9 @@ const writeToTerminal = (text: string): void => {
   window.terminal?.write(text)
 }
 
-// Inject prompt for agents (adds newline)
+// Inject prompt for agents (adds carriage return to execute)
 const handleInjectPrompt = (prompt: string): void => {
-  writeToTerminal(prompt + '\n')
+  writeToTerminal(prompt + '\r')
 }
 
 // Execute command
