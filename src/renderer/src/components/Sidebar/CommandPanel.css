@@ -18,6 +18,30 @@
   color: #888888;
 }
 
+.command-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.command-category {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.category-header {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #666666;
+  padding: 0 2px;
+  border-bottom: 1px solid #3d3d3d;
+  padding-bottom: 4px;
+  margin-bottom: 2px;
+}
+
 .command-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

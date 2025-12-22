@@ -5,58 +5,87 @@ interface QuickCommand {
   command: string
   icon?: string
   description?: string
-  category?: string
 }
 
-const DEFAULT_COMMANDS: QuickCommand[] = [
-  // Session commands
-  { name: 'Exit', command: '/exit', icon: '⏹', description: 'Exit Claude Code', category: 'session' },
-  { name: 'Clear', command: '/clear', icon: '🗑', description: 'Clear conversation', category: 'session' },
-  { name: 'Compact', command: '/compact', icon: '📦', description: 'Compact context', category: 'session' },
-  { name: 'Resume', command: '/resume', icon: '▶', description: 'Resume previous session', category: 'session' },
-  { name: 'Retry', command: '/retry', icon: '🔄', description: 'Retry last message', category: 'session' },
+interface CommandCategory {
+  id: string
+  label: string
+  commands: QuickCommand[]
+}
 
-  // Info commands
-  { name: 'Help', command: '/help', icon: '❓', description: 'Show help', category: 'info' },
-  { name: 'Cost', command: '/cost', icon: '💰', description: 'Show token cost', category: 'info' },
-  { name: 'Status', command: '/status', icon: '📊', description: 'Show status', category: 'info' },
-  { name: 'Doctor', command: '/doctor', icon: '🩺', description: 'Run diagnostics', category: 'info' },
-  { name: 'Config', command: '/config', icon: '⚙', description: 'Show configuration', category: 'info' },
-
-  // Context commands
-  { name: 'Context', command: '/context', icon: '📎', description: 'Add context files', category: 'context' },
-  { name: 'Memory', command: '/memory', icon: '🧠', description: 'Memory commands', category: 'context' },
-  { name: 'MCP', command: '/mcp', icon: '🔌', description: 'MCP server commands', category: 'context' },
-
-  // Code commands
-  { name: 'Review', command: '/review', icon: '👁', description: 'Review code', category: 'code' },
-  { name: 'PR Comments', command: '/pr-comments', icon: '💬', description: 'Get PR comments', category: 'code' },
-  { name: 'Init', command: '/init', icon: '🚀', description: 'Initialize project', category: 'code' },
-
-  // Settings commands
-  { name: 'Model', command: '/model', icon: '🤖', description: 'Change model', category: 'settings' },
-  { name: 'Vim', command: '/vim', icon: '⌨', description: 'Toggle vim mode', category: 'settings' },
-  { name: 'Theme', command: '/theme', icon: '🎨', description: 'Change theme', category: 'settings' },
-  { name: 'Permissions', command: '/permissions', icon: '🔐', description: 'Manage permissions', category: 'settings' },
-  { name: 'Terminal', command: '/terminal-setup', icon: '💻', description: 'Setup terminal', category: 'settings' },
-
-  // Account commands
-  { name: 'Login', command: '/login', icon: '🔑', description: 'Log in to Anthropic', category: 'account' },
-  { name: 'Logout', command: '/logout', icon: '🚪', description: 'Log out', category: 'account' },
-  { name: 'Bug', command: '/bug', icon: '🐛', description: 'Report a bug', category: 'account' }
+const COMMAND_CATEGORIES: CommandCategory[] = [
+  {
+    id: 'session',
+    label: 'Session',
+    commands: [
+      { name: 'Exit', command: '/exit', icon: '⏹', description: 'Exit Claude Code' },
+      { name: 'Clear', command: '/clear', icon: '🗑', description: 'Clear conversation' },
+      { name: 'Compact', command: '/compact', icon: '📦', description: 'Compact context' },
+      { name: 'Resume', command: '/resume', icon: '▶', description: 'Resume previous session' },
+      { name: 'Retry', command: '/retry', icon: '🔄', description: 'Retry last message' }
+    ]
+  },
+  {
+    id: 'info',
+    label: 'Info',
+    commands: [
+      { name: 'Help', command: '/help', icon: '❓', description: 'Show help' },
+      { name: 'Cost', command: '/cost', icon: '💰', description: 'Show token cost' },
+      { name: 'Status', command: '/status', icon: '📊', description: 'Show status' },
+      { name: 'Doctor', command: '/doctor', icon: '🩺', description: 'Run diagnostics' },
+      { name: 'Config', command: '/config', icon: '⚙', description: 'Show configuration' }
+    ]
+  },
+  {
+    id: 'context',
+    label: 'Context',
+    commands: [
+      { name: 'Context', command: '/context', icon: '📎', description: 'Add context files' },
+      { name: 'Memory', command: '/memory', icon: '🧠', description: 'Memory commands' },
+      { name: 'MCP', command: '/mcp', icon: '🔌', description: 'MCP server commands' }
+    ]
+  },
+  {
+    id: 'code',
+    label: 'Code',
+    commands: [
+      { name: 'Review', command: '/review', icon: '👁', description: 'Review code' },
+      { name: 'PR Comments', command: '/pr-comments', icon: '💬', description: 'Get PR comments' },
+      { name: 'Init', command: '/init', icon: '🚀', description: 'Initialize project' }
+    ]
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    commands: [
+      { name: 'Model', command: '/model', icon: '🤖', description: 'Change model' },
+      { name: 'Vim', command: '/vim', icon: '⌨', description: 'Toggle vim mode' },
+      { name: 'Theme', command: '/theme', icon: '🎨', description: 'Change theme' },
+      { name: 'Permissions', command: '/permissions', icon: '🔐', description: 'Manage permissions' },
+      { name: 'Terminal', command: '/terminal-setup', icon: '💻', description: 'Setup terminal' }
+    ]
+  },
+  {
+    id: 'account',
+    label: 'Account',
+    commands: [
+      { name: 'Login', command: '/login', icon: '🔑', description: 'Log in to Anthropic' },
+      { name: 'Logout', command: '/logout', icon: '🚪', description: 'Log out' },
+      { name: 'Bug', command: '/bug', icon: '🐛', description: 'Report a bug' }
+    ]
+  }
 ]
 
 interface CommandPanelProps {
   onCommand: (command: string) => void
-  commands?: QuickCommand[]
+  categories?: CommandCategory[]
 }
 
 export function CommandPanel({
   onCommand,
-  commands = DEFAULT_COMMANDS
+  categories = COMMAND_CATEGORIES
 }: CommandPanelProps): JSX.Element {
   const handleClick = (command: string): void => {
-    // Send command with newline to execute it
     onCommand(command + '\n')
   }
 
@@ -65,17 +94,24 @@ export function CommandPanel({
       <div className="panel-header">
         <span className="panel-title">Quick Commands</span>
       </div>
-      <div className="command-grid">
-        {commands.map((cmd) => (
-          <button
-            key={cmd.name}
-            className="command-button"
-            onClick={() => handleClick(cmd.command)}
-            title={cmd.description}
-          >
-            {cmd.icon && <span className="command-icon">{cmd.icon}</span>}
-            <span className="command-name">{cmd.name}</span>
-          </button>
+      <div className="command-categories">
+        {categories.map((category) => (
+          <div key={category.id} className="command-category">
+            <div className="category-header">{category.label}</div>
+            <div className="command-grid">
+              {category.commands.map((cmd) => (
+                <button
+                  key={cmd.name}
+                  className="command-button"
+                  onClick={() => handleClick(cmd.command)}
+                  title={cmd.description}
+                >
+                  {cmd.icon && <span className="command-icon">{cmd.icon}</span>}
+                  <span className="command-name">{cmd.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </div>
