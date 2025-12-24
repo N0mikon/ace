@@ -134,6 +134,11 @@ export interface AgentAPI {
     promptText: string
   ) => Promise<{ success: boolean; filePath?: string }>
   reload: () => Promise<Agent[]>
+  copyToProject: (
+    agentId: string,
+    projectPath: string
+  ) => Promise<{ success: boolean; filePath?: string; error?: string }>
+  getGlobalDirectory: () => Promise<string>
   onChanged: (callback: () => void) => () => void
 }
 

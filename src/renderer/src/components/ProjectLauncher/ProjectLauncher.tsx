@@ -3,10 +3,11 @@
  * Full-screen launcher shown on startup for project selection
  */
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useProjectStore } from '../../stores/projectStore'
 import { RecentProjects } from './RecentProjects'
 import { LaunchOptions } from './LaunchOptions'
+import { NewProjectWizard } from './NewProjectWizard'
 import './ProjectLauncher.css'
 
 export function ProjectLauncher(): JSX.Element {
@@ -19,19 +20,39 @@ export function ProjectLauncher(): JSX.Element {
     setLaunchOptions,
     launch,
     loadRecentProjects,
-    openFolder,
-    initializeProject
+    openFolder
   } = useProjectStore()
+
+  const [showWizard, setShowWizard] = useState(false)
 
   useEffect(() => {
     loadRecentProjects()
   }, [loadRecentProjects])
 
-  const handleNewProject = async (): Promise<void> => {
-    const path = await window.projects.openDialog()
-    if (path) {
-      await initializeProject(path)
-    }
+  const handleNewProject = (): void => {
+    setShowWizard(true)
+  }
+
+  const handleWizardComplete = async (projectPath: string): Promise<void> => {
+    setShowWizard(false)
+
+    // Load the newly created project
+    const config = await window.projects.loadConfig(projectPath)
+    const projectName = config?.project?.name || projectPath.split(/[/\\]/).pop() || 'Project'
+
+    setProject({
+      name: projectName,
+      path: projectPath,
+      lastOpened: new Date().toISOString(),
+      hasAceConfig: true
+    })
+
+    // Reload recent projects list
+    loadRecentProjects()
+  }
+
+  const handleWizardCancel = (): void => {
+    setShowWizard(false)
   }
 
   const handleSelectRecent = async (project: {
@@ -117,6 +138,10 @@ export function ProjectLauncher(): JSX.Element {
           <p>v0.1.0</p>
         </footer>
       </div>
+
+      {showWizard && (
+        <NewProjectWizard onComplete={handleWizardComplete} onCancel={handleWizardCancel} />
+      )}
     </div>
   )
 }

@@ -56,8 +56,62 @@ class AgentManager {
       globalDir || path.join(app.getPath('appData'), 'ace', 'ace', 'agents')
 
     this.ensureDirectory(this.globalDirectory)
+
+    // Install default agents on first run
+    this.installDefaultAgents()
+
     this.loadAgents()
     this.watchDirectories()
+  }
+
+  /**
+   * Install default agents from resources to global directory
+   * Only copies agents that don't already exist to avoid overwriting customizations
+   */
+  private installDefaultAgents(): void {
+    // In production, resources are in the app's resources folder
+    // In development, they're in the project root
+    const resourcePaths = [
+      path.join(process.resourcesPath, 'default-agents'),
+      path.join(app.getAppPath(), 'resources', 'default-agents'),
+      path.join(__dirname, '..', '..', '..', 'resources', 'default-agents')
+    ]
+
+    let defaultAgentsDir: string | null = null
+    for (const p of resourcePaths) {
+      if (fs.existsSync(p)) {
+        defaultAgentsDir = p
+        break
+      }
+    }
+
+    if (!defaultAgentsDir) {
+      console.log('No default agents directory found')
+      return
+    }
+
+    try {
+      const files = fs.readdirSync(defaultAgentsDir).filter((f) => f.endsWith('.toml'))
+      let installed = 0
+
+      for (const file of files) {
+        const targetPath = path.join(this.globalDirectory, file)
+
+        // Only copy if it doesn't exist (don't overwrite user customizations)
+        if (!fs.existsSync(targetPath)) {
+          const sourcePath = path.join(defaultAgentsDir, file)
+          fs.copyFileSync(sourcePath, targetPath)
+          installed++
+          console.log(`Installed default agent: ${file}`)
+        }
+      }
+
+      if (installed > 0) {
+        console.log(`Installed ${installed} default agent(s)`)
+      }
+    } catch (err) {
+      console.error('Failed to install default agents:', err)
+    }
   }
 
   /**
@@ -156,6 +210,41 @@ ${promptText}
    */
   reload(): void {
     this.loadAgents()
+  }
+
+  /**
+   * Copy an agent to a project's .claude/agents/ directory
+   */
+  copyToProject(id: string, projectPath: string): { success: boolean; filePath?: string; error?: string } {
+    const agent = this.agents.get(id)
+    if (!agent) {
+      return { success: false, error: `Agent not found: ${id}` }
+    }
+
+    // Target directory: .claude/agents/
+    const targetDir = path.join(projectPath, '.claude', 'agents')
+    this.ensureDirectory(targetDir)
+
+    const targetPath = path.join(targetDir, path.basename(agent.filePath))
+
+    // Check if already exists
+    if (fs.existsSync(targetPath)) {
+      return { success: false, error: `Agent already exists in project: ${path.basename(agent.filePath)}` }
+    }
+
+    try {
+      fs.copyFileSync(agent.filePath, targetPath)
+      return { success: true, filePath: targetPath }
+    } catch (err) {
+      return { success: false, error: `Failed to copy agent: ${err}` }
+    }
+  }
+
+  /**
+   * Get the global agents directory path
+   */
+  getGlobalDirectory(): string {
+    return this.globalDirectory
   }
 
   /**

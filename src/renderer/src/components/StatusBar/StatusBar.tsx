@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useProjectStore } from '../../stores/projectStore'
 import './StatusBar.css'
 
 interface StatusBarProps {
@@ -13,6 +14,7 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
   const [sessionId, setSessionId] = useState<number | null>(null)
   const [agentCount, setAgentCount] = useState(0)
   const [mcpCount, setMcpCount] = useState(0)
+  const closeProject = useProjectStore((state) => state.closeProject)
 
   useEffect(() => {
     // Update session timer
@@ -117,6 +119,14 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
         {sidebarCollapsed && (
           <span className="status-hint">Ctrl+B to show sidebar</span>
         )}
+        <button
+          className="status-action-btn"
+          onClick={closeProject}
+          title="Close Project"
+          aria-label="Close Project"
+        >
+          &#10006;
+        </button>
         {onOpenSettings && (
           <button
             className="status-settings-btn"

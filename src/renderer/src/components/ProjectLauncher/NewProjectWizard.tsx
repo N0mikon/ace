@@ -1,0 +1,319 @@
+/**
+ * New Project Wizard
+ * Multi-step wizard for creating new projects with agent selection
+ */
+
+import { useState, useEffect } from 'react'
+import type { Agent, McpServerInfo } from '../../../../preload/index.d'
+import './NewProjectWizard.css'
+
+interface NewProjectWizardProps {
+  onComplete: (projectPath: string) => void
+  onCancel: () => void
+}
+
+type WizardStep = 'folder' | 'agents' | 'confirm'
+
+export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps): JSX.Element {
+  const [step, setStep] = useState<WizardStep>('folder')
+  const [projectPath, setProjectPath] = useState<string | null>(null)
+  const [projectName, setProjectName] = useState<string>('')
+  const [availableAgents, setAvailableAgents] = useState<Agent[]>([])
+  const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set())
+  const [mcpServers, setMcpServers] = useState<McpServerInfo[]>([])
+  const [isCreating, setIsCreating] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Load global agents and MCP servers
+  useEffect(() => {
+    const loadData = async (): Promise<void> => {
+      try {
+        const agents = await window.agents.list()
+        const servers = await window.mcp.getServers()
+        setAvailableAgents(agents)
+        setMcpServers(servers)
+      } catch (err) {
+        console.error('Failed to load agents/MCP:', err)
+      }
+    }
+    loadData()
+  }, [])
+
+  const handleSelectFolder = async (): Promise<void> => {
+    const path = await window.projects.openDialog()
+    if (path) {
+      setProjectPath(path)
+      // Extract project name from path
+      const name = path.split(/[/\\]/).pop() || 'Project'
+      setProjectName(name)
+      setStep('agents')
+    }
+  }
+
+  const handleToggleAgent = (agentId: string): void => {
+    setSelectedAgents((prev) => {
+      const next = new Set(prev)
+      if (next.has(agentId)) {
+        next.delete(agentId)
+      } else {
+        next.add(agentId)
+      }
+      return next
+    })
+  }
+
+  const handleSelectAllAgents = (): void => {
+    setSelectedAgents(new Set(availableAgents.map((a) => a.id)))
+  }
+
+  const handleDeselectAllAgents = (): void => {
+    setSelectedAgents(new Set())
+  }
+
+  const handleCreate = async (): Promise<void> => {
+    if (!projectPath) return
+
+    setIsCreating(true)
+    setError(null)
+
+    try {
+      // Initialize project
+      await window.projects.initializeAce(projectPath)
+
+      // Copy selected agents to project
+      for (const agentId of selectedAgents) {
+        const result = await window.agents.copyToProject(agentId, projectPath)
+        if (!result.success) {
+          console.warn(`Failed to copy agent ${agentId}: ${result.error}`)
+        }
+      }
+
+      onComplete(projectPath)
+    } catch (err) {
+      setError(String(err))
+      setIsCreating(false)
+    }
+  }
+
+  const renderFolderStep = (): JSX.Element => (
+    <div className="wizard-step">
+      <div className="step-header">
+        <h3 className="step-title">Select Project Folder</h3>
+        <p className="step-description">
+          Choose a folder for your new project. ACE will create configuration files and a local
+          agents directory.
+        </p>
+      </div>
+
+      <div className="step-content">
+        {projectPath ? (
+          <div className="folder-selected">
+            <span className="folder-icon">&#128193;</span>
+            <div className="folder-info">
+              <span className="folder-name">{projectName}</span>
+              <span className="folder-path">{projectPath}</span>
+            </div>
+            <button className="change-button" onClick={handleSelectFolder}>
+              Change
+            </button>
+          </div>
+        ) : (
+          <button className="select-folder-button" onClick={handleSelectFolder}>
+            <span className="button-icon">&#128193;</span>
+            <span>Choose Folder...</span>
+          </button>
+        )}
+      </div>
+
+      <div className="step-actions">
+        <button className="wizard-button secondary" onClick={onCancel}>
+          Cancel
+        </button>
+        <button
+          className="wizard-button primary"
+          onClick={() => setStep('agents')}
+          disabled={!projectPath}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  )
+
+  const renderAgentsStep = (): JSX.Element => (
+    <div className="wizard-step">
+      <div className="step-header">
+        <h3 className="step-title">Import Agents</h3>
+        <p className="step-description">
+          Select agents to copy to your project. These will be available locally in{' '}
+          <code>.claude/agents/</code>
+        </p>
+      </div>
+
+      <div className="step-content">
+        {mcpServers.length > 0 && (
+          <div className="mcp-info">
+            <span className="mcp-icon">&#128268;</span>
+            <span className="mcp-text">
+              {mcpServers.length} MCP server{mcpServers.length !== 1 ? 's' : ''} configured globally
+            </span>
+          </div>
+        )}
+
+        <div className="agents-header">
+          <span className="agents-count">
+            {selectedAgents.size} of {availableAgents.length} selected
+          </span>
+          <div className="agents-actions">
+            <button className="text-button" onClick={handleSelectAllAgents}>
+              Select All
+            </button>
+            <span className="divider">|</span>
+            <button className="text-button" onClick={handleDeselectAllAgents}>
+              None
+            </button>
+          </div>
+        </div>
+
+        <div className="agents-list">
+          {availableAgents.length === 0 ? (
+            <div className="agents-empty">
+              <p>No agents available in global directory.</p>
+              <p className="hint">Agents will be created when you first run ACE.</p>
+            </div>
+          ) : (
+            availableAgents.map((agent) => (
+              <label key={agent.id} className="agent-item">
+                <input
+                  type="checkbox"
+                  checked={selectedAgents.has(agent.id)}
+                  onChange={() => handleToggleAgent(agent.id)}
+                />
+                <div className="agent-info">
+                  <span className="agent-name">{agent.agent.name}</span>
+                  <span className="agent-description">{agent.agent.description}</span>
+                </div>
+              </label>
+            ))
+          )}
+        </div>
+      </div>
+
+      <div className="step-actions">
+        <button className="wizard-button secondary" onClick={() => setStep('folder')}>
+          Back
+        </button>
+        <button className="wizard-button primary" onClick={() => setStep('confirm')}>
+          Next
+        </button>
+      </div>
+    </div>
+  )
+
+  const renderConfirmStep = (): JSX.Element => (
+    <div className="wizard-step">
+      <div className="step-header">
+        <h3 className="step-title">Confirm Project Setup</h3>
+        <p className="step-description">Review your project configuration before creating.</p>
+      </div>
+
+      <div className="step-content">
+        <div className="confirm-section">
+          <h4 className="confirm-label">Project Location</h4>
+          <div className="confirm-value">
+            <span className="folder-icon">&#128193;</span>
+            <div>
+              <strong>{projectName}</strong>
+              <span className="path">{projectPath}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="confirm-section">
+          <h4 className="confirm-label">Files to Create</h4>
+          <ul className="files-list">
+            <li>
+              <code>.ace/project.aceproj</code> - Project configuration
+            </li>
+            <li>
+              <code>.claude/agents/</code> - Local agents directory
+            </li>
+            {selectedAgents.size > 0 && (
+              <li>
+                {selectedAgents.size} agent file{selectedAgents.size !== 1 ? 's' : ''} copied
+              </li>
+            )}
+          </ul>
+        </div>
+
+        {selectedAgents.size > 0 && (
+          <div className="confirm-section">
+            <h4 className="confirm-label">Agents to Import ({selectedAgents.size})</h4>
+            <div className="selected-agents">
+              {availableAgents
+                .filter((a) => selectedAgents.has(a.id))
+                .map((agent) => (
+                  <span key={agent.id} className="agent-tag">
+                    {agent.agent.name}
+                  </span>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {error && <div className="error-message">{error}</div>}
+      </div>
+
+      <div className="step-actions">
+        <button
+          className="wizard-button secondary"
+          onClick={() => setStep('agents')}
+          disabled={isCreating}
+        >
+          Back
+        </button>
+        <button className="wizard-button primary" onClick={handleCreate} disabled={isCreating}>
+          {isCreating ? 'Creating...' : 'Create Project'}
+        </button>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="wizard-overlay">
+      <div className="wizard-container">
+        <div className="wizard-header">
+          <h2 className="wizard-title">New Project</h2>
+          <button className="close-button" onClick={onCancel} title="Cancel">
+            &times;
+          </button>
+        </div>
+
+        <div className="wizard-steps">
+          <div className={`step-indicator ${step === 'folder' ? 'active' : ''}`}>
+            <span className="step-number">1</span>
+            <span className="step-label">Folder</span>
+          </div>
+          <div className="step-line" />
+          <div className={`step-indicator ${step === 'agents' ? 'active' : ''}`}>
+            <span className="step-number">2</span>
+            <span className="step-label">Agents</span>
+          </div>
+          <div className="step-line" />
+          <div className={`step-indicator ${step === 'confirm' ? 'active' : ''}`}>
+            <span className="step-number">3</span>
+            <span className="step-label">Confirm</span>
+          </div>
+        </div>
+
+        <div className="wizard-body">
+          {step === 'folder' && renderFolderStep()}
+          {step === 'agents' && renderAgentsStep()}
+          {step === 'confirm' && renderConfirmStep()}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default NewProjectWizard

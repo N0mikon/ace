@@ -52,6 +52,23 @@ export function registerAgentIPC(mainWindow: BrowserWindow): void {
     return agentManager.list()
   })
 
+  // Copy agent to project directory
+  ipcMain.handle(
+    'agents:copyToProject',
+    async (
+      _event,
+      agentId: string,
+      projectPath: string
+    ): Promise<{ success: boolean; filePath?: string; error?: string }> => {
+      return agentManager.copyToProject(agentId, projectPath)
+    }
+  )
+
+  // Get global agents directory
+  ipcMain.handle('agents:getGlobalDirectory', async (): Promise<string> => {
+    return agentManager.getGlobalDirectory()
+  })
+
   // Set up change notification
   agentManager.onAgentsChanged(() => {
     mainWindow.webContents.send('agents:changed')

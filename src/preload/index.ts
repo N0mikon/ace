@@ -154,6 +154,16 @@ const agentAPI = {
     return ipcRenderer.invoke('agents:reload')
   },
 
+  // Copy agent to project directory
+  copyToProject: (agentId: string, projectPath: string) => {
+    return ipcRenderer.invoke('agents:copyToProject', agentId, projectPath)
+  },
+
+  // Get global agents directory
+  getGlobalDirectory: () => {
+    return ipcRenderer.invoke('agents:getGlobalDirectory')
+  },
+
   // Listen for agent changes
   onChanged: (callback: () => void) => {
     const handler = () => callback()
