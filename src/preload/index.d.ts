@@ -238,6 +238,39 @@ export interface RecentProject {
   lastOpened: string
 }
 
+export interface LaunchOptions {
+  bypassMode: boolean
+  resume: boolean
+  verbose: boolean
+  printMode: boolean
+}
+
+export interface LaunchConfig {
+  bypass_mode: boolean
+  resume: boolean
+  verbose: boolean
+  print_mode: boolean
+}
+
+export interface AgentsConfig {
+  include_global: boolean
+}
+
+export interface AceProjectConfig {
+  project: {
+    name: string
+    path: string
+  }
+  launch: LaunchConfig
+  agents: AgentsConfig
+}
+
+export interface ProjectLaunchedData {
+  path: string
+  options: LaunchOptions
+  agentsDir: string | null
+}
+
 export interface ProjectAPI {
   getRecent: () => Promise<RecentProject[]>
   getCurrent: () => Promise<{ path: string; name: string }>
@@ -246,6 +279,12 @@ export interface ProjectAPI {
   clearRecent: () => Promise<void>
   open: (projectPath: string) => Promise<{ success: boolean; error?: string }>
   hasConfig: (projectPath: string) => Promise<boolean>
+  loadConfig: (projectPath: string) => Promise<AceProjectConfig | null>
+  saveConfig: (projectPath: string, config: Partial<AceProjectConfig>) => Promise<void>
+  initializeAce: (projectPath: string) => Promise<void>
+  openDialog: () => Promise<string | null>
+  launch: (projectPath: string, options: LaunchOptions) => Promise<void>
+  onLaunched: (callback: (data: ProjectLaunchedData) => void) => () => void
 }
 
 declare global {

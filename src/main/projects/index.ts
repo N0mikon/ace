@@ -1,11 +1,19 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { app, ipcMain, BrowserWindow } from 'electron'
+import { app, ipcMain, dialog, BrowserWindow } from 'electron'
+import { projectConfigManager, AceProjectConfig, LaunchConfig } from './config'
 
 export interface RecentProject {
   path: string
   name: string
   lastOpened: string
+}
+
+export interface LaunchOptions {
+  bypassMode: boolean
+  resume: boolean
+  verbose: boolean
+  printMode: boolean
 }
 
 class ProjectManager {
@@ -108,8 +116,16 @@ class ProjectManager {
 
   // Check if a path has an ACE project config
   hasProjectConfig(projectPath: string): boolean {
-    const configPath = path.join(projectPath, 'ace.project.toml')
-    return fs.existsSync(configPath)
+    return projectConfigManager.hasConfig(projectPath)
+  }
+
+  // Get the agents directory for a project (.claude/agents/)
+  getProjectAgentsDir(projectPath: string): string | null {
+    const agentsDir = path.join(projectPath, '.claude', 'agents')
+    if (fs.existsSync(agentsDir)) {
+      return agentsDir
+    }
+    return null
   }
 }
 
@@ -172,7 +188,64 @@ export function registerProjectIPC(mainWindow: BrowserWindow): void {
     return projectManager.hasProjectConfig(projectPath)
   })
 
+  // Load project config (.aceproj)
+  ipcMain.handle(
+    'projects:loadConfig',
+    async (_, projectPath: string): Promise<AceProjectConfig | null> => {
+      return projectConfigManager.load(projectPath)
+    }
+  )
+
+  // Save project config (.aceproj)
+  ipcMain.handle(
+    'projects:saveConfig',
+    async (_, projectPath: string, config: Partial<AceProjectConfig>): Promise<void> => {
+      await projectConfigManager.save(projectPath, config)
+    }
+  )
+
+  // Initialize ACE in a project (creates .aceproj and .ace/agents/)
+  ipcMain.handle('projects:initializeAce', async (_, projectPath: string): Promise<void> => {
+    await projectConfigManager.initialize(projectPath)
+  })
+
+  // Open folder dialog
+  ipcMain.handle('projects:openDialog', async (): Promise<string | null> => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openDirectory'],
+      title: 'Select Project Folder'
+    })
+    return result.filePaths[0] || null
+  })
+
+  // Launch project (opens project, spawns terminal, runs claude)
+  // This is handled by the renderer coordinating terminal:spawn
+  ipcMain.handle(
+    'projects:launch',
+    async (_, projectPath: string, options: LaunchOptions): Promise<void> => {
+      // Set current project
+      projectManager.setCurrentProject(projectPath)
+
+      // Update window title
+      const config = await projectConfigManager.load(projectPath)
+      const projectName = config?.project?.name || projectManager.getCurrentProjectName()
+      mainWindow.setTitle(`ACE - ${projectName}`)
+
+      // The renderer will handle terminal spawn with the options
+      // Send event to renderer to trigger terminal spawn
+      mainWindow.webContents.send('project:launched', {
+        path: projectPath,
+        options,
+        agentsDir: projectManager.getProjectAgentsDir(projectPath)
+      })
+    }
+  )
+
   // Initialize window title with current project
   const projectName = projectManager.getCurrentProjectName()
   mainWindow.setTitle(`ACE - ${projectName}`)
 }
+
+// Export config manager for use in other modules
+export { projectConfigManager }
+export type { AceProjectConfig, LaunchConfig }

@@ -253,6 +253,43 @@ const projectAPI = {
   // Check if project has config
   hasConfig: (projectPath: string) => {
     return ipcRenderer.invoke('projects:hasConfig', projectPath)
+  },
+
+  // Load project config (.aceproj)
+  loadConfig: (projectPath: string) => {
+    return ipcRenderer.invoke('projects:loadConfig', projectPath)
+  },
+
+  // Save project config (.aceproj)
+  saveConfig: (projectPath: string, config: unknown) => {
+    return ipcRenderer.invoke('projects:saveConfig', projectPath, config)
+  },
+
+  // Initialize ACE in a project
+  initializeAce: (projectPath: string) => {
+    return ipcRenderer.invoke('projects:initializeAce', projectPath)
+  },
+
+  // Open folder dialog
+  openDialog: () => {
+    return ipcRenderer.invoke('projects:openDialog')
+  },
+
+  // Launch project with options
+  launch: (projectPath: string, options: unknown) => {
+    return ipcRenderer.invoke('projects:launch', projectPath, options)
+  },
+
+  // Listen for project launched event
+  onLaunched: (
+    callback: (data: { path: string; options: unknown; agentsDir: string | null }) => void
+  ) => {
+    const handler = (
+      _event: Electron.IpcRendererEvent,
+      data: { path: string; options: unknown; agentsDir: string | null }
+    ) => callback(data)
+    ipcRenderer.on('project:launched', handler)
+    return () => ipcRenderer.removeListener('project:launched', handler)
   }
 }
 
