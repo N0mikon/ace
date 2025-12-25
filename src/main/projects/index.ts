@@ -2,6 +2,8 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { app, ipcMain, dialog, BrowserWindow } from 'electron'
 import { projectConfigManager, AceProjectConfig, LaunchConfig } from './config'
+import { agentManager } from '../config/agents'
+import { mcpConfigManager } from '../config/mcp'
 
 export interface RecentProject {
   path: string
@@ -231,12 +233,19 @@ export function registerProjectIPC(mainWindow: BrowserWindow): void {
       const projectName = config?.project?.name || projectManager.getCurrentProjectName()
       mainWindow.setTitle(`ACE - ${projectName}`)
 
+      // Set project directory for agents (loads project-specific agents)
+      const agentsDir = projectManager.getProjectAgentsDir(projectPath)
+      agentManager.setProjectDirectory(agentsDir)
+
+      // Set project path for MCP (loads project-specific MCP servers)
+      await mcpConfigManager.setProjectPath(projectPath)
+
       // The renderer will handle terminal spawn with the options
       // Send event to renderer to trigger terminal spawn
       mainWindow.webContents.send('project:launched', {
         path: projectPath,
         options,
-        agentsDir: projectManager.getProjectAgentsDir(projectPath)
+        agentsDir
       })
     }
   )

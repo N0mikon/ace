@@ -9,9 +9,14 @@ import { mcpConfigManager, McpServerInfo } from './mcp'
  * Register MCP-related IPC handlers
  */
 export function registerMcpIPC(mainWindow: BrowserWindow): void {
-  // Get all MCP servers
+  // Get project MCP servers (for McpPanel)
   ipcMain.handle('mcp:getServers', async (): Promise<McpServerInfo[]> => {
     return mcpConfigManager.getServers()
+  })
+
+  // Get all global MCP servers (for wizard selection)
+  ipcMain.handle('mcp:getGlobalServers', async (): Promise<McpServerInfo[]> => {
+    return mcpConfigManager.getGlobalServers()
   })
 
   // Get a specific server
@@ -35,9 +40,33 @@ export function registerMcpIPC(mainWindow: BrowserWindow): void {
     return { success: true }
   })
 
-  // Reload config
+  // Set project path (loads project MCP servers)
+  ipcMain.handle('mcp:setProjectPath', async (_event, projectPath: string | null): Promise<{ success: boolean }> => {
+    await mcpConfigManager.setProjectPath(projectPath)
+    return { success: true }
+  })
+
+  // Copy a global MCP server to project
+  ipcMain.handle(
+    'mcp:copyToProject',
+    async (
+      _event,
+      serverName: string,
+      projectPath: string
+    ): Promise<{ success: boolean; error?: string }> => {
+      return mcpConfigManager.copyToProject(serverName, projectPath)
+    }
+  )
+
+  // Reload global config
   ipcMain.handle('mcp:reload', async (): Promise<McpServerInfo[]> => {
     mcpConfigManager.reload()
+    return mcpConfigManager.getServers()
+  })
+
+  // Reload project servers
+  ipcMain.handle('mcp:reloadProject', async (): Promise<McpServerInfo[]> => {
+    await mcpConfigManager.reloadProject()
     return mcpConfigManager.getServers()
   })
 

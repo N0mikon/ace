@@ -41,9 +41,12 @@ export interface AgentFile {
 
 // Agent manager class
 class AgentManager {
-  private agents: Map<string, Agent> = new Map()
+  private projectAgents: Map<string, Agent> = new Map()
+  private globalAgents: Map<string, Agent> = new Map()
+  private defaultAgents: Map<string, Agent> = new Map()
   private globalDirectory: string = ''
   private projectDirectory: string | null = null
+  private defaultAgentsDir: string | null = null
   private watchers: fs.FSWatcher[] = []
   private changeCallback: (() => void) | null = null
 
@@ -57,60 +60,33 @@ class AgentManager {
 
     this.ensureDirectory(this.globalDirectory)
 
-    // Install default agents on first run
-    this.installDefaultAgents()
+    // Find default agents directory
+    this.findDefaultAgentsDir()
 
-    this.loadAgents()
+    // Load global agents (user's custom agents)
+    this.loadGlobalAgents()
+
+    // Load default agents from resources
+    this.loadDefaultAgents()
+
     this.watchDirectories()
   }
 
   /**
-   * Install default agents from resources to global directory
-   * Only copies agents that don't already exist to avoid overwriting customizations
+   * Find the default agents directory in resources
    */
-  private installDefaultAgents(): void {
-    // In production, resources are in the app's resources folder
-    // In development, they're in the project root
+  private findDefaultAgentsDir(): void {
     const resourcePaths = [
       path.join(process.resourcesPath, 'default-agents'),
       path.join(app.getAppPath(), 'resources', 'default-agents'),
       path.join(__dirname, '..', '..', '..', 'resources', 'default-agents')
     ]
 
-    let defaultAgentsDir: string | null = null
     for (const p of resourcePaths) {
       if (fs.existsSync(p)) {
-        defaultAgentsDir = p
+        this.defaultAgentsDir = p
         break
       }
-    }
-
-    if (!defaultAgentsDir) {
-      console.log('No default agents directory found')
-      return
-    }
-
-    try {
-      const files = fs.readdirSync(defaultAgentsDir).filter((f) => f.endsWith('.toml'))
-      let installed = 0
-
-      for (const file of files) {
-        const targetPath = path.join(this.globalDirectory, file)
-
-        // Only copy if it doesn't exist (don't overwrite user customizations)
-        if (!fs.existsSync(targetPath)) {
-          const sourcePath = path.join(defaultAgentsDir, file)
-          fs.copyFileSync(sourcePath, targetPath)
-          installed++
-          console.log(`Installed default agent: ${file}`)
-        }
-      }
-
-      if (installed > 0) {
-        console.log(`Installed ${installed} default agent(s)`)
-      }
-    } catch (err) {
-      console.error('Failed to install default agents:', err)
     }
   }
 
@@ -119,7 +95,7 @@ class AgentManager {
    */
   setProjectDirectory(dir: string | null): void {
     this.projectDirectory = dir
-    this.loadAgents()
+    this.loadProjectAgents()
     this.watchDirectories()
   }
 
@@ -131,24 +107,58 @@ class AgentManager {
   }
 
   /**
-   * Get all loaded agents
+   * Get project-specific agents only (for Agent Panel)
    */
   list(): Agent[] {
-    return Array.from(this.agents.values())
+    return Array.from(this.projectAgents.values())
   }
 
   /**
-   * Get a specific agent by ID
+   * Get global agents (user's custom agents in appdata)
+   */
+  listGlobal(): Agent[] {
+    return Array.from(this.globalAgents.values())
+  }
+
+  /**
+   * Get default agents from resources (for wizard)
+   */
+  listDefaults(): Agent[] {
+    return Array.from(this.defaultAgents.values())
+  }
+
+  /**
+   * Get all available agents for selection (global + defaults, no duplicates)
+   * Used in New Project Wizard
+   */
+  listAllAvailable(): Agent[] {
+    const combined = new Map<string, Agent>()
+
+    // Add defaults first
+    for (const [id, agent] of this.defaultAgents) {
+      combined.set(id, agent)
+    }
+
+    // Global agents override defaults with same ID
+    for (const [id, agent] of this.globalAgents) {
+      combined.set(id, agent)
+    }
+
+    return Array.from(combined.values())
+  }
+
+  /**
+   * Get a specific agent by ID (searches project, then global, then defaults)
    */
   get(id: string): Agent | undefined {
-    return this.agents.get(id)
+    return this.projectAgents.get(id) || this.globalAgents.get(id) || this.defaultAgents.get(id)
   }
 
   /**
    * Get an agent's prompt text
    */
   getPrompt(id: string): string | undefined {
-    const agent = this.agents.get(id)
+    const agent = this.get(id)
     return agent?.prompt.text
   }
 
@@ -156,7 +166,7 @@ class AgentManager {
    * Open an agent file in the default editor
    */
   openFile(id: string): boolean {
-    const agent = this.agents.get(id)
+    const agent = this.get(id)
     if (agent) {
       const { shell } = require('electron')
       shell.openPath(agent.filePath)
@@ -214,9 +224,11 @@ ${promptText}
 
   /**
    * Copy an agent to a project's .claude/agents/ directory
+   * Searches in global and default agents (not project agents)
    */
   copyToProject(id: string, projectPath: string): { success: boolean; filePath?: string; error?: string } {
-    const agent = this.agents.get(id)
+    // Look for agent in global or defaults (not project, since we're copying TO project)
+    const agent = this.globalAgents.get(id) || this.defaultAgents.get(id)
     if (!agent) {
       return { success: false, error: `Agent not found: ${id}` }
     }
@@ -266,21 +278,47 @@ ${promptText}
     }
   }
 
+  /**
+   * Reload all agents
+   */
   private loadAgents(): void {
-    this.agents.clear()
-
-    // Load global agents
-    this.loadAgentsFromDirectory(this.globalDirectory)
-
-    // Load project-specific agents (override global)
-    if (this.projectDirectory && fs.existsSync(this.projectDirectory)) {
-      this.loadAgentsFromDirectory(this.projectDirectory)
-    }
-
-    console.log(`Loaded ${this.agents.size} agents`)
+    this.loadGlobalAgents()
+    this.loadProjectAgents()
+    this.loadDefaultAgents()
   }
 
-  private loadAgentsFromDirectory(dir: string): void {
+  /**
+   * Load global agents from user's appdata directory
+   */
+  private loadGlobalAgents(): void {
+    this.globalAgents.clear()
+    this.loadAgentsIntoMap(this.globalDirectory, this.globalAgents)
+    console.log(`Loaded ${this.globalAgents.size} global agents`)
+  }
+
+  /**
+   * Load project-specific agents
+   */
+  private loadProjectAgents(): void {
+    this.projectAgents.clear()
+    if (this.projectDirectory && fs.existsSync(this.projectDirectory)) {
+      this.loadAgentsIntoMap(this.projectDirectory, this.projectAgents)
+    }
+    console.log(`Loaded ${this.projectAgents.size} project agents`)
+  }
+
+  /**
+   * Load default agents from resources
+   */
+  private loadDefaultAgents(): void {
+    this.defaultAgents.clear()
+    if (this.defaultAgentsDir) {
+      this.loadAgentsIntoMap(this.defaultAgentsDir, this.defaultAgents)
+    }
+    console.log(`Loaded ${this.defaultAgents.size} default agents`)
+  }
+
+  private loadAgentsIntoMap(dir: string, targetMap: Map<string, Agent>): void {
     if (!fs.existsSync(dir)) return
 
     const files = fs.readdirSync(dir).filter((f) => f.endsWith('.toml'))
@@ -289,7 +327,7 @@ ${promptText}
       const filePath = path.join(dir, file)
       const agent = this.parseAgentFile(filePath)
       if (agent) {
-        this.agents.set(agent.id, agent)
+        targetMap.set(agent.id, agent)
       }
     }
   }

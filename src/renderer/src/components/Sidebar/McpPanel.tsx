@@ -60,15 +60,8 @@ export function McpPanel(): JSX.Element {
         <div className="mcp-loading">Loading...</div>
       ) : servers.length === 0 ? (
         <div className="mcp-empty">
-          {configPath ? (
-            <span>No MCP servers configured</span>
-          ) : (
-            <span>
-              MCP config not found.
-              <br />
-              Set path in Settings.
-            </span>
-          )}
+          <p>No MCP servers in this project.</p>
+          <p className="hint">Add MCP servers when creating a new project.</p>
         </div>
       ) : (
         <>

@@ -125,6 +125,9 @@ export interface Agent {
 
 export interface AgentAPI {
   list: () => Promise<Agent[]>
+  listGlobal: () => Promise<Agent[]>
+  listDefaults: () => Promise<Agent[]>
+  listAllAvailable: () => Promise<Agent[]>
   get: (id: string) => Promise<Agent | undefined>
   getPrompt: (id: string) => Promise<string | undefined>
   openFile: (id: string) => Promise<boolean>
@@ -196,11 +199,15 @@ export interface McpServerInfo {
 
 export interface McpAPI {
   getServers: () => Promise<McpServerInfo[]>
+  getGlobalServers: () => Promise<McpServerInfo[]>
   getServer: (name: string) => Promise<McpServerInfo | undefined>
   getConfigPath: () => Promise<string>
   isLoaded: () => Promise<boolean>
   setConfigPath: (path: string) => Promise<{ success: boolean }>
+  setProjectPath: (projectPath: string | null) => Promise<{ success: boolean }>
+  copyToProject: (serverName: string, projectPath: string) => Promise<{ success: boolean; error?: string }>
   reload: () => Promise<McpServerInfo[]>
+  reloadProject: () => Promise<McpServerInfo[]>
   onChanged: (callback: () => void) => () => void
 }
 

@@ -12,7 +12,7 @@ interface NewProjectWizardProps {
   onCancel: () => void
 }
 
-type WizardStep = 'folder' | 'agents' | 'confirm'
+type WizardStep = 'folder' | 'agents' | 'mcp' | 'confirm'
 
 export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps): JSX.Element {
   const [step, setStep] = useState<WizardStep>('folder')
@@ -21,15 +21,18 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
   const [availableAgents, setAvailableAgents] = useState<Agent[]>([])
   const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set())
   const [mcpServers, setMcpServers] = useState<McpServerInfo[]>([])
+  const [selectedMcpServers, setSelectedMcpServers] = useState<Set<string>>(new Set())
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Load global agents and MCP servers
+  // Load available agents (global + defaults) and global MCP servers
   useEffect(() => {
     const loadData = async (): Promise<void> => {
       try {
-        const agents = await window.agents.list()
-        const servers = await window.mcp.getServers()
+        // Use listAllAvailable to get global + default agents for selection
+        const agents = await window.agents.listAllAvailable()
+        // Use getGlobalServers to get globally configured MCP servers
+        const servers = await window.mcp.getGlobalServers()
         setAvailableAgents(agents)
         setMcpServers(servers)
       } catch (err) {
@@ -70,6 +73,26 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
     setSelectedAgents(new Set())
   }
 
+  const handleToggleMcpServer = (serverName: string): void => {
+    setSelectedMcpServers((prev) => {
+      const next = new Set(prev)
+      if (next.has(serverName)) {
+        next.delete(serverName)
+      } else {
+        next.add(serverName)
+      }
+      return next
+    })
+  }
+
+  const handleSelectAllMcpServers = (): void => {
+    setSelectedMcpServers(new Set(mcpServers.map((s) => s.name)))
+  }
+
+  const handleDeselectAllMcpServers = (): void => {
+    setSelectedMcpServers(new Set())
+  }
+
   const handleCreate = async (): Promise<void> => {
     if (!projectPath) return
 
@@ -85,6 +108,14 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         const result = await window.agents.copyToProject(agentId, projectPath)
         if (!result.success) {
           console.warn(`Failed to copy agent ${agentId}: ${result.error}`)
+        }
+      }
+
+      // Copy selected MCP servers to project
+      for (const serverName of selectedMcpServers) {
+        const result = await window.mcp.copyToProject(serverName, projectPath)
+        if (!result.success) {
+          console.warn(`Failed to copy MCP server ${serverName}: ${result.error}`)
         }
       }
 
@@ -151,15 +182,6 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
       </div>
 
       <div className="step-content">
-        {mcpServers.length > 0 && (
-          <div className="mcp-info">
-            <span className="mcp-icon">&#128268;</span>
-            <span className="mcp-text">
-              {mcpServers.length} MCP server{mcpServers.length !== 1 ? 's' : ''} configured globally
-            </span>
-          </div>
-        )}
-
         <div className="agents-header">
           <span className="agents-count">
             {selectedAgents.size} of {availableAgents.length} selected
@@ -178,8 +200,8 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         <div className="agents-list">
           {availableAgents.length === 0 ? (
             <div className="agents-empty">
-              <p>No agents available in global directory.</p>
-              <p className="hint">Agents will be created when you first run ACE.</p>
+              <p>No agents available.</p>
+              <p className="hint">Create agents in the global directory or use default agents.</p>
             </div>
           ) : (
             availableAgents.map((agent) => (
@@ -201,6 +223,69 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
       <div className="step-actions">
         <button className="wizard-button secondary" onClick={() => setStep('folder')}>
+          Back
+        </button>
+        <button className="wizard-button primary" onClick={() => setStep('mcp')}>
+          Next
+        </button>
+      </div>
+    </div>
+  )
+
+  const renderMcpStep = (): JSX.Element => (
+    <div className="wizard-step">
+      <div className="step-header">
+        <h3 className="step-title">Select MCP Servers</h3>
+        <p className="step-description">
+          Choose which MCP servers to enable for this project. These will be saved to your project
+          configuration.
+        </p>
+      </div>
+
+      <div className="step-content">
+        <div className="agents-header">
+          <span className="agents-count">
+            {selectedMcpServers.size} of {mcpServers.length} selected
+          </span>
+          <div className="agents-actions">
+            <button className="text-button" onClick={handleSelectAllMcpServers}>
+              Select All
+            </button>
+            <span className="divider">|</span>
+            <button className="text-button" onClick={handleDeselectAllMcpServers}>
+              None
+            </button>
+          </div>
+        </div>
+
+        <div className="agents-list">
+          {mcpServers.length === 0 ? (
+            <div className="agents-empty">
+              <p>No global MCP servers configured.</p>
+              <p className="hint">
+                Configure MCP servers in Claude Desktop to make them available here.
+              </p>
+            </div>
+          ) : (
+            mcpServers.map((server) => (
+              <label key={server.name} className="agent-item">
+                <input
+                  type="checkbox"
+                  checked={selectedMcpServers.has(server.name)}
+                  onChange={() => handleToggleMcpServer(server.name)}
+                />
+                <div className="agent-info">
+                  <span className="agent-name">{server.name}</span>
+                  <span className="agent-description">{server.command}</span>
+                </div>
+              </label>
+            ))
+          )}
+        </div>
+      </div>
+
+      <div className="step-actions">
+        <button className="wizard-button secondary" onClick={() => setStep('agents')}>
           Back
         </button>
         <button className="wizard-button primary" onClick={() => setStep('confirm')}>
@@ -261,13 +346,28 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           </div>
         )}
 
+        {selectedMcpServers.size > 0 && (
+          <div className="confirm-section">
+            <h4 className="confirm-label">MCP Servers to Add ({selectedMcpServers.size})</h4>
+            <div className="selected-agents">
+              {mcpServers
+                .filter((s) => selectedMcpServers.has(s.name))
+                .map((server) => (
+                  <span key={server.name} className="agent-tag">
+                    {server.name}
+                  </span>
+                ))}
+            </div>
+          </div>
+        )}
+
         {error && <div className="error-message">{error}</div>}
       </div>
 
       <div className="step-actions">
         <button
           className="wizard-button secondary"
-          onClick={() => setStep('agents')}
+          onClick={() => setStep('mcp')}
           disabled={isCreating}
         >
           Back
@@ -300,8 +400,13 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             <span className="step-label">Agents</span>
           </div>
           <div className="step-line" />
-          <div className={`step-indicator ${step === 'confirm' ? 'active' : ''}`}>
+          <div className={`step-indicator ${step === 'mcp' ? 'active' : ''}`}>
             <span className="step-number">3</span>
+            <span className="step-label">MCP</span>
+          </div>
+          <div className="step-line" />
+          <div className={`step-indicator ${step === 'confirm' ? 'active' : ''}`}>
+            <span className="step-number">4</span>
             <span className="step-label">Confirm</span>
           </div>
         </div>
@@ -309,6 +414,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         <div className="wizard-body">
           {step === 'folder' && renderFolderStep()}
           {step === 'agents' && renderAgentsStep()}
+          {step === 'mcp' && renderMcpStep()}
           {step === 'confirm' && renderConfirmStep()}
         </div>
       </div>

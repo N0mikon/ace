@@ -9,9 +9,24 @@ import { agentManager, Agent } from './agents'
  * Register agent-related IPC handlers
  */
 export function registerAgentIPC(mainWindow: BrowserWindow): void {
-  // List all agents
+  // List project agents only (for Agent Panel)
   ipcMain.handle('agents:list', async (): Promise<Agent[]> => {
     return agentManager.list()
+  })
+
+  // List global agents (user's custom agents)
+  ipcMain.handle('agents:listGlobal', async (): Promise<Agent[]> => {
+    return agentManager.listGlobal()
+  })
+
+  // List default agents from resources
+  ipcMain.handle('agents:listDefaults', async (): Promise<Agent[]> => {
+    return agentManager.listDefaults()
+  })
+
+  // List all available agents for selection (global + defaults)
+  ipcMain.handle('agents:listAllAvailable', async (): Promise<Agent[]> => {
+    return agentManager.listAllAvailable()
   })
 
   // Get specific agent

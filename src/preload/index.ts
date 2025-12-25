@@ -124,9 +124,24 @@ const sessionAPI = {
 
 // Agent API for renderer
 const agentAPI = {
-  // List all agents
+  // List project agents only (for Agent Panel)
   list: () => {
     return ipcRenderer.invoke('agents:list')
+  },
+
+  // List global agents (user's custom agents)
+  listGlobal: () => {
+    return ipcRenderer.invoke('agents:listGlobal')
+  },
+
+  // List default agents from resources
+  listDefaults: () => {
+    return ipcRenderer.invoke('agents:listDefaults')
+  },
+
+  // List all available agents for selection (global + defaults)
+  listAllAvailable: () => {
+    return ipcRenderer.invoke('agents:listAllAvailable')
   },
 
   // Get specific agent by ID
@@ -358,9 +373,14 @@ const adapterAPI = {
 
 // MCP API for renderer
 const mcpAPI = {
-  // Get all MCP servers
+  // Get project MCP servers (for McpPanel)
   getServers: () => {
     return ipcRenderer.invoke('mcp:getServers')
+  },
+
+  // Get all global MCP servers (for wizard selection)
+  getGlobalServers: () => {
+    return ipcRenderer.invoke('mcp:getGlobalServers')
   },
 
   // Get a specific server
@@ -383,9 +403,24 @@ const mcpAPI = {
     return ipcRenderer.invoke('mcp:setConfigPath', path)
   },
 
-  // Reload config
+  // Set project path (loads project MCP servers)
+  setProjectPath: (projectPath: string | null) => {
+    return ipcRenderer.invoke('mcp:setProjectPath', projectPath)
+  },
+
+  // Copy a global MCP server to project
+  copyToProject: (serverName: string, projectPath: string) => {
+    return ipcRenderer.invoke('mcp:copyToProject', serverName, projectPath)
+  },
+
+  // Reload global config
   reload: () => {
     return ipcRenderer.invoke('mcp:reload')
+  },
+
+  // Reload project servers
+  reloadProject: () => {
+    return ipcRenderer.invoke('mcp:reloadProject')
   },
 
   // Listen for config changes

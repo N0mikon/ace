@@ -18,6 +18,16 @@ export interface AgentsConfig {
   include_global: boolean
 }
 
+export interface McpServerConfig {
+  command: string
+  args?: string[]
+  env?: Record<string, string>
+}
+
+export interface McpProjectConfig {
+  servers: Record<string, McpServerConfig>
+}
+
 export interface AceProjectConfig {
   project: {
     name: string
@@ -25,6 +35,7 @@ export interface AceProjectConfig {
   }
   launch: LaunchConfig
   agents: AgentsConfig
+  mcp?: McpProjectConfig
 }
 
 export class ProjectConfigManager {
@@ -70,7 +81,8 @@ export class ProjectConfigManager {
       agents: {
         ...existing.agents,
         ...(config.agents || {})
-      }
+      },
+      mcp: config.mcp !== undefined ? config.mcp : existing.mcp
     }
 
     try {
@@ -141,6 +153,52 @@ Focus on providing clear, accurate information.
    */
   getAgentsDir(projectPath: string): string {
     return path.join(projectPath, '.claude', 'agents')
+  }
+
+  /**
+   * Get MCP servers configured for this project
+   */
+  async getMcpServers(projectPath: string): Promise<Record<string, McpServerConfig>> {
+    const config = await this.load(projectPath)
+    return config?.mcp?.servers || {}
+  }
+
+  /**
+   * Add an MCP server to the project config
+   */
+  async addMcpServer(
+    projectPath: string,
+    name: string,
+    serverConfig: McpServerConfig
+  ): Promise<void> {
+    const config = await this.load(projectPath)
+    const existingServers = config?.mcp?.servers || {}
+
+    await this.save(projectPath, {
+      mcp: {
+        servers: {
+          ...existingServers,
+          [name]: serverConfig
+        }
+      }
+    })
+  }
+
+  /**
+   * Remove an MCP server from the project config
+   */
+  async removeMcpServer(projectPath: string, name: string): Promise<void> {
+    const config = await this.load(projectPath)
+    const existingServers = config?.mcp?.servers || {}
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { [name]: _, ...remaining } = existingServers
+
+    await this.save(projectPath, {
+      mcp: {
+        servers: remaining
+      }
+    })
   }
 
   /**

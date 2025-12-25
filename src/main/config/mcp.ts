@@ -29,7 +29,9 @@ export interface McpServerInfo {
 
 class McpConfigManager {
   private configPath: string = ''
-  private servers: Map<string, McpServerInfo> = new Map()
+  private globalServers: Map<string, McpServerInfo> = new Map()
+  private projectServers: Map<string, McpServerInfo> = new Map()
+  private currentProjectPath: string | null = null
   private watcher: fs.FSWatcher | null = null
   private changeCallback: (() => void) | null = null
 
@@ -60,7 +62,7 @@ class McpConfigManager {
 
     if (this.configPath) {
       console.log(`MCP config found at: ${this.configPath}`)
-      this.load()
+      this.loadGlobal()
       this.watchConfig()
     } else {
       console.log('MCP config not found')
@@ -79,11 +81,19 @@ class McpConfigManager {
     this.configPath = configPath
 
     if (configPath && fs.existsSync(configPath)) {
-      this.load()
+      this.loadGlobal()
       this.watchConfig()
     } else {
-      this.servers.clear()
+      this.globalServers.clear()
     }
+  }
+
+  /**
+   * Set the current project path and load project MCP servers
+   */
+  async setProjectPath(projectPath: string | null): Promise<void> {
+    this.currentProjectPath = projectPath
+    await this.loadProjectServers()
   }
 
   /**
@@ -94,17 +104,52 @@ class McpConfigManager {
   }
 
   /**
-   * Get all configured servers
+   * Get project-specific MCP servers (for McpPanel)
    */
   getServers(): McpServerInfo[] {
-    return Array.from(this.servers.values())
+    return Array.from(this.projectServers.values())
   }
 
   /**
-   * Get a specific server by name
+   * Get all global MCP servers (for wizard selection)
+   */
+  getGlobalServers(): McpServerInfo[] {
+    return Array.from(this.globalServers.values())
+  }
+
+  /**
+   * Get a specific server by name (searches project first, then global)
    */
   getServer(name: string): McpServerInfo | undefined {
-    return this.servers.get(name)
+    return this.projectServers.get(name) || this.globalServers.get(name)
+  }
+
+  /**
+   * Copy a global MCP server to the current project
+   */
+  async copyToProject(
+    serverName: string,
+    projectPath: string
+  ): Promise<{ success: boolean; error?: string }> {
+    const server = this.globalServers.get(serverName)
+    if (!server) {
+      return { success: false, error: `Server not found: ${serverName}` }
+    }
+
+    // Import projectConfigManager here to avoid circular dependency
+    const { projectConfigManager } = await import('../projects/config')
+
+    try {
+      await projectConfigManager.addMcpServer(projectPath, serverName, {
+        command: server.command,
+        args: server.args
+      })
+      // Reload project servers
+      await this.loadProjectServers()
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: String(err) }
+    }
   }
 
   /**
@@ -118,14 +163,21 @@ class McpConfigManager {
    * Check if config is loaded
    */
   isLoaded(): boolean {
-    return this.configPath !== '' && this.servers.size > 0
+    return this.configPath !== '' && this.globalServers.size > 0
   }
 
   /**
    * Reload config from disk
    */
   reload(): void {
-    this.load()
+    this.loadGlobal()
+  }
+
+  /**
+   * Reload project servers
+   */
+  async reloadProject(): Promise<void> {
+    await this.loadProjectServers()
   }
 
   /**
@@ -140,9 +192,9 @@ class McpConfigManager {
 
   // Private methods
 
-  private load(): void {
+  private loadGlobal(): void {
     if (!this.configPath || !fs.existsSync(this.configPath)) {
-      this.servers.clear()
+      this.globalServers.clear()
       return
     }
 
@@ -150,11 +202,11 @@ class McpConfigManager {
       const content = fs.readFileSync(this.configPath, 'utf-8')
       const config = JSON.parse(content) as McpConfig
 
-      this.servers.clear()
+      this.globalServers.clear()
 
       if (config.mcpServers) {
         for (const [name, serverConfig] of Object.entries(config.mcpServers)) {
-          this.servers.set(name, {
+          this.globalServers.set(name, {
             name,
             command: serverConfig.command,
             args: serverConfig.args || [],
@@ -165,10 +217,38 @@ class McpConfigManager {
         }
       }
 
-      console.log(`Loaded ${this.servers.size} MCP servers from config`)
+      console.log(`Loaded ${this.globalServers.size} global MCP servers from config`)
     } catch (err) {
       console.error('Failed to parse MCP config:', err)
-      this.servers.clear()
+      this.globalServers.clear()
+    }
+  }
+
+  private async loadProjectServers(): Promise<void> {
+    this.projectServers.clear()
+
+    if (!this.currentProjectPath) {
+      return
+    }
+
+    try {
+      // Import here to avoid circular dependency
+      const { projectConfigManager } = await import('../projects/config')
+      const servers = await projectConfigManager.getMcpServers(this.currentProjectPath)
+
+      for (const [name, serverConfig] of Object.entries(servers)) {
+        this.projectServers.set(name, {
+          name,
+          command: serverConfig.command,
+          args: serverConfig.args || [],
+          status: 'configured',
+          toolCount: undefined
+        })
+      }
+
+      console.log(`Loaded ${this.projectServers.size} project MCP servers`)
+    } catch (err) {
+      console.error('Failed to load project MCP servers:', err)
     }
   }
 
@@ -183,7 +263,7 @@ class McpConfigManager {
         console.log('MCP config changed, reloading...')
         // Debounce to avoid multiple reloads
         setTimeout(() => {
-          this.load()
+          this.loadGlobal()
           this.changeCallback?.()
         }, 100)
       })

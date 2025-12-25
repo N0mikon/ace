@@ -144,7 +144,10 @@ export function AgentPanel({ onInjectPrompt }: AgentPanelProps): JSX.Element {
       {isLoading ? (
         <div className="agent-loading">Loading agents...</div>
       ) : agents.length === 0 ? (
-        <div className="agent-empty">No agents yet. Click + to create one.</div>
+        <div className="agent-empty">
+          <p>No agents in this project.</p>
+          <p className="hint">Import agents when creating a new project, or create one here.</p>
+        </div>
       ) : (
         <div className="agent-list" role="list">
           {agents.map((agent) => (
