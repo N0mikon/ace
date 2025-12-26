@@ -7,9 +7,10 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from '../src/App'
 import '../src/assets/main.css'
-import { initializeWsApi, getWsSyncedProject } from '../src/api/wsApi'
+import { initializeWsApi, getWsSyncedProject, isTerminalRunning } from '../src/api/wsApi'
 import { initApi } from '../src/api'
 import { useProjectStore } from '../src/stores/projectStore'
+import { useLayoutStore } from '../src/stores/layoutStore'
 
 // Set browser mode flag before anything else
 ;(window as unknown as { __ACE_BROWSER_MODE__: boolean }).__ACE_BROWSER_MODE__ = true
@@ -25,11 +26,15 @@ async function init(): Promise<void> {
     // Then initialize the API factory so components can use it
     await initApi()
 
-    // Check if a project is already running on the server
+    // Check if a project is already running on the server with an active terminal
     const syncedProject = getWsSyncedProject()
-    if (syncedProject) {
-      console.log('Browser: Syncing to already-running project:', syncedProject)
-      // Set the project store to show the main UI instead of launcher
+    const terminalActive = isTerminalRunning()
+
+    console.log('Browser: Sync state - project:', syncedProject, 'terminalRunning:', terminalActive)
+
+    if (syncedProject && terminalActive) {
+      // Active session exists - sync to it and skip ProjectLauncher
+      console.log('Browser: Active session detected, syncing to:', syncedProject)
       useProjectStore.setState({
         currentProject: {
           name: syncedProject.name,
@@ -37,8 +42,32 @@ async function init(): Promise<void> {
           lastOpened: new Date().toISOString(),
           hasAceConfig: true
         },
-        isLaunched: true
+        isLaunched: true  // Skip ProjectLauncher, go directly to terminal
       })
+    } else if (syncedProject) {
+      // Project exists but no active terminal - pre-select but show ProjectLauncher
+      console.log('Browser: Project found but no active session, showing ProjectLauncher:', syncedProject)
+      useProjectStore.setState({
+        currentProject: {
+          name: syncedProject.name,
+          path: syncedProject.path,
+          lastOpened: new Date().toISOString(),
+          hasAceConfig: true
+        }
+        // isLaunched stays false → shows ProjectLauncher
+      })
+    }
+    // If no syncedProject, isLaunched stays false → shows ProjectLauncher
+
+    // Set browser mode flag
+    const isMobile = window.innerWidth <= 768
+    console.log('Browser mode detected, mobile:', isMobile, 'width:', window.innerWidth)
+    useLayoutStore.getState().setBrowserMode(true)
+
+    // Apply mobile layout if needed (loadFromProject already handles this,
+    // but we need to handle the case where no project is synced)
+    if (isMobile && !syncedProject) {
+      useLayoutStore.getState().applyMobileLayout()
     }
 
     // Hide loading screen

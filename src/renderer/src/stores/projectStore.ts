@@ -5,6 +5,7 @@
 
 import { create } from 'zustand'
 import { api } from '../api'
+import { useLayoutStore } from './layoutStore'
 
 export interface LaunchOptions {
   bypassMode: boolean
@@ -100,6 +101,9 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
           print_mode: launchOptions.printMode
         }
       })
+
+      // Load project layout
+      await useLayoutStore.getState().loadFromProject(currentProject.path)
 
       // Launch terminal with project context
       await api.projects.launch(currentProject.path, launchOptions)

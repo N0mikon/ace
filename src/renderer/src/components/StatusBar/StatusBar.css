@@ -1,15 +1,27 @@
 .status-bar {
   height: var(--ace-statusbar-height);
   min-height: var(--ace-statusbar-height);
-  background-color: var(--ace-accent);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
   font-size: 11px;
   font-family: 'Poppins', Arial, sans-serif;
-  color: #FFFFFF;
   user-select: none;
+  transition: background-color var(--ace-transition-fast), color var(--ace-transition-fast);
+  flex-shrink: 0;
+
+  /* Light theme: subtle background with dark text */
+  background-color: var(--ace-bg-tertiary);
+  color: var(--ace-text-primary);
+  border-top: 1px solid var(--ace-border);
+  box-shadow: var(--ace-shadow-sm);
+}
+
+/* Dark theme: elevated surface */
+[data-theme="dark"] .status-bar {
+  background-color: var(--ace-bg-secondary);
+  border-top-color: var(--ace-border);
 }
 
 .status-left,
@@ -40,15 +52,17 @@
   border-radius: 50%;
   background-color: var(--ace-success);
   flex-shrink: 0;
+  transition: background-color var(--ace-transition-fast), box-shadow var(--ace-transition-fast);
 }
 
 .status-indicator.loading {
-  background-color: var(--ace-warning);
+  background-color: var(--ace-accent);
   animation: pulse 1s ease-in-out infinite;
 }
 
 .status-indicator.ready {
   background-color: var(--ace-success);
+  box-shadow: 0 0 6px var(--ace-success);
 }
 
 @keyframes pulse {
@@ -94,13 +108,58 @@
   margin-right: 8px;
 }
 
+/* Zoom controls in status right */
+.status-zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--ace-bg-hover);
+  border-radius: 4px;
+  padding: 1px;
+  margin-right: 8px;
+}
+
+.status-zoom-btn {
+  background: transparent;
+  border: none;
+  color: var(--ace-text-secondary);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 24px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--ace-transition-fast), background-color var(--ace-transition-fast);
+}
+
+.status-zoom-btn:hover {
+  color: var(--ace-text-primary);
+  background-color: var(--ace-bg-active);
+}
+
+.status-zoom-btn:active {
+  background-color: var(--ace-border);
+}
+
+.status-zoom-level {
+  font-size: 10px;
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  min-width: 36px;
+  padding: 2px 4px;
+}
+
 .status-brand {
   font-weight: 600;
   letter-spacing: 0.5px;
+  color: var(--ace-accent);
 }
 
 .status-version {
-  opacity: 0.7;
+  color: var(--ace-text-muted);
   font-size: 10px;
 }
 
@@ -108,25 +167,24 @@
 .status-settings-btn {
   background: transparent;
   border: none;
-  color: #FFFFFF;
+  color: var(--ace-text-secondary);
   font-size: 14px;
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 3px;
-  opacity: 0.85;
-  transition: opacity 0.15s, background-color 0.15s;
+  transition: color var(--ace-transition-fast), background-color var(--ace-transition-fast);
   margin-right: 8px;
 }
 
 .status-action-btn:hover,
 .status-settings-btn:hover {
-  opacity: 1;
-  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--ace-text-primary);
+  background-color: var(--ace-bg-hover);
 }
 
 .status-action-btn:active,
 .status-settings-btn:active {
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: var(--ace-bg-active);
 }
 
 .status-action-btn {
@@ -142,11 +200,11 @@
 }
 
 .status-save-saved {
-  color: var(--anthropic-green, #788c5d);
+  color: var(--ace-success);
 }
 
 .status-save-error {
-  color: #ffcccc;
+  color: var(--ace-error);
 }
 
 /* Server toggle button */
@@ -156,6 +214,9 @@
   gap: 4px;
   padding: 2px 8px;
   font-size: 11px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  transition: all var(--ace-transition-fast);
 }
 
 .status-server-btn:disabled {
@@ -168,15 +229,16 @@
   height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
+  transition: all var(--ace-transition-fast);
 }
 
 .server-indicator.stopped {
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: var(--ace-text-muted);
 }
 
 .server-indicator.running {
-  background-color: var(--ace-success, #4ade80);
-  box-shadow: 0 0 4px var(--ace-success, #4ade80);
+  background-color: var(--ace-success);
+  box-shadow: 0 0 6px var(--ace-success);
 }
 
 .server-label {
@@ -185,7 +247,8 @@
 }
 
 .server-clients {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--ace-accent-light);
+  color: var(--ace-accent);
   border-radius: 8px;
   padding: 0 5px;
   font-size: 9px;
@@ -194,9 +257,116 @@
 }
 
 .status-server-btn.server-active {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--ace-bg-hover);
+  border-color: var(--ace-border);
 }
 
 .status-server-btn.server-active:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--ace-bg-active);
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+/* Mobile layout (set via JS) - fixed status bar */
+.mobile-layout .status-bar,
+[data-mobile="true"] .status-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 44px; /* Larger for touch */
+  min-height: 44px;
+  background-color: var(--ace-bg-secondary);
+  border-top: 1px solid var(--ace-border);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .mobile-layout .status-bar,
+[data-theme="dark"][data-mobile="true"] .status-bar {
+  background-color: var(--ace-bg-primary);
+}
+
+@media (max-width: 768px) {
+  .status-bar {
+    padding: 0 8px;
+    font-size: 10px;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .status-center {
+    display: none; /* Hide center stats on mobile */
+  }
+
+  .status-left,
+  .status-right {
+    gap: 4px;
+  }
+
+  .status-action-btn,
+  .status-settings-btn {
+    padding: 4px 8px;
+    font-size: 18px; /* Larger touch target */
+    min-width: 40px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .status-server-btn {
+    padding: 4px 6px;
+    min-height: 32px;
+  }
+
+  .status-hint {
+    display: none;
+  }
+
+  .status-divider {
+    display: none;
+  }
+
+  /* Zoom controls - touch friendly */
+  .status-zoom-controls {
+    padding: 2px;
+    gap: 4px;
+    margin-right: 4px;
+  }
+
+  .status-zoom-btn {
+    min-width: 36px;
+    height: 32px;
+    font-size: 16px;
+    padding: 4px 8px;
+  }
+
+  .status-zoom-level {
+    font-size: 11px;
+    min-width: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .status-bar {
+    padding: 0 6px;
+  }
+
+  .status-text {
+    font-size: 9px;
+  }
+
+  .status-brand {
+    display: none;
+  }
+
+  .status-version {
+    display: none;
+  }
+
+  /* Hide save button on very small screens to make room */
+  .status-save-btn {
+    display: none;
+  }
 }

@@ -120,3 +120,119 @@
     transform: rotate(360deg);
   }
 }
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Tablet - narrower panels */
+@media (max-width: 1024px) {
+  .layout-panel-left,
+  .layout-panel-right {
+    width: 240px;
+    min-width: 180px;
+    max-width: 300px;
+  }
+}
+
+/* ===== MOBILE BROWSER LAYOUT ===== */
+/* Uses .mobile-layout class (set by JS) for reliable detection */
+
+.layout-manager.mobile-layout {
+  padding-bottom: var(--ace-statusbar-height-mobile);
+}
+
+.layout-manager.mobile-layout .layout-content {
+  flex-direction: column;
+}
+
+/* Top panel in mobile: visible at top with tabs */
+.layout-manager.mobile-layout .layout-panel-top {
+  width: 100%;
+  height: auto;
+  min-height: 120px;
+  max-height: 40vh;
+  flex-shrink: 0;
+  order: -1; /* Ensure panels are on top */
+  border-bottom: 1px solid var(--ace-border);
+  border-top: none;
+  resize: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide left/right/bottom panels in mobile - content moved to top */
+.layout-manager.mobile-layout .layout-panel-left,
+.layout-manager.mobile-layout .layout-panel-right,
+.layout-manager.mobile-layout .layout-panel-bottom {
+  display: none;
+}
+
+/* Terminal fills remaining space */
+.layout-manager.mobile-layout .layout-terminal {
+  flex: 1;
+  min-width: 0;
+  min-height: 150px;
+  width: 100%;
+  order: 1;
+}
+
+/* Fixed status bar at bottom - child selector for StatusBar inside layout-manager */
+.layout-manager.mobile-layout .status-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+/* Media query fallback for mobile browsers without JS mobile detection */
+@media (max-width: 768px) {
+  /* Only apply if not already using .mobile-layout */
+  .layout-manager:not(.mobile-layout) .layout-content {
+    flex-direction: column;
+  }
+
+  .layout-manager:not(.mobile-layout) .layout-panel-left,
+  .layout-manager:not(.mobile-layout) .layout-panel-right {
+    position: fixed;
+    bottom: var(--ace-statusbar-height);
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 50vh;
+    border: none;
+    border-top: 1px solid var(--ace-border);
+    border-radius: 12px 12px 0 0;
+    z-index: 100;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    resize: none;
+    direction: ltr;
+    box-shadow: var(--ace-shadow-lg);
+  }
+
+  .layout-manager:not(.mobile-layout) .layout-panel-left.mobile-open,
+  .layout-manager:not(.mobile-layout) .layout-panel-right.mobile-open {
+    transform: translateY(0);
+  }
+
+  .layout-manager:not(.mobile-layout) .layout-terminal {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .layout-manager.mobile-layout .layout-panel-top {
+    max-height: 45vh;
+    min-height: 100px;
+  }
+
+  .layout-manager:not(.mobile-layout) .layout-panel-left,
+  .layout-manager:not(.mobile-layout) .layout-panel-right {
+    max-height: 60vh;
+  }
+}

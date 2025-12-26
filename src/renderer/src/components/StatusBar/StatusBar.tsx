@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useProjectStore } from '../../stores/projectStore'
+import { useLayoutStore } from '../../stores/layoutStore'
 import { InputDialog } from '../common/InputDialog'
 import { api, isElectronMode } from '../../api'
 import './StatusBar.css'
@@ -27,6 +28,7 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
   const [serverState, setServerState] = useState<ServerState>({ running: false, port: 3456, clients: 0 })
   const [serverLoading, setServerLoading] = useState(false)
   const closeProject = useProjectStore((state) => state.closeProject)
+  const terminalZoom = useLayoutStore((state) => state.terminalZoom)
   const isElectron = isElectronMode()
 
   useEffect(() => {
@@ -200,6 +202,33 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
         )}
       </div>
       <div className="status-right">
+        {/* Terminal zoom controls - always visible for mobile/browser */}
+        <div className="status-zoom-controls">
+          <button
+            className="status-zoom-btn"
+            onClick={() => useLayoutStore.getState().zoomOut()}
+            title="Zoom out (Ctrl+-)"
+            aria-label="Zoom out terminal"
+          >
+            &#8722;
+          </button>
+          <button
+            className="status-zoom-btn status-zoom-level"
+            onClick={() => useLayoutStore.getState().resetZoom()}
+            title="Reset zoom (Ctrl+0)"
+            aria-label="Reset zoom"
+          >
+            {Math.round(terminalZoom * 100)}%
+          </button>
+          <button
+            className="status-zoom-btn"
+            onClick={() => useLayoutStore.getState().zoomIn()}
+            title="Zoom in (Ctrl+=)"
+            aria-label="Zoom in terminal"
+          >
+            +
+          </button>
+        </div>
         {sidebarCollapsed && (
           <span className="status-hint">Ctrl+B to show sidebar</span>
         )}

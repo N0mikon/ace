@@ -1,10 +1,11 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { app, ipcMain, dialog, BrowserWindow } from 'electron'
-import { projectConfigManager, AceProjectConfig, LaunchConfig } from './config'
+import { projectConfigManager, AceProjectConfig, LayoutConfig } from './config'
 import { agentManager } from '../config/agents'
 import { mcpConfigManager } from '../config/mcp'
 import { sessionLogger } from '../storage'
+import { clientManager } from '../server'
 
 export interface RecentProject {
   path: string
@@ -212,6 +213,32 @@ export function registerProjectIPC(mainWindow: BrowserWindow): void {
     await projectConfigManager.initialize(projectPath)
   })
 
+  // Load layout from project config
+  ipcMain.handle(
+    'layout:load',
+    async (_, projectPath: string): Promise<LayoutConfig | null> => {
+      const config = await projectConfigManager.load(projectPath)
+      return config?.layout || null
+    }
+  )
+
+  // Save layout to project config and broadcast to browser clients
+  ipcMain.handle(
+    'layout:save',
+    async (_, projectPath: string, layout: LayoutConfig): Promise<{ success: boolean }> => {
+      await projectConfigManager.save(projectPath, { layout })
+      // Broadcast to browser clients for real-time sync
+      clientManager.broadcast({
+        type: 'event',
+        channel: 'layout:changed',
+        data: { projectPath, layout }
+      })
+      // Also notify Electron renderer
+      mainWindow.webContents.send('layout:changed', { projectPath, layout })
+      return { success: true }
+    }
+  )
+
   // Open folder dialog
   ipcMain.handle('projects:openDialog', async (): Promise<string | null> => {
     const result = await dialog.showOpenDialog(mainWindow, {
@@ -261,4 +288,4 @@ export function registerProjectIPC(mainWindow: BrowserWindow): void {
 
 // Export config manager for use in other modules
 export { projectConfigManager }
-export type { AceProjectConfig, LaunchConfig }
+export type { AceProjectConfig, LaunchConfig, LayoutConfig, PanelConfig, PanelPosition, AreaSizes } from './config'

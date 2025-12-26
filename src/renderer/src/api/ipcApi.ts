@@ -15,7 +15,8 @@ import type {
   McpAPI,
   AdapterAPI,
   ProjectAPI,
-  ServerAPI
+  ServerAPI,
+  LayoutAPI
 } from './types'
 
 // Terminal API - wraps window.terminal
@@ -176,6 +177,28 @@ const serverApi: ServerAPI = {
   }
 }
 
+// Layout API - wraps window.layout (per-project layout storage)
+const layoutApi: LayoutAPI = {
+  load: (projectPath) => {
+    if (window.layout) {
+      return window.layout.load(projectPath)
+    }
+    return Promise.resolve(null)
+  },
+  save: (projectPath, layout) => {
+    if (window.layout) {
+      return window.layout.save(projectPath, layout)
+    }
+    return Promise.resolve({ success: false })
+  },
+  onChanged: (callback) => {
+    if (window.layout) {
+      return window.layout.onChanged(callback)
+    }
+    return () => {}
+  }
+}
+
 // Combined IPC API
 export const ipcApi: ACEAPI = {
   terminal: terminalApi,
@@ -187,7 +210,8 @@ export const ipcApi: ACEAPI = {
   mcp: mcpApi,
   adapters: adapterApi,
   projects: projectApi,
-  server: serverApi
+  server: serverApi,
+  layout: layoutApi
 }
 
 export default ipcApi

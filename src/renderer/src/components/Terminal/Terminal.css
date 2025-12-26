@@ -13,12 +13,14 @@
 }
 
 .terminal-container .xterm-viewport {
+  overflow-x: auto; /* Enable horizontal scroll when content is wider (windowsMode disables reflow) */
   overflow-y: auto;
 }
 
-/* Scrollbar styling */
+/* Scrollbar styling - vertical */
 .terminal-container .xterm-viewport::-webkit-scrollbar {
   width: 10px;
+  height: 8px; /* For horizontal scrollbar */
 }
 
 .terminal-container .xterm-viewport::-webkit-scrollbar-track {
@@ -34,7 +36,37 @@
   background: var(--ace-text-muted);
 }
 
+/* Horizontal scrollbar corner */
+.terminal-container .xterm-viewport::-webkit-scrollbar-corner {
+  background: var(--anthropic-dark);
+}
+
 /* Selection color */
 .terminal-container .xterm-selection div {
   background-color: rgba(106, 155, 204, 0.4);
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+/* Note: xterm.js uses canvas rendering, so CSS font-size doesn't work.
+   Font size is controlled programmatically in Terminal.tsx via terminalZoom. */
+
+@media (max-width: 768px) {
+  .terminal-container {
+    padding: 4px;
+    /* Ensure terminal can shrink properly */
+    min-height: 0;
+    flex: 1;
+  }
+}
+
+/* Mobile layout specific (set via JS) */
+.mobile-layout .terminal-container,
+[data-mobile="true"] .terminal-container {
+  padding: 4px;
+}
+
+@media (max-width: 480px) {
+  .terminal-container {
+    padding: 2px;
+  }
 }

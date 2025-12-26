@@ -7,11 +7,17 @@
   --ace-sidebar-width: 240px;
   --ace-sidebar-collapsed-width: 0px;
   --ace-statusbar-height: 24px;
+  --ace-statusbar-height-mobile: 44px;
   --ace-border-radius: 4px;
 
   /* Transitions */
   --ace-transition-fast: 0.15s ease;
   --ace-transition-normal: 0.2s ease;
+
+  /* Breakpoints (for reference in media queries) */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
 }
 
 /* ===== LIGHT THEME (Default) ===== */
@@ -58,6 +64,14 @@
   --ace-overlay-bg: rgba(26, 26, 25, 0.4);
   --ace-shadow-color: rgba(26, 26, 25, 0.12);
   --ace-shadow-strong: rgba(26, 26, 25, 0.18);
+
+  /* Shadow system - light theme */
+  --ace-shadow-xs: 0 1px 2px var(--ace-shadow-color);
+  --ace-shadow-sm: 0 2px 4px var(--ace-shadow-color);
+  --ace-shadow-md: 0 4px 12px var(--ace-shadow-color);
+  --ace-shadow-lg: 0 8px 24px var(--ace-shadow-strong);
+  --ace-shadow-inset: inset 0 1px 2px var(--ace-shadow-color);
+  --ace-shadow-glow: 0 0 8px var(--ace-accent-light);
 
   /* Legacy/compatibility */
   --ev-c-white: #ffffff;
@@ -129,6 +143,14 @@
   --ace-overlay-bg: rgba(0, 0, 0, 0.6);
   --ace-shadow-color: rgba(0, 0, 0, 0.3);
   --ace-shadow-strong: rgba(0, 0, 0, 0.5);
+
+  /* Shadow system - dark theme */
+  --ace-shadow-xs: 0 1px 2px var(--ace-shadow-color);
+  --ace-shadow-sm: 0 2px 4px var(--ace-shadow-color);
+  --ace-shadow-md: 0 4px 12px var(--ace-shadow-color);
+  --ace-shadow-lg: 0 8px 24px var(--ace-shadow-strong);
+  --ace-shadow-inset: inset 0 1px 2px var(--ace-shadow-color);
+  --ace-shadow-glow: 0 0 12px var(--ace-accent-light);
 
   /* Legacy/compatibility */
   --ev-c-white: #F4F3EE;

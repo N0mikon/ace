@@ -66,10 +66,18 @@
   border: 1px solid var(--ace-border);
   border-radius: 4px;
   cursor: default;
+  transition: all 0.15s ease;
 }
 
 .mcp-item:hover {
   background-color: var(--ace-bg-hover);
+  border-color: var(--ace-border-light);
+  box-shadow: var(--ace-shadow-sm);
+}
+
+.mcp-item:focus-visible {
+  outline: 2px solid var(--ace-accent);
+  outline-offset: 2px;
 }
 
 .mcp-status {
@@ -143,4 +151,64 @@
   color: var(--ace-text-muted);
   font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
   word-break: break-all;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .mcp-panel {
+    gap: 12px;
+  }
+
+  .panel-header {
+    padding: 0 8px;
+  }
+
+  .header-button {
+    padding: 8px;
+    font-size: 18px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mcp-item {
+    padding: 12px;
+    min-height: 44px; /* Touch target */
+    gap: 12px;
+  }
+
+  .mcp-status {
+    width: 10px;
+    height: 10px;
+  }
+
+  .mcp-name {
+    font-size: 14px;
+  }
+
+  .mcp-command {
+    font-size: 11px;
+  }
+
+  .mcp-tool-count {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mcp-item {
+    flex-wrap: wrap;
+  }
+
+  .mcp-info {
+    flex-basis: calc(100% - 32px);
+  }
+
+  .mcp-tool-count {
+    margin-left: 22px; /* Align with content after status dot */
+  }
 }

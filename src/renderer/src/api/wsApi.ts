@@ -16,8 +16,10 @@ import type {
   AdapterAPI,
   ProjectAPI,
   ServerAPI,
+  LayoutAPI,
   TerminalExitInfo,
-  HotkeyTriggerData
+  HotkeyTriggerData,
+  LayoutChangedData
 } from './types'
 
 // WebSocket message types
@@ -42,7 +44,7 @@ interface WSEvent {
   data: unknown
 }
 
-interface WSSyncState {
+export interface WSSyncState {
   terminalRunning: boolean
   terminalBuffer: string
   config: unknown
@@ -273,6 +275,21 @@ export function getWsSyncedProject(): { path: string; name: string } | null {
   return connection.getCurrentProject()
 }
 
+/**
+ * Get the full sync state (browser mode only)
+ * Includes terminalRunning, currentProject, etc.
+ */
+export function getWsSyncState(): WSSyncState | null {
+  return connection.getSyncState()
+}
+
+/**
+ * Check if a terminal session is actively running (browser mode only)
+ */
+export function isTerminalRunning(): boolean {
+  return connection.getSyncState()?.terminalRunning ?? false
+}
+
 // Initialize connection
 let initPromise: Promise<void> | null = null
 
@@ -425,6 +442,13 @@ const serverApi: ServerAPI = {
   onStateChanged: (callback) => connection.on('server:state-changed', (data) => callback(data as never))
 }
 
+// Layout API via WebSocket (per-project layout storage)
+const layoutApi: LayoutAPI = {
+  load: (projectPath) => connection.invoke('layout:load', projectPath),
+  save: (projectPath, layout) => connection.invoke('layout:save', projectPath, layout),
+  onChanged: (callback) => connection.on('layout:changed', (data) => callback(data as LayoutChangedData))
+}
+
 // Combined WebSocket API
 export const wsApi: ACEAPI = {
   terminal: terminalApi,
@@ -436,7 +460,8 @@ export const wsApi: ACEAPI = {
   mcp: mcpApi,
   adapters: adapterApi,
   projects: projectApi,
-  server: serverApi
+  server: serverApi,
+  layout: layoutApi
 }
 
 export default wsApi

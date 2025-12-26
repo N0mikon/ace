@@ -442,6 +442,29 @@ const serverAPI = {
   }
 }
 
+// Layout API for renderer (per-project layout storage)
+const layoutAPI = {
+  // Load layout from project config
+  load: (projectPath: string) => {
+    return ipcRenderer.invoke('layout:load', projectPath)
+  },
+
+  // Save layout to project config
+  save: (projectPath: string, layout: unknown) => {
+    return ipcRenderer.invoke('layout:save', projectPath, layout)
+  },
+
+  // Listen for layout changes (from other clients)
+  onChanged: (callback: (data: { projectPath: string; layout: unknown }) => void) => {
+    const handler = (
+      _event: Electron.IpcRendererEvent,
+      data: { projectPath: string; layout: unknown }
+    ) => callback(data)
+    ipcRenderer.on('layout:changed', handler)
+    return () => ipcRenderer.removeListener('layout:changed', handler)
+  }
+}
+
 // MCP API for renderer
 const mcpAPI = {
   // Get project MCP servers (for McpPanel)
@@ -517,6 +540,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('adapters', adapterAPI)
     contextBridge.exposeInMainWorld('projects', projectAPI)
     contextBridge.exposeInMainWorld('server', serverAPI)
+    contextBridge.exposeInMainWorld('layout', layoutAPI)
   } catch (error) {
     console.error(error)
   }
@@ -543,4 +567,6 @@ if (process.contextIsolated) {
   window.projects = projectAPI
   // @ts-ignore (define in dts)
   window.server = serverAPI
+  // @ts-ignore (define in dts)
+  window.layout = layoutAPI
 }

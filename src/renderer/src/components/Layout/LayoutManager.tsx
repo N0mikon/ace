@@ -21,8 +21,17 @@ export function LayoutManager(): JSX.Element {
 
   const {
     panels,
+    areaSizes,
     collapsedAreas,
-    toggleAreaCollapsed
+    activeTabByArea,
+    terminalZoom,
+    toggleAreaCollapsed,
+    isMobileLayout,
+    isBrowserMode,
+    currentProjectPath,
+    applyMobileLayout,
+    loadFromProject,
+    saveToProject
   } = useLayoutStore()
 
   // Helper to get panels in a specific area
@@ -54,6 +63,44 @@ export function LayoutManager(): JSX.Element {
       unsubscribe()
     }
   }, [])
+
+  // Handle viewport resize for mobile detection
+  useEffect(() => {
+    const handleResize = (): void => {
+      const isMobile = window.innerWidth <= 768
+
+      if (isMobile && !isMobileLayout) {
+        console.log('Switching to mobile layout')
+        applyMobileLayout()
+      } else if (!isMobile && isMobileLayout && currentProjectPath) {
+        console.log('Switching back to desktop layout, reloading from project')
+        // Reload project layout when leaving mobile
+        loadFromProject(currentProjectPath)
+      }
+    }
+
+    // Check on mount
+    handleResize()
+
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('orientationchange', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('orientationchange', handleResize)
+    }
+  }, [isMobileLayout, currentProjectPath, applyMobileLayout, loadFromProject])
+
+  // Debounced auto-save when layout changes (including zoom)
+  useEffect(() => {
+    if (!currentProjectPath || isMobileLayout) return
+
+    const timer = setTimeout(() => {
+      saveToProject()
+    }, 1000) // Debounce 1 second
+
+    return () => clearTimeout(timer)
+  }, [panels, areaSizes, collapsedAreas, activeTabByArea, terminalZoom, currentProjectPath, isMobileLayout, saveToProject])
 
   // Handle hotkey triggers from main process
   useEffect(() => {
@@ -142,7 +189,11 @@ export function LayoutManager(): JSX.Element {
   const showBottom = hasBottomPanels && !collapsedAreas.bottom
 
   return (
-    <div className="layout-manager">
+    <div
+      className={`layout-manager ${isMobileLayout ? 'mobile-layout' : ''}`}
+      data-mobile={isMobileLayout}
+      data-browser={isBrowserMode}
+    >
       {/* Top Panel Area */}
       {showTop && (
         <div className="layout-panel layout-panel-top">

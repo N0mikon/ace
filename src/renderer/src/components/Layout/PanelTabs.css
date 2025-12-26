@@ -90,3 +90,48 @@
   color: var(--ace-text-primary);
   background: var(--ace-bg-hover);
 }
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .panel-tabs {
+    min-height: 44px; /* Touch target */
+    padding: 0 8px;
+    gap: 4px;
+  }
+
+  .panel-tabs-list {
+    gap: 4px;
+  }
+
+  .panel-tab {
+    padding: 10px 14px;
+    min-height: 44px; /* Touch target */
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .panel-tab-icon {
+    font-size: 16px;
+  }
+
+  .panel-collapse-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .panel-tab {
+    padding: 10px 10px;
+  }
+
+  .panel-tab-label {
+    display: none; /* Show only icons on very small screens */
+  }
+
+  .panel-tab-icon {
+    font-size: 18px;
+  }
+}

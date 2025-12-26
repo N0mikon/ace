@@ -100,11 +100,19 @@
 .command-button:hover {
   background-color: var(--ace-bg-hover);
   border-color: var(--ace-border-light);
+  box-shadow: var(--ace-shadow-sm);
+  transform: translateY(-1px);
 }
 
 .command-button:active {
   background-color: var(--ace-bg-active);
-  transform: scale(0.98);
+  transform: scale(0.98) translateY(0);
+  box-shadow: var(--ace-shadow-xs);
+}
+
+.command-button:focus-visible {
+  outline: 2px solid var(--ace-accent);
+  outline-offset: 2px;
 }
 
 .command-icon {
@@ -119,4 +127,52 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .command-panel {
+    gap: 8px;
+  }
+
+  .panel-header {
+    padding: 0 8px;
+  }
+
+  .category-header {
+    padding: 10px 12px;
+    min-height: 44px; /* Touch target */
+  }
+
+  .command-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 8px;
+    padding: 8px 4px 12px;
+  }
+
+  .command-button {
+    padding: 12px 10px;
+    min-height: 44px; /* Touch target */
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  .command-icon {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .command-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .command-button {
+    padding: 10px 6px;
+    font-size: 11px;
+    flex-direction: column;
+    gap: 4px;
+  }
 }

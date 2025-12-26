@@ -352,6 +352,39 @@ export interface ServerAPI {
   onStateChanged: (callback: (state: ServerState) => void) => () => void
 }
 
+// Layout API types (per-project layout storage)
+export type PanelPosition = 'top' | 'left' | 'right' | 'bottom' | 'hidden'
+
+export interface PanelConfig {
+  position: PanelPosition
+  order: number
+}
+
+export interface AreaSizes {
+  top: number
+  left: number
+  bottom: number
+  right: number
+}
+
+export interface LayoutConfig {
+  panels: Record<string, PanelConfig>
+  areaSizes: AreaSizes
+  collapsedAreas: Record<string, boolean>
+  activeTabByArea: Record<string, string>
+}
+
+export interface LayoutChangedData {
+  projectPath: string
+  layout: LayoutConfig
+}
+
+export interface LayoutAPI {
+  load: (projectPath: string) => Promise<LayoutConfig | null>
+  save: (projectPath: string, layout: LayoutConfig) => Promise<{ success: boolean }>
+  onChanged: (callback: (data: LayoutChangedData) => void) => () => void
+}
+
 declare global {
   interface Window {
     electron: ElectronAPI
@@ -365,6 +398,7 @@ declare global {
     adapters: AdapterAPI
     projects: ProjectAPI
     server: ServerAPI
+    layout: LayoutAPI
     api: unknown
   }
 }

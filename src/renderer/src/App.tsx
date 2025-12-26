@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { LayoutManager } from './components/Layout'
 import { ProjectLauncher } from './components/ProjectLauncher'
 import { useProjectStore } from './stores/projectStore'
+import { useLayoutStore } from './stores/layoutStore'
 import { api } from './api'
 
 // Apply theme to document
@@ -24,6 +25,21 @@ function App(): JSX.Element {
       }
     }
     loadTheme()
+  }, [])
+
+  // Listen for layout changes from other clients (real-time sync)
+  useEffect(() => {
+    const unsubscribe = api.layout.onChanged(({ projectPath, layout }) => {
+      const { currentProjectPath, isMobileLayout, applyLayoutConfig } = useLayoutStore.getState()
+
+      // Only apply if it's for our current project and we're not in mobile layout
+      if (projectPath === currentProjectPath && !isMobileLayout) {
+        console.log('Received layout change from another client:', layout)
+        applyLayoutConfig(layout)
+      }
+    })
+
+    return () => unsubscribe()
   }, [])
 
   useEffect(() => {

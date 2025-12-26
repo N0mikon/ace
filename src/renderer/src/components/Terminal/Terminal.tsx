@@ -5,6 +5,7 @@ import { WebglAddon } from '@xterm/addon-webgl'
 import { WebLinksAddon } from '@xterm/addon-web-links'
 import { SearchAddon } from '@xterm/addon-search'
 import { api } from '../../api'
+import { useLayoutStore } from '../../stores/layoutStore'
 import '@xterm/xterm/css/xterm.css'
 import './Terminal.css'
 
@@ -17,6 +18,22 @@ export function Terminal({ onReady, onExit }: TerminalProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null)
   const terminalRef = useRef<XTerm | null>(null)
   const fitAddonRef = useRef<FitAddon | null>(null)
+  const baseFontSizeRef = useRef(14) // Base font before zoom
+
+  // Subscribe to zoom changes
+  const terminalZoom = useLayoutStore((state) => state.terminalZoom)
+
+  // Apply zoom when it changes
+  useEffect(() => {
+    if (!terminalRef.current || !fitAddonRef.current) return
+
+    const newSize = Math.round(baseFontSizeRef.current * terminalZoom)
+    terminalRef.current.options.fontSize = newSize
+    fitAddonRef.current.fit()
+
+    const { cols, rows } = terminalRef.current
+    api.terminal.resize(cols, rows)
+  }, [terminalZoom])
 
   // Handle terminal resize
   const handleResize = useCallback(() => {
@@ -38,11 +55,21 @@ export function Terminal({ onReady, onExit }: TerminalProps): JSX.Element {
     // Track if this effect instance is still active
     let isMounted = true
 
-    // Create terminal instance
+    // Detect mobile viewport for smaller base font
+    const isMobile = window.innerWidth <= 768
+    const isSmallMobile = window.innerWidth <= 480
+    const baseFont = isSmallMobile ? 10 : isMobile ? 11 : 14
+    baseFontSizeRef.current = baseFont
+
+    // Apply zoom to base font
+    const currentZoom = useLayoutStore.getState().terminalZoom
+    const fontSize = Math.round(baseFont * currentZoom)
+
+    // Create terminal instance with windowsMode to disable reflow
     const terminal = new XTerm({
       cursorBlink: true,
       cursorStyle: 'block',
-      fontSize: 14,
+      fontSize,
       fontFamily: "'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace",
       theme: {
         background: '#1e1e1e',
@@ -67,7 +94,8 @@ export function Terminal({ onReady, onExit }: TerminalProps): JSX.Element {
         brightCyan: '#4ec9b0',
         brightWhite: '#ffffff'
       },
-      allowProposedApi: true
+      allowProposedApi: true,
+      windowsMode: true // Disable reflow for Windows ConPTY - prevents line rewrapping on resize
     })
 
     terminalRef.current = terminal
@@ -105,6 +133,42 @@ export function Terminal({ onReady, onExit }: TerminalProps): JSX.Element {
       requestAnimationFrame(handleResize)
     })
     resizeObserver.observe(container)
+
+    // Handle viewport resize for dynamic base font adjustment
+    const handleViewportResize = (): void => {
+      const isMobileNow = window.innerWidth <= 768
+      const isSmallMobileNow = window.innerWidth <= 480
+      const newBaseFont = isSmallMobileNow ? 10 : isMobileNow ? 11 : 14
+
+      if (baseFontSizeRef.current !== newBaseFont) {
+        baseFontSizeRef.current = newBaseFont
+        const currentZoom = useLayoutStore.getState().terminalZoom
+        terminal.options.fontSize = Math.round(newBaseFont * currentZoom)
+        fitAddon.fit()
+        const { cols, rows } = terminal
+        api.terminal.resize(cols, rows)
+      }
+    }
+
+    // Handle zoom keyboard shortcuts (Ctrl+Plus/Minus/Zero)
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === '=' || e.key === '+') {
+          e.preventDefault()
+          useLayoutStore.getState().zoomIn()
+        } else if (e.key === '-') {
+          e.preventDefault()
+          useLayoutStore.getState().zoomOut()
+        } else if (e.key === '0') {
+          e.preventDefault()
+          useLayoutStore.getState().resetZoom()
+        }
+      }
+    }
+
+    window.addEventListener('resize', handleViewportResize)
+    window.addEventListener('orientationchange', handleViewportResize)
+    container.addEventListener('keydown', handleKeyDown)
 
     // Handle user input - send to PTY
     terminal.onData((data: string) => {
@@ -159,6 +223,9 @@ export function Terminal({ onReady, onExit }: TerminalProps): JSX.Element {
       cleanupData()
       cleanupExit()
       resizeObserver.disconnect()
+      window.removeEventListener('resize', handleViewportResize)
+      window.removeEventListener('orientationchange', handleViewportResize)
+      container.removeEventListener('keydown', handleKeyDown)
       terminal.dispose()
       terminalRef.current = null
       fitAddonRef.current = null

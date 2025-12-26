@@ -8,8 +8,8 @@ import { configManager, agentManager, mcpConfigManager, adapterManager } from '.
 import { databaseManager, sessionLogger } from '../storage'
 import { mainPty } from '../terminal/pty'
 import { hotkeyManager, APP_ACTIONS } from '../hotkeys/manager'
-import { projectManager, projectConfigManager } from '../projects'
-import { startServer, stopServer, isServerRunning, getPort, getClientCount } from './index'
+import { projectManager, projectConfigManager, LayoutConfig } from '../projects'
+import { startServer, stopServer, isServerRunning, getPort, getClientCount, clientManager } from './index'
 
 /**
  * Handle an RPC call from a WebSocket client
@@ -324,6 +324,25 @@ export async function handleRpcCall(channel: string, args: unknown[]): Promise<u
     return { success: true }
   }
 
+  // Layout API
+  if (channel === 'layout:load') {
+    const projectPath = args[0] as string
+    const config = await projectConfigManager.load(projectPath)
+    return config?.layout || null
+  }
+  if (channel === 'layout:save') {
+    const projectPath = args[0] as string
+    const layout = args[1] as LayoutConfig
+    await projectConfigManager.save(projectPath, { layout })
+    // Broadcast to all clients (including sender) for real-time sync
+    clientManager.broadcast({
+      type: 'event',
+      channel: 'layout:changed',
+      data: { projectPath, layout }
+    })
+    return { success: true }
+  }
+
   // Server API
   if (channel === 'server:start') {
     return startServer()
@@ -423,6 +442,8 @@ export function getAvailableChannels(): string[] {
     'projects:initializeAce',
     'projects:openDialog',
     'projects:launch',
+    'layout:load',
+    'layout:save',
     'server:start',
     'server:stop',
     'server:isRunning',

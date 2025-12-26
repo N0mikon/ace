@@ -28,6 +28,28 @@ export interface McpProjectConfig {
   servers: Record<string, McpServerConfig>
 }
 
+export type PanelPosition = 'top' | 'left' | 'right' | 'bottom' | 'hidden'
+
+export interface PanelConfig {
+  position: PanelPosition
+  order: number
+}
+
+export interface AreaSizes {
+  top: number
+  left: number
+  bottom: number
+  right: number
+}
+
+export interface LayoutConfig {
+  panels: Record<string, PanelConfig>
+  areaSizes: AreaSizes
+  collapsedAreas: Record<string, boolean>
+  activeTabByArea: Record<string, string>
+  terminalZoom?: number // 0.5 to 2.0, default 1.0
+}
+
 export interface AceProjectConfig {
   project: {
     name: string
@@ -36,6 +58,7 @@ export interface AceProjectConfig {
   launch: LaunchConfig
   agents: AgentsConfig
   mcp?: McpProjectConfig
+  layout?: LayoutConfig
 }
 
 export class ProjectConfigManager {
@@ -82,7 +105,8 @@ export class ProjectConfigManager {
         ...existing.agents,
         ...(config.agents || {})
       },
-      mcp: config.mcp !== undefined ? config.mcp : existing.mcp
+      mcp: config.mcp !== undefined ? config.mcp : existing.mcp,
+      layout: config.layout !== undefined ? config.layout : existing.layout
     }
 
     try {

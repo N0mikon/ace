@@ -73,10 +73,19 @@
 .agent-item:hover {
   background-color: var(--ace-bg-hover);
   border-color: var(--ace-border-light);
+  box-shadow: var(--ace-shadow-sm);
+  transform: translateY(-1px);
 }
 
 .agent-item:active {
   background-color: var(--ace-bg-active);
+  transform: translateY(0);
+  box-shadow: var(--ace-shadow-xs);
+}
+
+.agent-item:focus-visible {
+  outline: 2px solid var(--ace-accent);
+  outline-offset: 2px;
 }
 
 .agent-icon {
@@ -220,4 +229,94 @@
 
 .form-button.primary:hover {
   background-color: var(--ace-accent-hover);
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .agent-panel {
+    gap: 12px;
+  }
+
+  .panel-header {
+    padding: 0 8px;
+  }
+
+  .header-button {
+    padding: 8px;
+    font-size: 18px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .agent-item {
+    padding: 12px;
+    min-height: 44px; /* Touch target */
+    gap: 12px;
+  }
+
+  .agent-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .agent-name {
+    font-size: 14px;
+  }
+
+  .agent-description {
+    font-size: 12px;
+  }
+
+  .agent-hotkey {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  /* Always show actions on mobile (no hover) */
+  .agent-actions {
+    opacity: 1;
+  }
+
+  .agent-action-button {
+    padding: 8px;
+    font-size: 16px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Form adjustments */
+  .create-agent-form {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .form-input,
+  .form-textarea {
+    font-size: 16px; /* Prevent iOS zoom */
+    padding: 10px 12px;
+  }
+
+  .form-button {
+    padding: 10px 16px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .agent-item {
+    flex-wrap: wrap;
+  }
+
+  .agent-hotkey {
+    display: none; /* Hide hotkey hints on small mobile */
+  }
 }

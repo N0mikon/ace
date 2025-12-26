@@ -9,6 +9,7 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  animation: fadeIn 0.15s ease;
 }
 
 .settings-modal {
@@ -20,7 +21,8 @@
   max-height: 80vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 40px var(--ace-shadow-strong), 0 2px 8px var(--ace-shadow-color);
+  box-shadow: var(--ace-shadow-lg);
+  animation: scaleIn 0.2s ease;
 }
 
 .settings-header {
@@ -195,4 +197,116 @@
 
 .btn-secondary:hover {
   background-color: var(--ace-bg-hover);
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .settings-modal {
+    width: 95%;
+    max-height: 90vh;
+    border-radius: 12px;
+  }
+
+  .settings-header {
+    padding: 14px 16px;
+  }
+
+  .settings-header h2 {
+    font-size: 16px;
+  }
+
+  .close-button {
+    font-size: 28px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .settings-tabs {
+    padding: 0 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab {
+    padding: 14px 12px;
+    min-height: 44px; /* Touch target */
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .settings-content {
+    padding: 16px;
+  }
+
+  .settings-section {
+    gap: 20px;
+  }
+
+  .setting-group label {
+    font-size: 14px;
+    gap: 10px;
+  }
+
+  .setting-group input[type='text'],
+  .setting-group input[type='number'],
+  .setting-group select {
+    font-size: 16px; /* Prevent iOS zoom */
+    padding: 12px 14px;
+    min-height: 44px;
+  }
+
+  .setting-group input[type='checkbox'] {
+    width: 22px;
+    height: 22px;
+  }
+
+  .setting-group input[type='color'] {
+    width: 80px;
+    height: 44px;
+  }
+
+  .settings-footer {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 12px 20px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .settings-tabs {
+    padding: 0 8px;
+  }
+
+  .tab {
+    padding: 12px 10px;
+    font-size: 11px;
+  }
+
+  .settings-footer {
+    flex-direction: column-reverse;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
 }
