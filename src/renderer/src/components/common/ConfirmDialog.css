@@ -1,0 +1,104 @@
+.confirm-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--ace-overlay-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirm-dialog {
+  background-color: var(--ace-bg-secondary);
+  border: 1px solid var(--ace-border);
+  border-radius: 6px;
+  padding: 20px;
+  min-width: 350px;
+  max-width: 450px;
+  box-shadow: 0 8px 40px var(--ace-shadow-strong), 0 2px 8px var(--ace-shadow-color);
+}
+
+.confirm-dialog-title {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Poppins', Arial, sans-serif;
+  color: var(--ace-text-primary);
+}
+
+.confirm-dialog-message {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  font-family: 'Lora', Georgia, serif;
+  color: var(--ace-text-secondary);
+  line-height: 1.5;
+}
+
+.confirm-dialog-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  font-family: 'Poppins', Arial, sans-serif;
+  color: var(--ace-text-secondary);
+  cursor: pointer;
+}
+
+.confirm-dialog-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ace-accent);
+  cursor: pointer;
+}
+
+.confirm-dialog-checkbox span {
+  user-select: none;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.confirm-dialog-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: 'Poppins', Arial, sans-serif;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.confirm-dialog-btn-cancel {
+  background-color: transparent;
+  border: 1px solid var(--ace-border-light);
+  color: var(--ace-text-primary);
+}
+
+.confirm-dialog-btn-cancel:hover {
+  background-color: var(--ace-bg-tertiary);
+}
+
+.confirm-dialog-btn-confirm {
+  background-color: var(--ace-accent);
+  border: none;
+  color: #FFFFFF;
+}
+
+.confirm-dialog-btn-confirm:hover {
+  background-color: var(--ace-accent-hover);
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .confirm-dialog {
+    min-width: auto;
+    max-width: calc(100vw - 32px);
+    margin: 0 16px;
+  }
+}

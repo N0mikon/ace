@@ -20,9 +20,12 @@ const writeToTerminal = (text: string): void => {
   api.terminal.write(text)
 }
 
-// Inject prompt for agents (adds carriage return to execute)
+// Inject prompt for agents - send text then Enter separately
 const handleInjectPrompt = (prompt: string): void => {
-  writeToTerminal(prompt + '\r')
+  writeToTerminal(prompt)
+  setTimeout(() => {
+    writeToTerminal('\r')
+  }, 50)
 }
 
 // Execute command

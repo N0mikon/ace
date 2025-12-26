@@ -60,7 +60,10 @@ function App(): JSX.Element {
         if (options.verbose) cmd += ' --verbose'
         if (options.printMode) cmd += ' --print'
 
-        api.terminal.write(cmd + '\r')
+        api.terminal.write(cmd)
+        setTimeout(() => {
+          api.terminal.write('\r')
+        }, 50)
       }, 500)
 
       // TODO: Notify agent manager about project agents directory

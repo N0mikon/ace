@@ -15,9 +15,12 @@ export function Sidebar({
   onOpenSettings,
   collapsed = false
 }: SidebarProps): JSX.Element {
-  // Handle agent prompt injection - write to terminal with carriage return to execute
+  // Handle agent prompt injection - send text then Enter separately
   const handleInjectPrompt = (prompt: string): void => {
-    api.terminal.write(prompt + '\r')
+    api.terminal.write(prompt)
+    setTimeout(() => {
+      api.terminal.write('\r')
+    }, 50)
   }
 
   return (

@@ -116,8 +116,12 @@ export function CommandPanel({
   }, [collapsedCategories])
 
   const handleClick = (command: string): void => {
-    // Use \r (carriage return) to simulate pressing Enter in terminal
-    onCommand(command + '\r')
+    // Send command text first, then Enter separately after a small delay
+    // This mimics natural typing and works better with Claude Code's input handling
+    onCommand(command)
+    setTimeout(() => {
+      onCommand('\r')
+    }, 50)
   }
 
   const toggleCategory = (categoryId: string): void => {

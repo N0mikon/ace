@@ -75,26 +75,27 @@
 
 .command-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-  gap: 4px;
-  padding: 4px 0 8px 0;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 6px;
+  padding: 6px 0 10px 0;
 }
 
 .command-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 8px 6px;
+  gap: 6px;
+  padding: 12px 10px;
   background-color: var(--ace-bg-tertiary);
   border: 1px solid var(--ace-border);
   border-radius: 4px;
   color: var(--ace-text-primary);
-  font-size: 11px;
+  font-size: 12px;
   font-family: inherit;
   cursor: pointer;
   transition: all 0.15s ease;
   min-width: 0;
+  min-height: 40px;
 }
 
 .command-button:hover {
@@ -116,7 +117,7 @@
 }
 
 .command-icon {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1;
   flex-shrink: 0;
   color: var(--anthropic-blue);
@@ -146,20 +147,20 @@
   }
 
   .command-grid {
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 8px;
     padding: 8px 4px 12px;
   }
 
   .command-button {
-    padding: 12px 10px;
-    min-height: 44px; /* Touch target */
-    font-size: 12px;
-    gap: 6px;
+    padding: 14px 12px;
+    min-height: 48px; /* Touch target */
+    font-size: 13px;
+    gap: 8px;
   }
 
   .command-icon {
-    font-size: 16px;
+    font-size: 18px;
   }
 }
 

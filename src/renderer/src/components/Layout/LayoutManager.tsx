@@ -154,7 +154,10 @@ export function LayoutManager(): JSX.Element {
             const index = parseInt(data.action.agentId) - 1
             const agent = agentsRef.current[index]
             if (agent) {
-              api.terminal.write(agent.prompt.text + '\r')
+              api.terminal.write(agent.prompt.text)
+              setTimeout(() => {
+                api.terminal.write('\r')
+              }, 50)
             }
           }
           break

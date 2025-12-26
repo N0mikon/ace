@@ -1,9 +1,28 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useProjectStore } from '../../stores/projectStore'
 import { useLayoutStore } from '../../stores/layoutStore'
 import { InputDialog } from '../common/InputDialog'
+import { ConfirmDialog } from '../common/ConfirmDialog'
 import { api, isElectronMode } from '../../api'
 import './StatusBar.css'
+
+const SKIP_CLOSE_CONFIRM_KEY = 'ace-skip-close-confirm'
+
+const getSkipCloseConfirm = (): boolean => {
+  try {
+    return localStorage.getItem(SKIP_CLOSE_CONFIRM_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+const setSkipCloseConfirm = (value: boolean): void => {
+  try {
+    localStorage.setItem(SKIP_CLOSE_CONFIRM_KEY, String(value))
+  } catch (e) {
+    console.error('Failed to save close confirm preference:', e)
+  }
+}
 
 interface StatusBarProps {
   terminalReady: boolean
@@ -24,10 +43,11 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
   const [agentCount, setAgentCount] = useState(0)
   const [mcpCount, setMcpCount] = useState(0)
   const [showSaveDialog, setShowSaveDialog] = useState(false)
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [serverState, setServerState] = useState<ServerState>({ running: false, port: 3456, clients: 0 })
   const [serverLoading, setServerLoading] = useState(false)
-  const closeProject = useProjectStore((state) => state.closeProject)
+  const closeProjectStore = useProjectStore((state) => state.closeProject)
   const terminalZoom = useLayoutStore((state) => state.terminalZoom)
   const isElectron = isElectronMode()
 
@@ -160,6 +180,38 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
     }
   }
 
+  // Close project with /exit command
+  const performCloseProject = useCallback((): void => {
+    // Send /exit to Claude Code, then Enter separately after a small delay
+    // This mimics natural typing and works better with Claude Code's input handling
+    api.terminal.write('/exit')
+    setTimeout(() => {
+      api.terminal.write('\r')
+    }, 50)
+    // Wait a moment for Claude to process the exit, then close
+    setTimeout(() => {
+      closeProjectStore()
+    }, 850)
+  }, [closeProjectStore])
+
+  const handleCloseProject = useCallback((): void => {
+    if (getSkipCloseConfirm()) {
+      // Skip confirmation, close immediately
+      performCloseProject()
+    } else {
+      // Show confirmation dialog
+      setShowCloseConfirm(true)
+    }
+  }, [performCloseProject])
+
+  const handleConfirmClose = useCallback((dontAskAgain: boolean): void => {
+    setShowCloseConfirm(false)
+    if (dontAskAgain) {
+      setSkipCloseConfirm(true)
+    }
+    performCloseProject()
+  }, [performCloseProject])
+
   return (
     <div className="status-bar">
       <div className="status-left">
@@ -265,7 +317,7 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
         </button>
         <button
           className="status-action-btn"
-          onClick={closeProject}
+          onClick={handleCloseProject}
           title="Close Project"
           aria-label="Close Project"
         >
@@ -292,6 +344,17 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
         confirmLabel="Save Log"
         onConfirm={handleSaveLog}
         onCancel={() => setShowSaveDialog(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={showCloseConfirm}
+        title="Close Project"
+        message="This will send /exit to Claude Code and close the current session. Any unsaved work may be lost."
+        confirmLabel="Close"
+        cancelLabel="Cancel"
+        showDontAskAgain={true}
+        onConfirm={handleConfirmClose}
+        onCancel={() => setShowCloseConfirm(false)}
       />
     </div>
   )

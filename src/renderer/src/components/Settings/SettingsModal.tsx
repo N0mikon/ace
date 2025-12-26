@@ -5,6 +5,24 @@ import { HotkeyEditor } from './HotkeyEditor'
 import { LayoutSettings } from './LayoutSettings'
 import './SettingsModal.css'
 
+const SKIP_CLOSE_CONFIRM_KEY = 'ace-skip-close-confirm'
+
+const getSkipCloseConfirm = (): boolean => {
+  try {
+    return localStorage.getItem(SKIP_CLOSE_CONFIRM_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+const setSkipCloseConfirmStorage = (value: boolean): void => {
+  try {
+    localStorage.setItem(SKIP_CLOSE_CONFIRM_KEY, String(value))
+  } catch (e) {
+    console.error('Failed to save close confirm preference:', e)
+  }
+}
+
 interface SettingsModalProps {
   isOpen: boolean
   onClose: () => void
@@ -17,6 +35,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps): JSX.Elem
   )
   const [activeTab, setActiveTab] = useState<'general' | 'claude' | 'hotkeys' | 'paths' | 'layout'>('general')
   const [hasChanges, setHasChanges] = useState(false)
+  const [showCloseConfirm, setShowCloseConfirm] = useState(() => !getSkipCloseConfirm())
   const modalRef = useRef<HTMLDivElement>(null)
 
   // Handle Escape key to close modal
@@ -153,6 +172,20 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps): JSX.Elem
                   <option value="dark">Dark</option>
                   <option value="light">Light</option>
                 </select>
+              </div>
+              <div className="setting-group setting-group-checkbox">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={showCloseConfirm}
+                    onChange={(e) => {
+                      setShowCloseConfirm(e.target.checked)
+                      setSkipCloseConfirmStorage(!e.target.checked)
+                    }}
+                  />
+                  <span>Show confirmation when closing project</span>
+                </label>
+                <span className="hint">When disabled, closing a project will immediately send /exit without asking</span>
               </div>
             </div>
           )}
