@@ -7,7 +7,8 @@
   justify-content: space-between;
   padding: 0 12px;
   font-size: 11px;
-  color: #ffffff;
+  font-family: 'Poppins', Arial, sans-serif;
+  color: #FFFFFF;
   user-select: none;
 }
 
@@ -107,12 +108,12 @@
 .status-settings-btn {
   background: transparent;
   border: none;
-  color: #ffffff;
+  color: #FFFFFF;
   font-size: 14px;
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 3px;
-  opacity: 0.8;
+  opacity: 0.85;
   transition: opacity 0.15s, background-color 0.15s;
   margin-right: 8px;
 }
@@ -130,4 +131,72 @@
 
 .status-action-btn {
   font-size: 12px;
+}
+
+.status-save-btn {
+  font-size: 14px;
+}
+
+.status-save-btn:disabled {
+  cursor: wait;
+}
+
+.status-save-saved {
+  color: var(--anthropic-green, #788c5d);
+}
+
+.status-save-error {
+  color: #ffcccc;
+}
+
+/* Server toggle button */
+.status-server-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+}
+
+.status-server-btn:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.server-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.server-indicator.stopped {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.server-indicator.running {
+  background-color: var(--ace-success, #4ade80);
+  box-shadow: 0 0 4px var(--ace-success, #4ade80);
+}
+
+.server-label {
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  font-size: 10px;
+}
+
+.server-clients {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0 5px;
+  font-size: 9px;
+  font-weight: 600;
+  margin-left: 2px;
+}
+
+.status-server-btn.server-active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.status-server-btn.server-active:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }

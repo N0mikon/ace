@@ -1,21 +1,22 @@
 /**
  * Hotkey Manager for ACE
  * Handles global keyboard shortcuts using Electron's globalShortcut API
+ *
+ * This system has NO default hotkeys - all hotkeys are user-defined.
+ * Users can assign hotkeys to:
+ * - Quick commands (send text to terminal)
+ * - Agents (invoke an agent)
+ * - App actions (toggle panels, focus terminal, etc.)
  */
 
 import { globalShortcut, BrowserWindow } from 'electron'
 
-export interface HotkeyBinding {
-  id: string
-  accelerator: string
-  description: string
-  action: HotkeyAction
+export interface HotkeyAction {
+  type: 'command' | 'agent' | 'app'
+  command?: string
+  agentId?: string
+  appAction?: AppAction
 }
-
-export type HotkeyAction =
-  | { type: 'command'; command: string }
-  | { type: 'agent'; agentId: string }
-  | { type: 'app'; action: AppAction }
 
 export type AppAction =
   | 'toggleLeftPanel'
@@ -24,136 +25,98 @@ export type AppAction =
   | 'toggleBottomPanel'
   | 'focusTerminal'
   | 'openSettings'
-  | 'newSession'
-  | 'exportSession'
 
-// Default hotkey bindings
-export const DEFAULT_HOTKEYS: Record<string, string> = {
-  // Quick commands
-  exit: 'CommandOrControl+Shift+E',
-  compact: 'CommandOrControl+Shift+C',
-  clear: 'CommandOrControl+Shift+K',
-  help: 'CommandOrControl+Shift+H',
-
-  // App actions
-  toggleLeftPanel: 'CommandOrControl+[',
-  toggleRightPanel: 'CommandOrControl+]',
-  toggleBottomPanel: 'CommandOrControl+J',
-  toggleTopPanel: 'CommandOrControl+Shift+J',
-  focusTerminal: 'CommandOrControl+`',
-  openSettings: 'CommandOrControl+,',
-  newSession: 'CommandOrControl+Shift+N',
-  exportSession: 'CommandOrControl+Shift+S',
-
-  // Agent hotkeys (Ctrl+1-9 reserved)
-  agent1: 'CommandOrControl+1',
-  agent2: 'CommandOrControl+2',
-  agent3: 'CommandOrControl+3',
-  agent4: 'CommandOrControl+4',
-  agent5: 'CommandOrControl+5',
-  agent6: 'CommandOrControl+6',
-  agent7: 'CommandOrControl+7',
-  agent8: 'CommandOrControl+8',
-  agent9: 'CommandOrControl+9'
+export interface HotkeyBinding {
+  id: string
+  accelerator: string
+  description: string
+  action: HotkeyAction
 }
 
-// Command descriptions for UI
-export const HOTKEY_DESCRIPTIONS: Record<string, string> = {
-  exit: 'Send /exit to terminal',
-  compact: 'Send /compact to terminal',
-  clear: 'Send /clear to terminal',
-  help: 'Send /help to terminal',
-  toggleLeftPanel: 'Toggle left panel',
-  toggleRightPanel: 'Toggle right panel',
-  toggleTopPanel: 'Toggle top panel',
-  toggleBottomPanel: 'Toggle bottom panel',
-  focusTerminal: 'Focus terminal',
-  openSettings: 'Open settings',
-  newSession: 'Start new terminal session',
-  exportSession: 'Export current session',
-  agent1: 'Activate Agent 1',
-  agent2: 'Activate Agent 2',
-  agent3: 'Activate Agent 3',
-  agent4: 'Activate Agent 4',
-  agent5: 'Activate Agent 5',
-  agent6: 'Activate Agent 6',
-  agent7: 'Activate Agent 7',
-  agent8: 'Activate Agent 8',
-  agent9: 'Activate Agent 9'
+export interface HotkeyEntry {
+  accelerator: string
+  action: {
+    type: 'command' | 'agent' | 'app'
+    command?: string
+    agentId?: string
+    appAction?: string
+  }
+  description: string
 }
 
-// Map hotkey IDs to their actions
-const HOTKEY_ACTIONS: Record<string, HotkeyAction> = {
-  exit: { type: 'command', command: '/exit\r' },
-  compact: { type: 'command', command: '/compact\r' },
-  clear: { type: 'command', command: '/clear\r' },
-  help: { type: 'command', command: '/help\r' },
-  toggleLeftPanel: { type: 'app', action: 'toggleLeftPanel' },
-  toggleRightPanel: { type: 'app', action: 'toggleRightPanel' },
-  toggleTopPanel: { type: 'app', action: 'toggleTopPanel' },
-  toggleBottomPanel: { type: 'app', action: 'toggleBottomPanel' },
-  focusTerminal: { type: 'app', action: 'focusTerminal' },
-  openSettings: { type: 'app', action: 'openSettings' },
-  newSession: { type: 'app', action: 'newSession' },
-  exportSession: { type: 'app', action: 'exportSession' },
-  agent1: { type: 'agent', agentId: '1' },
-  agent2: { type: 'agent', agentId: '2' },
-  agent3: { type: 'agent', agentId: '3' },
-  agent4: { type: 'agent', agentId: '4' },
-  agent5: { type: 'agent', agentId: '5' },
-  agent6: { type: 'agent', agentId: '6' },
-  agent7: { type: 'agent', agentId: '7' },
-  agent8: { type: 'agent', agentId: '8' },
-  agent9: { type: 'agent', agentId: '9' }
-}
+// Available app actions that can be bound to hotkeys
+export const APP_ACTIONS: { id: AppAction; description: string }[] = [
+  { id: 'toggleLeftPanel', description: 'Toggle left panel' },
+  { id: 'toggleRightPanel', description: 'Toggle right panel' },
+  { id: 'toggleTopPanel', description: 'Toggle top panel' },
+  { id: 'toggleBottomPanel', description: 'Toggle bottom panel' },
+  { id: 'focusTerminal', description: 'Focus terminal' },
+  { id: 'openSettings', description: 'Open settings' }
+]
 
 class HotkeyManager {
   private bindings: Map<string, HotkeyBinding> = new Map()
-  private customBindings: Record<string, string> = {}
   private mainWindow: BrowserWindow | null = null
   private initialized: boolean = false
 
   /**
    * Initialize hotkey manager with main window reference
    */
-  init(mainWindow: BrowserWindow, customBindings?: Record<string, string>): void {
-    // Prevent double initialization
+  init(mainWindow: BrowserWindow, savedBindings?: HotkeyEntry[]): void {
     if (this.initialized) {
       console.log('HotkeyManager already initialized, skipping')
       return
     }
 
     this.mainWindow = mainWindow
-    this.customBindings = customBindings || {}
     this.initialized = true
-    this.registerAll()
 
-    // Note: We don't re-register on focus since hotkeys stay registered globally.
-    // If we wanted to unregister on blur and re-register on focus, we'd add those handlers here.
-  }
-
-  /**
-   * Register all hotkeys
-   */
-  registerAll(): void {
-    this.unregisterAll()
-
-    for (const [id, defaultAccelerator] of Object.entries(DEFAULT_HOTKEYS)) {
-      const accelerator = this.customBindings[id] || defaultAccelerator
-      const action = HOTKEY_ACTIONS[id]
-
-      if (action) {
-        this.register(id, accelerator, action)
-      }
+    // Register saved bindings
+    if (savedBindings && savedBindings.length > 0) {
+      this.registerFromEntries(savedBindings)
     }
 
     console.log(`Registered ${this.bindings.size} hotkeys`)
   }
 
   /**
+   * Register hotkeys from saved entries
+   */
+  registerFromEntries(entries: HotkeyEntry[]): void {
+    this.unregisterAll()
+
+    for (const entry of entries) {
+      const id = this.generateId(entry.action)
+      const action: HotkeyAction = {
+        type: entry.action.type,
+        command: entry.action.command,
+        agentId: entry.action.agentId,
+        appAction: entry.action.appAction as AppAction
+      }
+      this.register(id, entry.accelerator, entry.description, action)
+    }
+  }
+
+  /**
+   * Generate a unique ID for a hotkey action
+   */
+  private generateId(action: HotkeyEntry['action']): string {
+    switch (action.type) {
+      case 'command':
+        return `cmd_${action.command?.replace(/[^a-zA-Z0-9]/g, '_') || 'unknown'}`
+      case 'agent':
+        return `agent_${action.agentId || 'unknown'}`
+      case 'app':
+        return `app_${action.appAction || 'unknown'}`
+      default:
+        return `unknown_${Date.now()}`
+    }
+  }
+
+  /**
    * Register a single hotkey
    */
-  register(id: string, accelerator: string, action: HotkeyAction): boolean {
+  register(id: string, accelerator: string, description: string, action: HotkeyAction): boolean {
     try {
       // Unregister if already registered
       if (this.bindings.has(id)) {
@@ -168,12 +131,7 @@ class HotkeyManager {
       })
 
       if (success) {
-        this.bindings.set(id, {
-          id,
-          accelerator,
-          description: HOTKEY_DESCRIPTIONS[id] || id,
-          action
-        })
+        this.bindings.set(id, { id, accelerator, description, action })
         return true
       } else {
         console.warn(`Failed to register hotkey: ${id} (${accelerator})`)
@@ -186,9 +144,36 @@ class HotkeyManager {
   }
 
   /**
-   * Unregister a single hotkey
+   * Add a new hotkey binding
    */
-  unregister(id: string): boolean {
+  addBinding(accelerator: string, action: HotkeyAction, description: string): { success: boolean; id?: string; error?: string } {
+    // Validate accelerator
+    if (!this.isValidAccelerator(accelerator)) {
+      return { success: false, error: 'Invalid key combination' }
+    }
+
+    // Check for conflicts
+    const conflict = this.hasConflict(accelerator)
+    if (conflict) {
+      const existingBinding = this.bindings.get(conflict)
+      return { success: false, error: `Conflicts with: ${existingBinding?.description || conflict}` }
+    }
+
+    const id = this.generateId({
+      type: action.type,
+      command: action.command,
+      agentId: action.agentId,
+      appAction: action.appAction
+    })
+
+    const success = this.register(id, accelerator, description, action)
+    return { success, id: success ? id : undefined }
+  }
+
+  /**
+   * Remove a hotkey binding
+   */
+  removeBinding(id: string): boolean {
     const binding = this.bindings.get(id)
     if (binding) {
       globalShortcut.unregister(binding.accelerator)
@@ -196,6 +181,34 @@ class HotkeyManager {
       return true
     }
     return false
+  }
+
+  /**
+   * Update a hotkey binding's accelerator
+   */
+  updateBinding(id: string, newAccelerator: string): { success: boolean; error?: string } {
+    const binding = this.bindings.get(id)
+    if (!binding) {
+      return { success: false, error: 'Hotkey not found' }
+    }
+
+    // Validate accelerator
+    if (!this.isValidAccelerator(newAccelerator)) {
+      return { success: false, error: 'Invalid key combination' }
+    }
+
+    // Check for conflicts
+    const conflict = this.hasConflict(newAccelerator, id)
+    if (conflict) {
+      const existingBinding = this.bindings.get(conflict)
+      return { success: false, error: `Conflicts with: ${existingBinding?.description || conflict}` }
+    }
+
+    // Unregister old and register new
+    globalShortcut.unregister(binding.accelerator)
+    const success = this.register(id, newAccelerator, binding.description, binding.action)
+
+    return { success }
   }
 
   /**
@@ -207,42 +220,6 @@ class HotkeyManager {
   }
 
   /**
-   * Update a hotkey binding
-   */
-  updateBinding(id: string, accelerator: string): boolean {
-    const action = HOTKEY_ACTIONS[id]
-    if (!action) {
-      console.warn(`Unknown hotkey ID: ${id}`)
-      return false
-    }
-
-    this.customBindings[id] = accelerator
-    return this.register(id, accelerator, action)
-  }
-
-  /**
-   * Reset a hotkey to its default
-   */
-  resetBinding(id: string): boolean {
-    delete this.customBindings[id]
-    const defaultAccelerator = DEFAULT_HOTKEYS[id]
-    const action = HOTKEY_ACTIONS[id]
-
-    if (defaultAccelerator && action) {
-      return this.register(id, defaultAccelerator, action)
-    }
-    return false
-  }
-
-  /**
-   * Reset all hotkeys to defaults
-   */
-  resetAll(): void {
-    this.customBindings = {}
-    this.registerAll()
-  }
-
-  /**
    * Get all current bindings
    */
   getBindings(): HotkeyBinding[] {
@@ -250,28 +227,31 @@ class HotkeyManager {
   }
 
   /**
-   * Get custom bindings (overrides)
+   * Get bindings as entries for saving to config
    */
-  getCustomBindings(): Record<string, string> {
-    return { ...this.customBindings }
+  getBindingsAsEntries(): HotkeyEntry[] {
+    return Array.from(this.bindings.values()).map(b => ({
+      accelerator: b.accelerator,
+      action: {
+        type: b.action.type,
+        command: b.action.command,
+        agentId: b.action.agentId,
+        appAction: b.action.appAction
+      },
+      description: b.description
+    }))
   }
 
   /**
    * Check if an accelerator is valid
    */
   isValidAccelerator(accelerator: string): boolean {
-    // Basic validation - Electron will throw if invalid
     const validModifiers = ['Command', 'Cmd', 'Control', 'Ctrl', 'CommandOrControl', 'CmdOrCtrl', 'Alt', 'Option', 'AltGr', 'Shift', 'Super', 'Meta']
     const validKeys = [
-      // Letters
       ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
-      // Numbers
       ...'0123456789'.split(''),
-      // Function keys
       ...Array.from({ length: 24 }, (_, i) => `F${i + 1}`),
-      // Special keys
-      'Space', 'Tab', 'Capslock', 'Numlock', 'Scrolllock', 'Backspace', 'Delete', 'Insert', 'Return', 'Enter', 'Up', 'Down', 'Left', 'Right', 'Home', 'End', 'PageUp', 'PageDown', 'Escape', 'Esc', 'VolumeUp', 'VolumeDown', 'VolumeMute', 'MediaNextTrack', 'MediaPreviousTrack', 'MediaStop', 'MediaPlayPause', 'PrintScreen', 'numdec', 'numadd', 'numsub', 'nummult', 'numdiv',
-      // Punctuation
+      'Space', 'Tab', 'Capslock', 'Numlock', 'Scrolllock', 'Backspace', 'Delete', 'Insert', 'Return', 'Enter', 'Up', 'Down', 'Left', 'Right', 'Home', 'End', 'PageUp', 'PageDown', 'Escape', 'Esc', 'VolumeUp', 'VolumeDown', 'VolumeMute', 'MediaNextTrack', 'MediaPreviousTrack', 'MediaStop', 'MediaPlayPause', 'PrintScreen',
       'Plus', 'Minus', '`', '-', '=', '[', ']', '\\', ';', "'", ',', '.', '/'
     ]
 
@@ -312,7 +292,9 @@ class HotkeyManager {
    */
   setEnabled(enabled: boolean): void {
     if (enabled) {
-      this.registerAll()
+      // Re-register all bindings
+      const entries = this.getBindingsAsEntries()
+      this.registerFromEntries(entries)
     } else {
       this.unregisterAll()
     }

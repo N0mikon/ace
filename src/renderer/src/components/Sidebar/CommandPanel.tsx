@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import './CommandPanel.css'
 
 interface QuickCommand {
@@ -11,6 +12,28 @@ interface CommandCategory {
   id: string
   label: string
   commands: QuickCommand[]
+}
+
+const STORAGE_KEY = 'ace-collapsed-categories'
+
+const loadCollapsedState = (): Set<string> => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      return new Set(JSON.parse(saved))
+    }
+  } catch (e) {
+    console.error('Failed to load collapsed state:', e)
+  }
+  return new Set()
+}
+
+const saveCollapsedState = (collapsed: Set<string>): void => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...collapsed]))
+  } catch (e) {
+    console.error('Failed to save collapsed state:', e)
+  }
 }
 
 const COMMAND_CATEGORIES: CommandCategory[] = [
@@ -85,9 +108,28 @@ export function CommandPanel({
   onCommand,
   categories = COMMAND_CATEGORIES
 }: CommandPanelProps): JSX.Element {
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(() => loadCollapsedState())
+
+  // Save collapsed state when it changes
+  useEffect(() => {
+    saveCollapsedState(collapsedCategories)
+  }, [collapsedCategories])
+
   const handleClick = (command: string): void => {
     // Use \r (carriage return) to simulate pressing Enter in terminal
     onCommand(command + '\r')
+  }
+
+  const toggleCategory = (categoryId: string): void => {
+    setCollapsedCategories((prev) => {
+      const next = new Set(prev)
+      if (next.has(categoryId)) {
+        next.delete(categoryId)
+      } else {
+        next.add(categoryId)
+      }
+      return next
+    })
   }
 
   return (
@@ -96,24 +138,37 @@ export function CommandPanel({
         <span className="panel-title">Quick Commands</span>
       </div>
       <div className="command-categories">
-        {categories.map((category) => (
-          <div key={category.id} className="command-category">
-            <div className="category-header">{category.label}</div>
-            <div className="command-grid">
-              {category.commands.map((cmd) => (
-                <button
-                  key={cmd.name}
-                  className="command-button"
-                  onClick={() => handleClick(cmd.command)}
-                  title={cmd.description}
-                >
-                  {cmd.icon && <span className="command-icon">{cmd.icon}</span>}
-                  <span className="command-name">{cmd.name}</span>
-                </button>
-              ))}
+        {categories.map((category) => {
+          const isCollapsed = collapsedCategories.has(category.id)
+          return (
+            <div key={category.id} className={`command-category ${isCollapsed ? 'collapsed' : ''}`}>
+              <button
+                className="category-header"
+                onClick={() => toggleCategory(category.id)}
+                aria-expanded={!isCollapsed}
+              >
+                <span className="category-arrow">{isCollapsed ? '▶' : '▼'}</span>
+                <span className="category-label">{category.label}</span>
+                <span className="category-count">{category.commands.length}</span>
+              </button>
+              {!isCollapsed && (
+                <div className="command-grid">
+                  {category.commands.map((cmd) => (
+                    <button
+                      key={cmd.name}
+                      className="command-button"
+                      onClick={() => handleClick(cmd.command)}
+                      title={cmd.description}
+                    >
+                      {cmd.icon && <span className="command-icon">{cmd.icon}</span>}
+                      <span className="command-name">{cmd.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

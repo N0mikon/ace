@@ -1,8 +1,7 @@
 import { CommandPanel } from './CommandPanel'
-import { SessionPanel } from './SessionPanel'
 import { AgentPanel } from './AgentPanel'
 import { McpPanel } from './McpPanel'
-import { ProjectPanel } from './ProjectPanel'
+import { api } from '../../api'
 import './Sidebar.css'
 
 interface SidebarProps {
@@ -18,17 +17,15 @@ export function Sidebar({
 }: SidebarProps): JSX.Element {
   // Handle agent prompt injection - write to terminal with carriage return to execute
   const handleInjectPrompt = (prompt: string): void => {
-    window.terminal?.write(prompt + '\r')
+    api.terminal.write(prompt + '\r')
   }
 
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-content">
-        <ProjectPanel />
         <AgentPanel onInjectPrompt={handleInjectPrompt} />
         <CommandPanel onCommand={onCommand} />
         <McpPanel />
-        <SessionPanel />
       </div>
       <div className="sidebar-footer">
         <button className="settings-button" onClick={onOpenSettings} title="Settings (Ctrl+,)">

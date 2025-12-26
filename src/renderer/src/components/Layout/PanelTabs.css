@@ -6,8 +6,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--bg-tertiary, #1a1a1a);
-  border-bottom: 1px solid var(--border-color, #333);
+  background: var(--ace-bg-tertiary);
+  border-bottom: 1px solid var(--ace-border);
   min-height: 32px;
   padding: 0 4px;
 }
@@ -32,7 +32,7 @@
 }
 
 .panel-tabs-list::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb, #444);
+  background: var(--ace-border-light);
   border-radius: 2px;
 }
 
@@ -44,21 +44,22 @@
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  color: var(--text-secondary, #888);
+  color: var(--ace-text-secondary);
   cursor: pointer;
   font-size: 12px;
+  font-family: 'Poppins', Arial, sans-serif;
   white-space: nowrap;
   transition: all 0.15s ease;
 }
 
 .panel-tab:hover {
-  color: var(--text-primary, #fff);
-  background: var(--bg-hover, rgba(255, 255, 255, 0.05));
+  color: var(--ace-text-primary);
+  background: var(--ace-bg-hover);
 }
 
 .panel-tab.active {
-  color: var(--text-primary, #fff);
-  border-bottom-color: var(--accent-color, #007acc);
+  color: var(--ace-text-primary);
+  border-bottom-color: var(--ace-accent);
 }
 
 .panel-tab-icon {
@@ -77,7 +78,7 @@
   height: 24px;
   background: transparent;
   border: none;
-  color: var(--text-secondary, #888);
+  color: var(--ace-text-secondary);
   cursor: pointer;
   font-size: 10px;
   border-radius: 4px;
@@ -86,6 +87,6 @@
 }
 
 .panel-collapse-btn:hover {
-  color: var(--text-primary, #fff);
-  background: var(--bg-hover, rgba(255, 255, 255, 0.1));
+  color: var(--ace-text-primary);
+  background: var(--ace-bg-hover);
 }

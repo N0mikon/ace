@@ -16,7 +16,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #888888;
+  color: var(--ace-text-secondary);
 }
 
 .header-actions {
@@ -27,22 +27,29 @@
 .header-button {
   background: none;
   border: none;
-  color: #888888;
+  color: var(--ace-text-secondary);
   font-size: 14px;
   cursor: pointer;
   padding: 2px 4px;
 }
 
 .header-button:hover {
-  color: #d4d4d4;
+  color: var(--ace-text-primary);
 }
 
 .agent-loading,
 .agent-empty {
   font-size: 12px;
-  color: #888888;
+  color: var(--ace-text-secondary);
   text-align: center;
   padding: 16px 0;
+}
+
+.agent-empty .hint {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 11px;
+  margin-top: 4px;
+  opacity: 0.8;
 }
 
 .agent-list {
@@ -56,20 +63,20 @@
   align-items: center;
   gap: 8px;
   padding: 8px;
-  background-color: #2d2d2d;
-  border: 1px solid #3d3d3d;
+  background-color: var(--ace-bg-tertiary);
+  border: 1px solid var(--ace-border);
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .agent-item:hover {
-  background-color: #3d3d3d;
-  border-color: #4d4d4d;
+  background-color: var(--ace-bg-hover);
+  border-color: var(--ace-border-light);
 }
 
 .agent-item:active {
-  background-color: #454545;
+  background-color: var(--ace-bg-active);
 }
 
 .agent-icon {
@@ -79,7 +86,7 @@
   width: 24px;
   height: 24px;
   font-size: 14px;
-  color: #888888;
+  color: var(--ace-accent);
 }
 
 .agent-info {
@@ -90,7 +97,7 @@
 .agent-name {
   font-size: 12px;
   font-weight: 500;
-  color: #d4d4d4;
+  color: var(--ace-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -98,7 +105,8 @@
 
 .agent-description {
   font-size: 10px;
-  color: #888888;
+  font-family: 'Lora', Georgia, serif;
+  color: var(--ace-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -106,12 +114,12 @@
 
 .agent-hotkey {
   font-size: 10px;
-  color: #888888;
-  background-color: #252525;
-  border: 1px solid #3d3d3d;
+  color: var(--ace-text-secondary);
+  background-color: var(--ace-bg-secondary);
+  border: 1px solid var(--ace-border);
   border-radius: 3px;
   padding: 2px 4px;
-  font-family: monospace;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
 }
 
 .agent-actions {
@@ -128,7 +136,7 @@
 .agent-action-button {
   background: none;
   border: none;
-  color: #888888;
+  color: var(--ace-text-secondary);
   font-size: 12px;
   cursor: pointer;
   padding: 2px 4px;
@@ -136,8 +144,8 @@
 }
 
 .agent-action-button:hover {
-  color: #d4d4d4;
-  background-color: #454545;
+  color: var(--ace-text-primary);
+  background-color: var(--ace-bg-active);
 }
 
 .create-agent-form {
@@ -145,8 +153,8 @@
   flex-direction: column;
   gap: 8px;
   padding: 8px;
-  background-color: #2d2d2d;
-  border: 1px solid #3d3d3d;
+  background-color: var(--ace-bg-tertiary);
+  border: 1px solid var(--ace-border);
   border-radius: 4px;
 }
 
@@ -158,16 +166,16 @@
 
 .form-label {
   font-size: 10px;
-  color: #888888;
+  color: var(--ace-text-secondary);
   text-transform: uppercase;
 }
 
 .form-input,
 .form-textarea {
-  background-color: #1e1e1e;
-  border: 1px solid #3d3d3d;
+  background-color: var(--ace-bg-primary);
+  border: 1px solid var(--ace-border);
   border-radius: 3px;
-  color: #d4d4d4;
+  color: var(--ace-text-primary);
   font-size: 12px;
   padding: 6px 8px;
   font-family: inherit;
@@ -176,7 +184,7 @@
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #007acc;
+  border-color: var(--ace-accent);
 }
 
 .form-textarea {
@@ -195,21 +203,21 @@
   border-radius: 3px;
   font-size: 12px;
   cursor: pointer;
-  border: 1px solid #3d3d3d;
-  background-color: #2d2d2d;
-  color: #d4d4d4;
+  border: 1px solid var(--ace-border);
+  background-color: var(--ace-bg-tertiary);
+  color: var(--ace-text-primary);
 }
 
 .form-button:hover {
-  background-color: #3d3d3d;
+  background-color: var(--ace-bg-hover);
 }
 
 .form-button.primary {
-  background-color: #007acc;
-  border-color: #007acc;
-  color: white;
+  background-color: var(--ace-accent);
+  border-color: var(--ace-accent);
+  color: #FFFFFF;
 }
 
 .form-button.primary:hover {
-  background-color: #0088e5;
+  background-color: var(--ace-accent-hover);
 }

@@ -4,6 +4,7 @@ import { FitAddon } from '@xterm/addon-fit'
 import { WebglAddon } from '@xterm/addon-webgl'
 import { WebLinksAddon } from '@xterm/addon-web-links'
 import { SearchAddon } from '@xterm/addon-search'
+import { api } from '../../api'
 import '@xterm/xterm/css/xterm.css'
 import './Terminal.css'
 
@@ -24,7 +25,7 @@ export function Terminal({ onReady, onExit }: TerminalProps): JSX.Element {
     try {
       fitAddonRef.current.fit()
       const { cols, rows } = terminalRef.current
-      window.terminal?.resize(cols, rows)
+      api.terminal.resize(cols, rows)
     } catch (err) {
       console.warn('Failed to resize terminal:', err)
     }
@@ -107,18 +108,18 @@ export function Terminal({ onReady, onExit }: TerminalProps): JSX.Element {
 
     // Handle user input - send to PTY
     terminal.onData((data: string) => {
-      window.terminal?.write(data)
+      api.terminal.write(data)
     })
 
     // Listen for PTY data
-    const cleanupData = window.terminal?.onData((data: string) => {
+    const cleanupData = api.terminal.onData((data: string) => {
       if (isMounted) {
         terminal.write(data)
       }
     })
 
     // Listen for PTY exit
-    const cleanupExit = window.terminal?.onExit((info) => {
+    const cleanupExit = api.terminal.onExit((info) => {
       if (isMounted) {
         terminal.writeln(`\r\n[Process exited with code ${info.exitCode}]`)
         onExit?.(info)
@@ -130,14 +131,14 @@ export function Terminal({ onReady, onExit }: TerminalProps): JSX.Element {
       if (!isMounted) return
 
       // Check if PTY is already running
-      const status = await window.terminal?.isRunning()
+      const status = await api.terminal.isRunning()
       if (status?.running) {
         onReady?.()
         return
       }
 
       const { cols, rows } = terminal
-      const result = await window.terminal?.spawn({ cols, rows })
+      const result = await api.terminal.spawn({ cols, rows })
       if (isMounted) {
         if (result?.success) {
           onReady?.()
@@ -155,8 +156,8 @@ export function Terminal({ onReady, onExit }: TerminalProps): JSX.Element {
     // Cleanup - dispose xterm UI only, PTY lifecycle managed by main process
     return () => {
       isMounted = false
-      cleanupData?.()
-      cleanupExit?.()
+      cleanupData()
+      cleanupExit()
       resizeObserver.disconnect()
       terminal.dispose()
       terminalRef.current = null

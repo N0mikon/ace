@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react'
 import { useProjectStore } from '../../stores/projectStore'
+import { api } from '../../api'
 import { RecentProjects } from './RecentProjects'
 import { LaunchOptions } from './LaunchOptions'
 import { NewProjectWizard } from './NewProjectWizard'
@@ -37,7 +38,7 @@ export function ProjectLauncher(): JSX.Element {
     setShowWizard(false)
 
     // Load the newly created project
-    const config = await window.projects.loadConfig(projectPath)
+    const config = await api.projects.loadConfig(projectPath)
     const projectName = config?.project?.name || projectPath.split(/[/\\]/).pop() || 'Project'
 
     setProject({
@@ -61,7 +62,7 @@ export function ProjectLauncher(): JSX.Element {
     lastOpened: string
   }): Promise<void> => {
     // Load config to check if it exists
-    const config = await window.projects.loadConfig(project.path)
+    const config = await api.projects.loadConfig(project.path)
 
     setProject({
       ...project,

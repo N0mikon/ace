@@ -28,7 +28,6 @@ export interface TerminalAPI {
 export interface AceConfig {
   general: {
     theme: 'dark' | 'light'
-    accentColor: string
   }
   shell: {
     path: string
@@ -37,10 +36,6 @@ export interface AceConfig {
   }
   terminal: {
     fontFamily: string
-    fontSize: number
-    scrollback: number
-    cursorStyle: 'block' | 'underline' | 'bar'
-    cursorBlink: boolean
   }
   claudeCode: {
     configPath: string
@@ -55,7 +50,22 @@ export interface AceConfig {
   agents: {
     globalDirectory: string
   }
-  hotkeys: Record<string, string>
+  hotkeys: {
+    bindings: Array<{
+      accelerator: string
+      action: {
+        type: 'command' | 'agent' | 'app'
+        command?: string
+        agentId?: string
+        appAction?: string
+      }
+      description: string
+    }>
+  }
+  server: {
+    enabled: boolean
+    port: number
+  }
   quickCommands: Array<{
     name: string
     command: string
@@ -99,6 +109,10 @@ export interface SessionAPI {
   count: () => Promise<{ count: number }>
 }
 
+export interface LogAPI {
+  save: (description: string) => Promise<{ success: boolean; filepath?: string; error?: string }>
+}
+
 export interface AgentDefinition {
   name: string
   description: string
@@ -131,6 +145,8 @@ export interface AgentAPI {
   get: (id: string) => Promise<Agent | undefined>
   getPrompt: (id: string) => Promise<string | undefined>
   openFile: (id: string) => Promise<boolean>
+  readFile: (id: string) => Promise<{ success: boolean; content?: string; filePath?: string; error?: string }>
+  saveFile: (id: string, content: string) => Promise<{ success: boolean; error?: string }>
   create: (
     name: string,
     description: string,
@@ -176,14 +192,35 @@ export interface HotkeyTriggerData {
   action: HotkeyAction
 }
 
+export interface AppActionInfo {
+  id: AppAction
+  description: string
+}
+
+export interface HotkeyEntry {
+  accelerator: string
+  action: {
+    type: 'command' | 'agent' | 'app'
+    command?: string
+    agentId?: string
+    appAction?: string
+  }
+  description: string
+}
+
 export interface HotkeyAPI {
   list: () => Promise<HotkeyBinding[]>
-  getDefaults: () => Promise<Record<string, string>>
-  getDescriptions: () => Promise<Record<string, string>>
-  getCustom: () => Promise<Record<string, string>>
+  getAppActions: () => Promise<AppActionInfo[]>
+  getEntries: () => Promise<HotkeyEntry[]>
+  add: (
+    accelerator: string,
+    action: { type: string; command?: string; agentId?: string; appAction?: string },
+    description: string
+  ) => Promise<{ success: boolean; id?: string; error?: string }>
+  remove: (id: string) => Promise<{ success: boolean }>
   update: (id: string, accelerator: string) => Promise<{ success: boolean; error?: string }>
-  reset: (id: string) => Promise<{ success: boolean }>
-  resetAll: () => Promise<{ success: boolean }>
+  clearAll: () => Promise<{ success: boolean }>
+  loadEntries: (entries: HotkeyEntry[]) => Promise<{ success: boolean }>
   setEnabled: (enabled: boolean) => Promise<{ success: boolean }>
   validate: (accelerator: string) => Promise<{ valid: boolean; conflict?: string }>
   onTriggered: (callback: (data: HotkeyTriggerData) => void) => () => void
@@ -299,17 +336,35 @@ export interface ProjectAPI {
   onLaunched: (callback: (data: ProjectLaunchedData) => void) => () => void
 }
 
+// Server API types
+export interface ServerState {
+  running: boolean
+  port: number
+  clients: number
+}
+
+export interface ServerAPI {
+  start: () => Promise<{ success: boolean; port?: number; error?: string }>
+  stop: () => Promise<{ success: boolean }>
+  isRunning: () => Promise<{ running: boolean; port?: number }>
+  getPort: () => Promise<number>
+  getClientCount: () => Promise<number>
+  onStateChanged: (callback: (state: ServerState) => void) => () => void
+}
+
 declare global {
   interface Window {
     electron: ElectronAPI
     terminal: TerminalAPI
     config: ConfigAPI
     session: SessionAPI
+    log: LogAPI
     agents: AgentAPI
     hotkeys: HotkeyAPI
     mcp: McpAPI
     adapters: AdapterAPI
     projects: ProjectAPI
+    server: ServerAPI
     api: unknown
   }
 }

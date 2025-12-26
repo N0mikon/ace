@@ -13,130 +13,266 @@
 .hotkey-title {
   font-size: 14px;
   font-weight: 500;
-  color: #d4d4d4;
+  font-family: 'Poppins', Arial, sans-serif;
+  color: var(--ace-text-primary);
 }
 
-.reset-all-button {
-  padding: 4px 12px;
-  border-radius: 3px;
-  font-size: 12px;
-  cursor: pointer;
-  border: 1px solid #3d3d3d;
-  background-color: #2d2d2d;
-  color: #888888;
-}
-
-.reset-all-button:hover {
-  background-color: #3d3d3d;
-  color: #d4d4d4;
-}
-
-.hotkey-section {
+.hotkey-header-actions {
   display: flex;
-  flex-direction: column;
   gap: 8px;
 }
 
-.section-title {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #888888;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #3d3d3d;
+.add-hotkey-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Poppins', Arial, sans-serif;
+  cursor: pointer;
+  border: none;
+  background-color: var(--ace-accent);
+  color: #fff;
 }
 
-.hotkey-list {
+.add-hotkey-button:hover {
+  background-color: var(--ace-accent-hover);
+}
+
+.clear-all-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Poppins', Arial, sans-serif;
+  cursor: pointer;
+  border: 1px solid var(--ace-border);
+  background-color: var(--ace-bg-tertiary);
+  color: var(--ace-text-secondary);
+}
+
+.clear-all-button:hover {
+  background-color: var(--ace-bg-hover);
+  color: var(--ace-text-primary);
+}
+
+/* Add Hotkey Form */
+.add-hotkey-form {
+  padding: 16px;
+  background-color: var(--ace-bg-secondary);
+  border: 1px solid var(--ace-border);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-row {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.form-row label {
+  font-size: 11px;
+  font-weight: 500;
+  font-family: 'Poppins', Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ace-text-secondary);
+}
+
+.form-row select,
+.form-row input[type="text"] {
+  padding: 8px 10px;
+  background-color: var(--ace-bg-tertiary);
+  border: 1px solid var(--ace-border);
+  border-radius: 4px;
+  color: var(--ace-text-primary);
+  font-size: 13px;
+  font-family: 'Lora', Georgia, serif;
+}
+
+.form-row select:focus,
+.form-row input[type="text"]:focus {
+  outline: none;
+  border-color: var(--ace-accent);
+}
+
+.form-row input::placeholder {
+  color: var(--ace-text-muted);
+}
+
+.form-error {
+  font-size: 12px;
+  color: var(--ace-error);
+  padding: 8px;
+  background-color: rgba(255, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ace-border);
+}
+
+.form-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'Poppins', Arial, sans-serif;
+  cursor: pointer;
+}
+
+.form-button.cancel {
+  border: 1px solid var(--ace-border);
+  background-color: transparent;
+  color: var(--ace-text-primary);
+}
+
+.form-button.cancel:hover {
+  background-color: var(--ace-bg-hover);
+}
+
+.form-button.primary {
+  border: none;
+  background-color: var(--ace-accent);
+  color: #fff;
+}
+
+.form-button.primary:hover {
+  background-color: var(--ace-accent-hover);
+}
+
+/* Hotkey List */
+.hotkey-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .hotkey-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px;
-  background-color: #252525;
+  padding: 10px 12px;
+  background-color: var(--ace-bg-secondary);
   border-radius: 4px;
+  flex-wrap: wrap;
+}
+
+.hotkey-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.hotkey-type-badge {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'Poppins', Arial, sans-serif;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background-color: var(--ace-bg-tertiary);
+  color: var(--ace-text-secondary);
 }
 
 .hotkey-description {
-  flex: 1;
   font-size: 12px;
-  color: #d4d4d4;
+  font-family: 'Lora', Georgia, serif;
+  color: var(--ace-text-primary);
 }
 
 .hotkey-input-wrapper {
-  position: relative;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .hotkey-input {
   width: 160px;
   padding: 6px 8px;
-  background-color: #1e1e1e;
-  border: 1px solid #3d3d3d;
+  background-color: var(--ace-bg-primary);
+  border: 1px solid var(--ace-border);
   border-radius: 3px;
-  color: #d4d4d4;
+  color: var(--ace-text-primary);
   font-size: 12px;
-  font-family: monospace;
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
   text-align: center;
+  cursor: pointer;
 }
 
 .hotkey-input:focus {
   outline: none;
-  border-color: #007acc;
+  border-color: var(--ace-accent);
 }
 
 .hotkey-input.recording {
-  border-color: #ff9800;
-  background-color: #2d2520;
+  border-color: var(--ace-accent);
+  background-color: var(--ace-accent-light);
 }
 
 .hotkey-input.error {
-  border-color: #f44747;
+  border-color: var(--ace-error);
 }
 
-.hotkey-input.modified {
-  border-color: #4ec9b0;
-}
-
-.hotkey-reset-button {
-  padding: 4px 8px;
-  border-radius: 3px;
-  font-size: 11px;
+.hotkey-remove-button {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  font-size: 16px;
   cursor: pointer;
-  border: 1px solid #3d3d3d;
+  border: none;
   background-color: transparent;
-  color: #888888;
+  color: var(--ace-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.hotkey-reset-button:hover {
-  background-color: #3d3d3d;
-  color: #d4d4d4;
-}
-
-.hotkey-reset-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.hotkey-remove-button:hover {
+  background-color: var(--ace-error);
+  color: #fff;
 }
 
 .hotkey-error {
+  width: 100%;
   font-size: 11px;
-  color: #f44747;
-  margin-top: 2px;
+  color: var(--ace-error);
+  margin-top: 4px;
 }
 
+/* Empty State */
+.hotkey-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--ace-text-secondary);
+}
+
+.hotkey-empty p {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-family: 'Lora', Georgia, serif;
+}
+
+.hotkey-empty .hint {
+  font-size: 12px;
+  color: var(--ace-text-muted);
+}
+
+/* Recording Hint */
 .recording-hint {
   font-size: 11px;
-  color: #ff9800;
+  font-family: 'Lora', Georgia, serif;
+  color: var(--ace-accent);
   text-align: center;
   padding: 8px;
-  background-color: #2d2520;
+  background-color: var(--ace-accent-light);
   border-radius: 4px;
   margin-bottom: 8px;
 }

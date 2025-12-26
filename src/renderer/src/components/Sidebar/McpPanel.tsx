@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { McpServerInfo } from '../../../../preload/index.d'
+import type { McpServerInfo } from '../../api/types'
+import { api } from '../../api'
 import './McpPanel.css'
 
 export function McpPanel(): JSX.Element {
@@ -11,8 +12,8 @@ export function McpPanel(): JSX.Element {
   const loadServers = useCallback(async () => {
     setIsLoading(true)
     const [serverList, path] = await Promise.all([
-      window.mcp?.getServers(),
-      window.mcp?.getConfigPath()
+      api.mcp.getServers(),
+      api.mcp.getConfigPath()
     ])
     setServers(serverList || [])
     setConfigPath(path || '')
@@ -23,12 +24,12 @@ export function McpPanel(): JSX.Element {
     loadServers()
 
     // Listen for config changes
-    const unsubscribe = window.mcp?.onChanged(() => {
+    const unsubscribe = api.mcp.onChanged(() => {
       loadServers()
     })
 
     return () => {
-      unsubscribe?.()
+      unsubscribe()
     }
   }, [loadServers])
 

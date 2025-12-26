@@ -4,7 +4,8 @@
  */
 
 import { useState, useEffect } from 'react'
-import type { Agent, McpServerInfo } from '../../../../preload/index.d'
+import type { Agent, McpServerInfo } from '../../api/types'
+import { api } from '../../api'
 import './NewProjectWizard.css'
 
 interface NewProjectWizardProps {
@@ -30,9 +31,9 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
     const loadData = async (): Promise<void> => {
       try {
         // Use listAllAvailable to get global + default agents for selection
-        const agents = await window.agents.listAllAvailable()
+        const agents = await api.agents.listAllAvailable()
         // Use getGlobalServers to get globally configured MCP servers
-        const servers = await window.mcp.getGlobalServers()
+        const servers = await api.mcp.getGlobalServers()
         setAvailableAgents(agents)
         setMcpServers(servers)
       } catch (err) {
@@ -43,7 +44,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
   }, [])
 
   const handleSelectFolder = async (): Promise<void> => {
-    const path = await window.projects.openDialog()
+    const path = await api.projects.openDialog()
     if (path) {
       setProjectPath(path)
       // Extract project name from path
@@ -101,11 +102,11 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
     try {
       // Initialize project
-      await window.projects.initializeAce(projectPath)
+      await api.projects.initializeAce(projectPath)
 
       // Copy selected agents to project
       for (const agentId of selectedAgents) {
-        const result = await window.agents.copyToProject(agentId, projectPath)
+        const result = await api.agents.copyToProject(agentId, projectPath)
         if (!result.success) {
           console.warn(`Failed to copy agent ${agentId}: ${result.error}`)
         }
@@ -113,7 +114,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
       // Copy selected MCP servers to project
       for (const serverName of selectedMcpServers) {
-        const result = await window.mcp.copyToProject(serverName, projectPath)
+        const result = await api.mcp.copyToProject(serverName, projectPath)
         if (!result.success) {
           console.warn(`Failed to copy MCP server ${serverName}: ${result.error}`)
         }

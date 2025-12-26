@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { Agent } from '../../../../preload/index.d'
+import type { Agent } from '../../api/types'
+import { api } from '../../api'
+import { AgentEditor } from '../Editor/AgentEditor'
+import { AgentPromptDialog } from '../Agent/AgentPromptDialog'
 import './AgentPanel.css'
 
 interface AgentPanelProps {
@@ -15,10 +18,13 @@ export function AgentPanel({ onInjectPrompt }: AgentPanelProps): JSX.Element {
     description: '',
     prompt: ''
   })
+  const [editingAgent, setEditingAgent] = useState<{ id: string; name: string } | null>(null)
+  const [promptDialogOpen, setPromptDialogOpen] = useState(false)
+  const [selectedAgentForPrompt, setSelectedAgentForPrompt] = useState<Agent | null>(null)
 
   const loadAgents = useCallback(async () => {
     setIsLoading(true)
-    const data = await window.agents?.list()
+    const data = await api.agents.list()
     setAgents(data || [])
     setIsLoading(false)
   }, [])
@@ -27,25 +33,34 @@ export function AgentPanel({ onInjectPrompt }: AgentPanelProps): JSX.Element {
     loadAgents()
 
     // Listen for agent file changes
-    const unsubscribe = window.agents?.onChanged(() => {
+    const unsubscribe = api.agents.onChanged(() => {
       loadAgents()
     })
 
     return () => {
-      unsubscribe?.()
+      unsubscribe()
     }
   }, [loadAgents])
 
-  const handleAgentClick = async (agent: Agent): Promise<void> => {
-    const prompt = agent.prompt.text
-    if (prompt) {
-      onInjectPrompt(prompt)
-    }
+  const handleAgentClick = (agent: Agent): void => {
+    setSelectedAgentForPrompt(agent)
+    setPromptDialogOpen(true)
   }
 
-  const handleEditAgent = async (agentId: string, e: React.MouseEvent): Promise<void> => {
+  const handlePromptDialogRun = (prompt: string): void => {
+    setPromptDialogOpen(false)
+    setSelectedAgentForPrompt(null)
+    onInjectPrompt(prompt)
+  }
+
+  const handlePromptDialogCancel = (): void => {
+    setPromptDialogOpen(false)
+    setSelectedAgentForPrompt(null)
+  }
+
+  const handleEditAgent = (agent: Agent, e: React.MouseEvent): void => {
     e.stopPropagation()
-    await window.agents?.openFile(agentId)
+    setEditingAgent({ id: agent.id, name: agent.agent.name })
   }
 
   const handleCreateAgent = async (): Promise<void> => {
@@ -53,7 +68,7 @@ export function AgentPanel({ onInjectPrompt }: AgentPanelProps): JSX.Element {
       return
     }
 
-    const result = await window.agents?.create(
+    const result = await api.agents.create(
       newAgent.name.trim(),
       newAgent.description.trim(),
       newAgent.prompt.trim()
@@ -175,7 +190,7 @@ export function AgentPanel({ onInjectPrompt }: AgentPanelProps): JSX.Element {
               <div className="agent-actions">
                 <button
                   className="agent-action-button"
-                  onClick={(e) => handleEditAgent(agent.id, e)}
+                  onClick={(e) => handleEditAgent(agent, e)}
                   title="Edit agent file"
                 >
                   &#9998;
@@ -185,6 +200,24 @@ export function AgentPanel({ onInjectPrompt }: AgentPanelProps): JSX.Element {
           ))}
         </div>
       )}
+
+      {editingAgent && (
+        <AgentEditor
+          isOpen={true}
+          agentId={editingAgent.id}
+          agentName={editingAgent.name}
+          onClose={() => setEditingAgent(null)}
+          onSaved={loadAgents}
+        />
+      )}
+
+      <AgentPromptDialog
+        isOpen={promptDialogOpen}
+        agents={agents}
+        selectedAgent={selectedAgentForPrompt}
+        onRun={handlePromptDialogRun}
+        onCancel={handlePromptDialogCancel}
+      />
     </div>
   )
 }

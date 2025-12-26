@@ -8,7 +8,7 @@
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background: var(--bg-primary, #1e1e1e);
+  background: var(--ace-bg-primary);
 }
 
 .layout-content {
@@ -24,8 +24,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--bg-secondary, #252526);
-  border: 1px solid var(--border-color, #3d3d3d);
+  background: var(--ace-bg-secondary);
+  border: 1px solid var(--ace-border);
 }
 
 .layout-panel-left {
@@ -56,7 +56,7 @@
   height: 150px;
   min-height: 100px;
   max-height: 300px;
-  border-bottom: 1px solid var(--border-color, #3d3d3d);
+  border-bottom: 1px solid var(--ace-border);
   resize: vertical;
   overflow: auto;
   flex-shrink: 0;
@@ -67,7 +67,7 @@
   height: 150px;
   min-height: 100px;
   max-height: 300px;
-  border-top: 1px solid var(--border-color, #3d3d3d);
+  border-top: 1px solid var(--ace-border);
   resize: vertical;
   overflow: auto;
   flex-shrink: 0;
@@ -80,7 +80,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #000;
+  background: var(--anthropic-dark);
 }
 
 /* Loading overlay */
@@ -93,7 +93,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(30, 30, 30, 0.9);
+  background: var(--ace-bg-primary);
   z-index: 1000;
 }
 
@@ -101,15 +101,16 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: var(--text-primary, #d4d4d4);
+  color: var(--ace-text-primary);
   font-size: 16px;
+  font-family: 'Poppins', Arial, sans-serif;
 }
 
 .loading-spinner {
   width: 24px;
   height: 24px;
-  border: 2px solid var(--border-color, #333);
-  border-top-color: var(--accent-color, #007acc);
+  border: 2px solid var(--ace-border);
+  border-top-color: var(--ace-accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

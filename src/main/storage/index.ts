@@ -10,38 +10,43 @@ export type { SessionMeta, SessionRecord } from './database'
  * Register session-related IPC handlers
  */
 export function registerSessionIPC(): void {
-  // List sessions
-  ipcMain.handle('session:list', async (_event, limit?: number, offset?: number) => {
-    return databaseManager.listSessions(limit, offset)
-  })
+  // Save log to file (new manual save)
+  ipcMain.handle(
+    'log:save',
+    async (
+      _event,
+      description: string
+    ): Promise<{ success: boolean; filepath?: string; error?: string }> => {
+      return sessionLogger.saveLog(description)
+    }
+  )
 
-  // Get session by ID
-  ipcMain.handle('session:get', async (_event, sessionId: number) => {
-    return databaseManager.getSession(sessionId)
-  })
-
-  // Search sessions
-  ipcMain.handle('session:search', async (_event, query: string, limit?: number) => {
-    return databaseManager.searchSessions(query, limit)
-  })
-
-  // Delete session
-  ipcMain.handle('session:delete', async (_event, sessionId: number) => {
-    return { success: databaseManager.deleteSession(sessionId) }
-  })
-
-  // Export session to markdown
-  ipcMain.handle('session:export', async (_event, sessionId: number) => {
-    const filepath = sessionLogger.exportToMarkdown(sessionId)
-    return { success: filepath !== null, filepath }
-  })
-
-  // Get current session ID
+  // Get current session ID (for backward compat)
   ipcMain.handle('session:current', async () => {
     return { sessionId: sessionLogger.getCurrentSessionId() }
   })
 
-  // Get session count
+  // Legacy handlers - kept for backward compatibility but may not be fully functional
+  ipcMain.handle('session:list', async (_event, limit?: number, offset?: number) => {
+    return databaseManager.listSessions(limit, offset)
+  })
+
+  ipcMain.handle('session:get', async (_event, sessionId: number) => {
+    return databaseManager.getSession(sessionId)
+  })
+
+  ipcMain.handle('session:search', async (_event, query: string, limit?: number) => {
+    return databaseManager.searchSessions(query, limit)
+  })
+
+  ipcMain.handle('session:delete', async (_event, sessionId: number) => {
+    return { success: databaseManager.deleteSession(sessionId) }
+  })
+
+  ipcMain.handle('session:export', async () => {
+    return { success: false, error: 'Legacy export not supported' }
+  })
+
   ipcMain.handle('session:count', async () => {
     return { count: databaseManager.getSessionCount() }
   })

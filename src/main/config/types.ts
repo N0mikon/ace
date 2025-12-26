@@ -4,7 +4,6 @@
 
 export interface GeneralConfig {
   theme: 'dark' | 'light'
-  accentColor: string
 }
 
 export interface ShellConfig {
@@ -15,10 +14,10 @@ export interface ShellConfig {
 
 export interface TerminalConfig {
   fontFamily: string
-  fontSize: number
-  scrollback: number
-  cursorStyle: 'block' | 'underline' | 'bar'
-  cursorBlink: boolean
+  fontSize?: number
+  scrollback?: number
+  cursorStyle?: 'block' | 'underline' | 'bar'
+  cursorBlink?: boolean
 }
 
 export interface ClaudeCodeConfig {
@@ -37,14 +36,24 @@ export interface AgentsConfig {
   globalDirectory: string
 }
 
+export interface HotkeyEntry {
+  accelerator: string
+  action: {
+    type: 'command' | 'agent' | 'app'
+    command?: string
+    agentId?: string
+    appAction?: string
+  }
+  description: string
+}
+
 export interface HotkeysConfig {
-  exit: string
-  compact: string
-  clear: string
-  help: string
-  toggleSidebar: string
-  focusTerminal: string
-  [key: string]: string
+  bindings: HotkeyEntry[]
+}
+
+export interface ServerConfig {
+  enabled: boolean
+  port: number
 }
 
 export interface QuickCommand {
@@ -62,6 +71,7 @@ export interface AceConfig {
   logging: LoggingConfig
   agents: AgentsConfig
   hotkeys: HotkeysConfig
+  server: ServerConfig
   quickCommands: QuickCommand[]
 }
 
@@ -70,8 +80,7 @@ export interface AceConfig {
  */
 export const DEFAULT_CONFIG: AceConfig = {
   general: {
-    theme: 'dark',
-    accentColor: '#007acc'
+    theme: 'dark'
   },
   shell: {
     path: '',  // Auto-detect
@@ -79,15 +88,11 @@ export const DEFAULT_CONFIG: AceConfig = {
     fallback: 'cmd.exe'
   },
   terminal: {
-    fontFamily: "'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace",
-    fontSize: 14,
-    scrollback: 10000,
-    cursorStyle: 'block',
-    cursorBlink: true
+    fontFamily: "'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace"
   },
   claudeCode: {
-    configPath: '',  // User must set
-    mcpConfig: ''    // User must set
+    configPath: '%USERPROFILE%\\.claude\\',
+    mcpConfig: '%USERPROFILE%\\.claude\\mcp.json'
   },
   logging: {
     enabled: true,
@@ -99,12 +104,11 @@ export const DEFAULT_CONFIG: AceConfig = {
     globalDirectory: ''  // Defaults to %APPDATA%/ace/agents/
   },
   hotkeys: {
-    exit: 'Ctrl+Shift+E',
-    compact: 'Ctrl+Shift+C',
-    clear: 'Ctrl+Shift+K',
-    help: 'Ctrl+Shift+H',
-    toggleSidebar: 'Ctrl+Shift+B',
-    focusTerminal: 'Ctrl+Shift+`'
+    bindings: []
+  },
+  server: {
+    enabled: true,
+    port: 3456
   },
   quickCommands: [
     { name: 'Exit', command: '/exit', icon: '⏹' },

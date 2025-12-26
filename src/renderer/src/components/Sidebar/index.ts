@@ -1,6 +1,5 @@
 export { Sidebar } from './Sidebar'
 export { CommandPanel } from './CommandPanel'
-export { SessionPanel } from './SessionPanel'
 export { AgentPanel } from './AgentPanel'
 export { McpPanel } from './McpPanel'
 export { Sidebar as default } from './Sidebar'

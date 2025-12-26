@@ -4,11 +4,10 @@
  */
 
 import { useLayoutStore } from '../../stores/layoutStore'
+import { api } from '../../api'
 import { PanelTabs } from './PanelTabs'
 import { AgentPanel } from '../Sidebar/AgentPanel'
-import { SessionPanel } from '../Sidebar/SessionPanel'
 import { McpPanel } from '../Sidebar/McpPanel'
-import { ProjectPanel } from '../Sidebar/ProjectPanel'
 import { CommandPanel } from '../Sidebar/CommandPanel'
 import './PanelArea.css'
 
@@ -18,7 +17,7 @@ interface PanelAreaProps {
 
 // Helper to write to terminal
 const writeToTerminal = (text: string): void => {
-  window.terminal?.write(text)
+  api.terminal.write(text)
 }
 
 // Inject prompt for agents (adds carriage return to execute)
@@ -47,16 +46,12 @@ export function PanelArea({ position }: PanelAreaProps): JSX.Element {
   // Render the active panel component
   const renderPanel = (panelId: string): JSX.Element | null => {
     switch (panelId) {
-      case 'project':
-        return <ProjectPanel />
       case 'agents':
         return <AgentPanel onInjectPrompt={handleInjectPrompt} />
       case 'commands':
         return <CommandPanel onCommand={handleCommand} />
       case 'mcp':
         return <McpPanel />
-      case 'sessions':
-        return <SessionPanel />
       default:
         return null
     }

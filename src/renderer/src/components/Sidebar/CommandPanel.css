@@ -1,7 +1,7 @@
 .command-panel {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .panel-header {
@@ -15,65 +15,95 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #888888;
+  color: var(--ace-text-secondary);
 }
 
 .command-categories {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 2px;
 }
 
 .command-category {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+}
+
+.command-category.collapsed {
+  /* No special styling needed, just hides grid */
 }
 
 .category-header {
-  font-size: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #666666;
-  padding: 0 2px;
-  border-bottom: 1px solid #3d3d3d;
-  padding-bottom: 4px;
-  margin-bottom: 2px;
+  color: var(--ace-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.category-header:hover {
+  background-color: var(--ace-bg-tertiary);
+}
+
+.category-arrow {
+  font-size: 8px;
+  color: var(--ace-text-muted);
+  width: 10px;
+  text-align: center;
+}
+
+.category-label {
+  flex: 1;
+  text-align: left;
+}
+
+.category-count {
+  font-size: 10px;
+  color: var(--ace-text-muted);
+  font-weight: 400;
 }
 
 .command-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
   gap: 4px;
+  padding: 4px 0 8px 0;
 }
 
 .command-button {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 4px;
-  padding: 6px 8px;
-  background-color: #2d2d2d;
-  border: 1px solid #3d3d3d;
+  padding: 8px 6px;
+  background-color: var(--ace-bg-tertiary);
+  border: 1px solid var(--ace-border);
   border-radius: 4px;
-  color: #d4d4d4;
+  color: var(--ace-text-primary);
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
   transition: all 0.15s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .command-button:hover {
-  background-color: #3d3d3d;
-  border-color: #4d4d4d;
+  background-color: var(--ace-bg-hover);
+  border-color: var(--ace-border-light);
 }
 
 .command-button:active {
-  background-color: #4d4d4d;
+  background-color: var(--ace-bg-active);
   transform: scale(0.98);
 }
 
@@ -81,10 +111,12 @@
   font-size: 12px;
   line-height: 1;
   flex-shrink: 0;
+  color: var(--anthropic-blue);
 }
 
 .command-name {
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }

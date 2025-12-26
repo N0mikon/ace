@@ -6,11 +6,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 // Using simple CSS flexbox instead of react-resizable-panels
 import { useLayoutStore } from '../../stores/layoutStore'
+import { api } from '../../api'
 import { PanelArea } from './PanelArea'
 import { Terminal } from '../Terminal'
 import { StatusBar } from '../StatusBar'
 import { SettingsModal } from '../Settings'
-import type { HotkeyTriggerData, Agent } from '../../../../preload/index.d'
+import type { HotkeyTriggerData, Agent } from '../../api/types'
 import './LayoutManager.css'
 
 export function LayoutManager(): JSX.Element {
@@ -40,29 +41,29 @@ export function LayoutManager(): JSX.Element {
   // Load agents for hotkey support
   useEffect(() => {
     const loadAgents = async (): Promise<void> => {
-      const agents = await window.agents?.list()
+      const agents = await api.agents.list()
       agentsRef.current = agents || []
     }
     loadAgents()
 
-    const unsubscribe = window.agents?.onChanged(() => {
+    const unsubscribe = api.agents.onChanged(() => {
       loadAgents()
     })
 
     return () => {
-      unsubscribe?.()
+      unsubscribe()
     }
   }, [])
 
   // Handle hotkey triggers from main process
   useEffect(() => {
-    const unsubscribe = window.hotkeys?.onTriggered((data: HotkeyTriggerData) => {
+    const unsubscribe = api.hotkeys.onTriggered((data: HotkeyTriggerData) => {
       console.log('Hotkey triggered:', data)
 
       switch (data.action.type) {
         case 'command':
           if (data.action.command) {
-            window.terminal?.write(data.action.command)
+            api.terminal.write(data.action.command)
           }
           break
 
@@ -87,14 +88,14 @@ export function LayoutManager(): JSX.Element {
               setIsSettingsOpen(true)
               break
             case 'newSession':
-              window.terminal?.kill().then(() => {
-                window.terminal?.spawn()
+              api.terminal.kill().then(() => {
+                api.terminal.spawn()
               })
               break
             case 'exportSession':
-              window.session?.current().then((result) => {
+              api.session.current().then((result) => {
                 if (result?.sessionId) {
-                  window.session?.export(result.sessionId)
+                  api.session.export(result.sessionId)
                 }
               })
               break
@@ -106,7 +107,7 @@ export function LayoutManager(): JSX.Element {
             const index = parseInt(data.action.agentId) - 1
             const agent = agentsRef.current[index]
             if (agent) {
-              window.terminal?.write(agent.prompt.text + '\r')
+              api.terminal.write(agent.prompt.text + '\r')
             }
           }
           break
@@ -114,7 +115,7 @@ export function LayoutManager(): JSX.Element {
     })
 
     return () => {
-      unsubscribe?.()
+      unsubscribe()
     }
   }, [toggleAreaCollapsed])
 

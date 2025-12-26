@@ -38,8 +38,11 @@ export function registerConfigIPC(): void {
   ipcMain.handle('config:update', async (_event, updates: Partial<AceConfig>) => {
     // Merge updates into config
     for (const [section, values] of Object.entries(updates)) {
-      if (typeof values === 'object' && values !== null) {
-        for (const [key, value] of Object.entries(values as Record<string, unknown>)) {
+      if (Array.isArray(values)) {
+        // Handle array sections like quickCommands directly
+        configManager.set(section, values)
+      } else if (typeof values === 'object' && values !== null) {
+        for (const [key, value] of Object.entries(values as unknown as Record<string, unknown>)) {
           configManager.set(`${section}.${key}`, value)
         }
       }

@@ -14,9 +14,11 @@ import {
   registerAdapterIpcHandlers
 } from './config'
 import { databaseManager, registerSessionIPC } from './storage'
-import { hotkeyManager, registerHotkeyIPC } from './hotkeys'
+import { hotkeyManager, registerHotkeyIPC, type HotkeyEntry } from './hotkeys'
 import { windowStateManager } from './window'
 import { projectManager, registerProjectIPC } from './projects'
+import { initServer, stopServer } from './server'
+import { initTerminalBridge } from './server/terminalBridge'
 
 function createWindow(): void {
   // Get saved window state
@@ -59,8 +61,8 @@ function createWindow(): void {
   registerAgentIPC(mainWindow)
 
   // Initialize hotkey manager and register IPC handlers
-  const customHotkeys = configManager.get<Record<string, string>>('hotkeys') || {}
-  hotkeyManager.init(mainWindow, customHotkeys)
+  const hotkeyConfig = configManager.get<{ bindings: HotkeyEntry[] }>('hotkeys')
+  hotkeyManager.init(mainWindow, hotkeyConfig?.bindings || [])
   registerHotkeyIPC(mainWindow)
 
   // Register MCP IPC handlers
@@ -108,6 +110,12 @@ app.whenReady().then(() => {
   // Initialize project manager
   projectManager.init()
 
+  // Initialize server for browser access
+  initServer().then(() => {
+    // Initialize terminal bridge for WebSocket broadcasting
+    initTerminalBridge()
+  })
+
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   app.on('browser-window-created', (_, window) => {
@@ -130,7 +138,8 @@ app.on('window-all-closed', () => {
   }
 })
 
-// Clean up hotkeys on quit
-app.on('will-quit', () => {
+// Clean up hotkeys and server on quit
+app.on('will-quit', async () => {
   hotkeyManager.dispose()
+  await stopServer()
 })

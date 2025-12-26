@@ -4,6 +4,7 @@ import { app, ipcMain, dialog, BrowserWindow } from 'electron'
 import { projectConfigManager, AceProjectConfig, LaunchConfig } from './config'
 import { agentManager } from '../config/agents'
 import { mcpConfigManager } from '../config/mcp'
+import { sessionLogger } from '../storage'
 
 export interface RecentProject {
   path: string
@@ -239,6 +240,9 @@ export function registerProjectIPC(mainWindow: BrowserWindow): void {
 
       // Set project path for MCP (loads project-specific MCP servers)
       await mcpConfigManager.setProjectPath(projectPath)
+
+      // Set project path for session logger (for log saving)
+      sessionLogger.setProjectPath(projectPath)
 
       // The renderer will handle terminal spawn with the options
       // Send event to renderer to trigger terminal spawn

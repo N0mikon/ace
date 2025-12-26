@@ -14,6 +14,8 @@ export class PtyManager extends EventEmitter {
   private ptyProcess: IPty | null = null
   private cols: number = 80
   private rows: number = 30
+  private scrollbackBuffer: string[] = []
+  private maxBufferLines: number = 1000
 
   /**
    * Spawns a new PTY process. If already running, returns true without respawning.
@@ -38,8 +40,9 @@ export class PtyManager extends EventEmitter {
         env: process.env as Record<string, string>
       })
 
-      // Forward data events
+      // Forward data events and store in buffer
       this.ptyProcess.onData((data: string) => {
+        this.appendToBuffer(data)
         this.emit('data', data)
       })
 
@@ -92,6 +95,8 @@ export class PtyManager extends EventEmitter {
     if (this.ptyProcess) {
       this.ptyProcess.kill()
       this.ptyProcess = null
+      // Clear buffer on kill
+      this.scrollbackBuffer = []
     }
   }
 
@@ -107,6 +112,55 @@ export class PtyManager extends EventEmitter {
    */
   getDimensions(): { cols: number; rows: number } {
     return { cols: this.cols, rows: this.rows }
+  }
+
+  /**
+   * Appends data to the scrollback buffer
+   */
+  private appendToBuffer(data: string): void {
+    // Split by lines and append
+    const lines = data.split('\n')
+    for (const line of lines) {
+      if (line.length > 0) {
+        this.scrollbackBuffer.push(line)
+      }
+    }
+
+    // Trim buffer if too large
+    while (this.scrollbackBuffer.length > this.maxBufferLines) {
+      this.scrollbackBuffer.shift()
+    }
+  }
+
+  /**
+   * Gets the scrollback buffer as a single string
+   * Used to send terminal history to late-joining browser clients
+   */
+  getBuffer(): string {
+    return this.scrollbackBuffer.join('\n')
+  }
+
+  /**
+   * Clears the scrollback buffer
+   */
+  clearBuffer(): void {
+    this.scrollbackBuffer = []
+  }
+
+  /**
+   * Register a data listener that returns an unsubscribe function
+   */
+  onData(callback: (data: string) => void): () => void {
+    this.on('data', callback)
+    return () => this.off('data', callback)
+  }
+
+  /**
+   * Register an exit listener that returns an unsubscribe function
+   */
+  onExit(callback: (info: { exitCode: number; signal?: number }) => void): () => void {
+    this.on('exit', callback)
+    return () => this.off('exit', callback)
   }
 }
 

@@ -7,7 +7,7 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background: var(--bg-secondary, #252526);
+  background: var(--ace-bg-secondary);
   overflow: hidden;
 }
 

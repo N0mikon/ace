@@ -14,34 +14,36 @@
 .panel-title {
   font-size: 11px;
   font-weight: 600;
+  font-family: 'Poppins', Arial, sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #888888;
+  color: var(--ace-text-secondary);
 }
 
 .header-button {
   background: none;
   border: none;
-  color: #888888;
+  color: var(--ace-text-secondary);
   font-size: 14px;
   cursor: pointer;
   padding: 2px 4px;
 }
 
 .header-button:hover {
-  color: #d4d4d4;
+  color: var(--ace-text-primary);
 }
 
 .mcp-loading,
 .mcp-empty {
   font-size: 12px;
-  color: #888888;
+  font-family: 'Lora', Georgia, serif;
+  color: var(--ace-text-secondary);
   text-align: center;
   padding: 16px 0;
 }
 
 .mcp-empty a {
-  color: #4ec9b0;
+  color: var(--ace-success);
   text-decoration: none;
 }
 
@@ -60,14 +62,14 @@
   align-items: center;
   gap: 8px;
   padding: 8px;
-  background-color: #2d2d2d;
-  border: 1px solid #3d3d3d;
+  background-color: var(--ace-bg-tertiary);
+  border: 1px solid var(--ace-border);
   border-radius: 4px;
   cursor: default;
 }
 
 .mcp-item:hover {
-  background-color: #353535;
+  background-color: var(--ace-bg-hover);
 }
 
 .mcp-status {
@@ -78,15 +80,15 @@
 }
 
 .mcp-status.configured {
-  background-color: #4ec9b0;
+  background-color: var(--ace-success);
 }
 
 .mcp-status.unknown {
-  background-color: #888888;
+  background-color: var(--ace-text-secondary);
 }
 
 .mcp-status.error {
-  background-color: #f44747;
+  background-color: var(--ace-error);
 }
 
 .mcp-info {
@@ -97,7 +99,8 @@
 .mcp-name {
   font-size: 12px;
   font-weight: 500;
-  color: #d4d4d4;
+  font-family: 'Poppins', Arial, sans-serif;
+  color: var(--ace-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -105,8 +108,8 @@
 
 .mcp-command {
   font-size: 10px;
-  color: #888888;
-  font-family: monospace;
+  color: var(--ace-text-secondary);
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -114,16 +117,17 @@
 
 .mcp-tool-count {
   font-size: 10px;
-  color: #888888;
-  background-color: #252525;
-  border: 1px solid #3d3d3d;
+  color: var(--ace-text-secondary);
+  background-color: var(--ace-bg-secondary);
+  border: 1px solid var(--ace-border);
   border-radius: 3px;
   padding: 2px 6px;
 }
 
 .mcp-config-path {
   font-size: 10px;
-  color: #666666;
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  color: var(--ace-text-muted);
   padding: 4px;
   word-break: break-all;
 }
@@ -131,12 +135,12 @@
 .mcp-details {
   margin-top: 4px;
   padding-top: 4px;
-  border-top: 1px solid #3d3d3d;
+  border-top: 1px solid var(--ace-border);
 }
 
 .mcp-args {
   font-size: 10px;
-  color: #666666;
-  font-family: monospace;
+  color: var(--ace-text-muted);
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
   word-break: break-all;
 }

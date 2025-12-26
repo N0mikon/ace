@@ -36,11 +36,9 @@ export interface LayoutState {
 }
 
 const DEFAULT_PANELS: Record<string, PanelConfig> = {
-  project: { position: 'left', order: 0 },
-  agents: { position: 'left', order: 1 },
-  commands: { position: 'left', order: 2 },
-  mcp: { position: 'right', order: 0 },
-  sessions: { position: 'bottom', order: 0 }
+  agents: { position: 'left', order: 0 },
+  commands: { position: 'left', order: 1 },
+  mcp: { position: 'left', order: 2 }
 }
 
 const DEFAULT_AREA_SIZES: AreaSizes = {
@@ -60,7 +58,7 @@ const DEFAULT_COLLAPSED_AREAS: Record<string, boolean> = {
 const DEFAULT_ACTIVE_TABS: Record<string, string> = {
   left: 'agents',
   right: 'mcp',
-  bottom: 'sessions',
+  bottom: '',
   top: ''
 }
 
@@ -125,7 +123,7 @@ export const useLayoutStore = create<LayoutState>()(
     }),
     {
       name: 'ace-layout',
-      version: 5,
+      version: 6,
       migrate: (_persistedState: unknown, version: number) => {
         console.log('Migrating layout store from version:', version)
         // Always reset to defaults on migration

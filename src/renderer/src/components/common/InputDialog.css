@@ -1,0 +1,92 @@
+.input-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--ace-overlay-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.input-dialog {
+  background-color: var(--ace-bg-secondary);
+  border: 1px solid var(--ace-border);
+  border-radius: 6px;
+  padding: 20px;
+  min-width: 350px;
+  max-width: 450px;
+  box-shadow: 0 8px 40px var(--ace-shadow-strong), 0 2px 8px var(--ace-shadow-color);
+}
+
+.input-dialog-title {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Poppins', Arial, sans-serif;
+  color: var(--ace-text-primary);
+}
+
+.input-dialog-input {
+  width: 100%;
+  padding: 10px 12px;
+  background-color: var(--ace-bg-tertiary);
+  border: 1px solid var(--ace-border-light);
+  border-radius: 4px;
+  color: var(--ace-text-primary);
+  font-size: 13px;
+  font-family: 'Lora', Georgia, serif;
+  box-sizing: border-box;
+}
+
+.input-dialog-input:focus {
+  outline: none;
+  border-color: var(--ace-accent);
+}
+
+.input-dialog-input::placeholder {
+  color: var(--ace-text-muted);
+}
+
+.input-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.input-dialog-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: 'Poppins', Arial, sans-serif;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.input-dialog-btn-cancel {
+  background-color: transparent;
+  border: 1px solid var(--ace-border-light);
+  color: var(--ace-text-primary);
+}
+
+.input-dialog-btn-cancel:hover {
+  background-color: var(--ace-bg-tertiary);
+}
+
+.input-dialog-btn-confirm {
+  background-color: var(--ace-accent);
+  border: none;
+  color: #FFFFFF;
+}
+
+.input-dialog-btn-confirm:hover:not(:disabled) {
+  background-color: var(--ace-accent-hover);
+}
+
+.input-dialog-btn-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

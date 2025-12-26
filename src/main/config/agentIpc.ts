@@ -39,10 +39,29 @@ export function registerAgentIPC(mainWindow: BrowserWindow): void {
     return agentManager.getPrompt(id)
   })
 
-  // Open agent file in editor
+  // Open agent file in editor (deprecated, use readFile + editor window)
   ipcMain.handle('agents:openFile', async (_event, id: string): Promise<boolean> => {
     return agentManager.openFile(id)
   })
+
+  // Read agent file content
+  ipcMain.handle(
+    'agents:readFile',
+    async (
+      _event,
+      id: string
+    ): Promise<{ success: boolean; content?: string; filePath?: string; error?: string }> => {
+      return agentManager.readFile(id)
+    }
+  )
+
+  // Save agent file content
+  ipcMain.handle(
+    'agents:saveFile',
+    async (_event, id: string, content: string): Promise<{ success: boolean; error?: string }> => {
+      return agentManager.saveFile(id, content)
+    }
+  )
 
   // Create new agent
   ipcMain.handle(

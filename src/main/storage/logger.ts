@@ -1,43 +1,36 @@
-import { writeFileSync } from 'fs'
+import { writeFileSync, mkdirSync, existsSync } from 'fs'
 import { join } from 'path'
-import { databaseManager } from './database'
-import { configManager } from '../config'
 
 class SessionLogger {
-  private currentSessionId: number | null = null
   private buffer: string = ''
-  private flushInterval: NodeJS.Timeout | null = null
+  private sessionStartTime: Date | null = null
+  private currentProjectPath: string = ''
 
   /**
-   * Start a new logging session
+   * Set the current project path for log saving
    */
-  startSession(projectPath: string, shell: string): number {
-    // End any existing session
-    if (this.currentSessionId !== null) {
-      this.endSession()
-    }
+  setProjectPath(projectPath: string): void {
+    this.currentProjectPath = projectPath
+    console.log(`Session logger project path set to: ${projectPath}`)
+  }
 
+  /**
+   * Start a new logging session (just resets the buffer)
+   */
+  startSession(projectPath: string, _shell: string): number {
     this.buffer = ''
-
-    // Create new session in database
-    this.currentSessionId = databaseManager.createSession(projectPath, shell)
-
-    // Start periodic buffer flush (every 2 seconds)
-    this.flushInterval = setInterval(() => {
-      this.flushBuffer()
-    }, 2000)
-
-    console.log(`Session started: ${this.currentSessionId}`)
-    return this.currentSessionId
+    this.sessionStartTime = new Date()
+    if (projectPath) {
+      this.currentProjectPath = projectPath
+    }
+    console.log('Session logging started')
+    return 0 // No longer using session IDs
   }
 
   /**
    * Log data from PTY output
    */
   log(data: string): void {
-    if (this.currentSessionId === null) return
-
-    // Add timestamp prefix for each line if it starts fresh
     this.buffer += data
   }
 
@@ -45,94 +38,83 @@ class SessionLogger {
    * Log a command that was injected
    */
   logCommand(command: string, source: 'button' | 'hotkey' | 'typed'): void {
-    if (this.currentSessionId === null) return
-
     const timestamp = new Date().toISOString()
     const prefix = `\n[${timestamp}] [${source}] >>> `
     this.buffer += prefix + command
   }
 
   /**
-   * Flush buffer to database
+   * Save the current buffer to a log file
    */
-  private flushBuffer(): void {
-    if (this.currentSessionId === null || this.buffer.length === 0) return
-
-    databaseManager.appendToTranscript(this.currentSessionId, this.buffer)
-    this.buffer = ''
-  }
-
-  /**
-   * End the current session
-   */
-  endSession(): void {
-    if (this.currentSessionId === null) return
-
-    // Stop flush interval
-    if (this.flushInterval) {
-      clearInterval(this.flushInterval)
-      this.flushInterval = null
+  saveLog(description: string, projectPath?: string): { success: boolean; filepath?: string; error?: string } {
+    const targetPath = projectPath || this.currentProjectPath
+    if (!targetPath) {
+      return { success: false, error: 'No project path available' }
     }
 
-    // Flush remaining buffer
-    this.flushBuffer()
-
-    // End session in database
-    databaseManager.endSession(this.currentSessionId)
-
-    // Auto-export if enabled
-    const config = configManager.getConfig()
-    if (config.logging.autoExport) {
-      this.exportToMarkdown(this.currentSessionId)
+    if (this.buffer.length === 0) {
+      return { success: false, error: 'No content to save' }
     }
 
-    console.log(`Session ended: ${this.currentSessionId}`)
-    this.currentSessionId = null
-  }
+    // Create logs directory in .ace folder
+    const logsDir = join(targetPath, '.ace', 'logs')
+    try {
+      if (!existsSync(logsDir)) {
+        mkdirSync(logsDir, { recursive: true })
+      }
+    } catch (err) {
+      return { success: false, error: `Failed to create logs directory: ${err}` }
+    }
 
-  /**
-   * Export session to markdown file
-   */
-  exportToMarkdown(sessionId: number): string | null {
-    const session = databaseManager.getSession(sessionId)
-    if (!session) return null
-
-    const config = configManager.getConfig()
-    const logsDir = config.logging.directory
-
-    const startDate = new Date(session.startTime)
-    const filename = `session_${startDate.toISOString().replace(/[:.]/g, '-')}.md`
+    // Generate filename with timestamp
+    const now = new Date()
+    const timestamp = now.toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, 19)
+    const filename = `${timestamp}.md`
     const filepath = join(logsDir, filename)
 
-    const duration = session.duration
-      ? this.formatDuration(session.duration)
-      : 'In progress'
+    // Calculate session duration
+    const duration = this.sessionStartTime
+      ? this.formatDuration(Math.floor((now.getTime() - this.sessionStartTime.getTime()) / 1000))
+      : 'Unknown'
 
-    const markdown = `# ACE Session Log
+    // Format markdown content
+    const markdown = `# Session Log
 
-**Project:** ${session.projectPath}
-**Started:** ${session.startTime}
-**Ended:** ${session.endTime || 'In progress'}
+**Description:** ${description}
+**Date:** ${now.toLocaleString()}
+**Project:** ${targetPath}
 **Duration:** ${duration}
-**Shell:** ${session.shell}
 
 ---
 
-## Session Transcript
+## Terminal Output
 
 \`\`\`
-${session.transcript}
+${this.buffer}
 \`\`\`
 `
 
     try {
       writeFileSync(filepath, markdown, 'utf-8')
-      console.log(`Session exported to: ${filepath}`)
-      return filepath
+      console.log(`Log saved to: ${filepath}`)
+
+      // Clear buffer after successful save
+      this.buffer = ''
+      this.sessionStartTime = new Date()
+
+      return { success: true, filepath }
     } catch (error) {
-      console.error('Failed to export session:', error)
-      return null
+      console.error('Failed to save log:', error)
+      return { success: false, error: `Failed to write file: ${error}` }
     }
+  }
+
+  /**
+   * End the current session (just logs, doesn't save)
+   */
+  endSession(): void {
+    console.log('Session ended')
+    // Buffer is preserved in case user wants to save later
   }
 
   /**
@@ -153,17 +135,24 @@ ${session.transcript}
   }
 
   /**
-   * Get current session ID
+   * Get current session ID (deprecated, returns 0)
    */
   getCurrentSessionId(): number | null {
-    return this.currentSessionId
+    return this.sessionStartTime ? 0 : null
   }
 
   /**
    * Check if logging is active
    */
   isLogging(): boolean {
-    return this.currentSessionId !== null
+    return this.sessionStartTime !== null
+  }
+
+  /**
+   * Get the current buffer length (for UI status)
+   */
+  getBufferSize(): number {
+    return this.buffer.length
   }
 }
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import type { AceConfig } from '../../../../preload/index.d'
+import type { AceConfig } from '../../api/types'
+import { api } from '../../api'
 import { HotkeyEditor } from './HotkeyEditor'
 import { LayoutSettings } from './LayoutSettings'
 import './SettingsModal.css'
@@ -14,7 +15,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps): JSX.Elem
   const [configPaths, setConfigPaths] = useState<{ configDir: string; configFile: string } | null>(
     null
   )
-  const [activeTab, setActiveTab] = useState<'general' | 'terminal' | 'claude' | 'hotkeys' | 'paths' | 'layout'>('general')
+  const [activeTab, setActiveTab] = useState<'general' | 'claude' | 'hotkeys' | 'paths' | 'layout'>('general')
   const [hasChanges, setHasChanges] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
 
@@ -40,8 +41,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps): JSX.Elem
   }, [isOpen, handleKeyDown])
 
   const loadConfig = async (): Promise<void> => {
-    const cfg = await window.config?.get()
-    const paths = await window.config?.getPaths()
+    const cfg = await api.config.get()
+    const paths = await api.config.getPaths()
     setConfig(cfg)
     setConfigPaths(paths)
   }
@@ -60,6 +61,11 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps): JSX.Elem
     }
     obj[keys[keys.length - 1]] = value
 
+    // Apply theme immediately for live preview
+    if (path === 'general.theme') {
+      document.documentElement.setAttribute('data-theme', value as string)
+    }
+
     setConfig(newConfig)
     setHasChanges(true)
   }
@@ -67,12 +73,19 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps): JSX.Elem
   const handleSave = async (): Promise<void> => {
     if (!config) return
 
-    await window.config?.update(config)
+    await api.config.update(config)
     setHasChanges(false)
     onClose()
   }
 
-  const handleCancel = (): void => {
+  const handleCancel = async (): Promise<void> => {
+    // Revert theme to saved config value if changed
+    if (hasChanges) {
+      const savedTheme = await api.config.getValue<string>('general.theme')
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme)
+      }
+    }
     setHasChanges(false)
     onClose()
   }
@@ -101,12 +114,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps): JSX.Elem
             onClick={() => setActiveTab('general')}
           >
             General
-          </button>
-          <button
-            className={`tab ${activeTab === 'terminal' ? 'active' : ''}`}
-            onClick={() => setActiveTab('terminal')}
-          >
-            Terminal
           </button>
           <button
             className={`tab ${activeTab === 'claude' ? 'active' : ''}`}
@@ -147,61 +154,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps): JSX.Elem
                   <option value="light">Light</option>
                 </select>
               </div>
-              <div className="setting-group">
-                <label>Accent Color</label>
-                <input
-                  type="color"
-                  value={config.general.accentColor}
-                  onChange={(e) => handleChange('general.accentColor', e.target.value)}
-                />
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'terminal' && (
-            <div className="settings-section">
-              <div className="setting-group">
-                <label>Font Size</label>
-                <input
-                  type="number"
-                  min="8"
-                  max="32"
-                  value={config.terminal.fontSize}
-                  onChange={(e) => handleChange('terminal.fontSize', parseInt(e.target.value))}
-                />
-              </div>
-              <div className="setting-group">
-                <label>Scrollback Lines</label>
-                <input
-                  type="number"
-                  min="1000"
-                  max="100000"
-                  step="1000"
-                  value={config.terminal.scrollback}
-                  onChange={(e) => handleChange('terminal.scrollback', parseInt(e.target.value))}
-                />
-              </div>
-              <div className="setting-group">
-                <label>Cursor Style</label>
-                <select
-                  value={config.terminal.cursorStyle}
-                  onChange={(e) => handleChange('terminal.cursorStyle', e.target.value)}
-                >
-                  <option value="block">Block</option>
-                  <option value="underline">Underline</option>
-                  <option value="bar">Bar</option>
-                </select>
-              </div>
-              <div className="setting-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={config.terminal.cursorBlink}
-                    onChange={(e) => handleChange('terminal.cursorBlink', e.target.checked)}
-                  />
-                  Cursor Blink
-                </label>
-              </div>
             </div>
           )}
 
@@ -213,7 +165,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps): JSX.Elem
                   type="text"
                   value={config.claudeCode.configPath}
                   onChange={(e) => handleChange('claudeCode.configPath', e.target.value)}
-                  placeholder="e.g., C:\Users\Name\.claude\"
                 />
                 <span className="hint">Path to your Claude Code configuration directory</span>
               </div>
@@ -223,7 +174,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps): JSX.Elem
                   type="text"
                   value={config.claudeCode.mcpConfig}
                   onChange={(e) => handleChange('claudeCode.mcpConfig', e.target.value)}
-                  placeholder="e.g., C:\Users\Name\.claude\mcp.json"
                 />
                 <span className="hint">Path to your MCP servers configuration file</span>
               </div>

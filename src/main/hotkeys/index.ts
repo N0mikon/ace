@@ -3,10 +3,11 @@
  */
 
 import { ipcMain, BrowserWindow } from 'electron'
-import { hotkeyManager, DEFAULT_HOTKEYS, HOTKEY_DESCRIPTIONS } from './manager'
+import { hotkeyManager, APP_ACTIONS } from './manager'
+import type { HotkeyAction, HotkeyEntry } from './manager'
 
-export { hotkeyManager, DEFAULT_HOTKEYS, HOTKEY_DESCRIPTIONS } from './manager'
-export type { HotkeyBinding, HotkeyAction, AppAction } from './manager'
+export { hotkeyManager, APP_ACTIONS } from './manager'
+export type { HotkeyBinding, HotkeyAction, AppAction, HotkeyEntry } from './manager'
 
 /**
  * Register hotkey-related IPC handlers
@@ -17,52 +18,60 @@ export function registerHotkeyIPC(_mainWindow: BrowserWindow): void {
     return hotkeyManager.getBindings()
   })
 
-  // Get default hotkeys
-  ipcMain.handle('hotkeys:getDefaults', async () => {
-    return DEFAULT_HOTKEYS
+  // Get available app actions
+  ipcMain.handle('hotkeys:getAppActions', async () => {
+    return APP_ACTIONS
   })
 
-  // Get hotkey descriptions
-  ipcMain.handle('hotkeys:getDescriptions', async () => {
-    return HOTKEY_DESCRIPTIONS
+  // Get bindings as entries (for config)
+  ipcMain.handle('hotkeys:getEntries', async () => {
+    return hotkeyManager.getBindingsAsEntries()
   })
 
-  // Get custom bindings
-  ipcMain.handle('hotkeys:getCustom', async () => {
-    return hotkeyManager.getCustomBindings()
-  })
+  // Add a new hotkey binding
+  ipcMain.handle(
+    'hotkeys:add',
+    async (
+      _event,
+      accelerator: string,
+      action: HotkeyAction,
+      description: string
+    ): Promise<{ success: boolean; id?: string; error?: string }> => {
+      return hotkeyManager.addBinding(accelerator, action, description)
+    }
+  )
+
+  // Remove a hotkey binding
+  ipcMain.handle(
+    'hotkeys:remove',
+    async (_event, id: string): Promise<{ success: boolean }> => {
+      const success = hotkeyManager.removeBinding(id)
+      return { success }
+    }
+  )
 
   // Update a hotkey binding
   ipcMain.handle(
     'hotkeys:update',
     async (_event, id: string, accelerator: string): Promise<{ success: boolean; error?: string }> => {
-      // Validate accelerator
-      if (!hotkeyManager.isValidAccelerator(accelerator)) {
-        return { success: false, error: 'Invalid key combination' }
-      }
-
-      // Check for conflicts
-      const conflict = hotkeyManager.hasConflict(accelerator, id)
-      if (conflict) {
-        return { success: false, error: `Conflicts with: ${HOTKEY_DESCRIPTIONS[conflict] || conflict}` }
-      }
-
-      const success = hotkeyManager.updateBinding(id, accelerator)
-      return { success }
+      return hotkeyManager.updateBinding(id, accelerator)
     }
   )
 
-  // Reset a single hotkey to default
-  ipcMain.handle('hotkeys:reset', async (_event, id: string): Promise<{ success: boolean }> => {
-    const success = hotkeyManager.resetBinding(id)
-    return { success }
-  })
-
-  // Reset all hotkeys to defaults
-  ipcMain.handle('hotkeys:resetAll', async (): Promise<{ success: boolean }> => {
-    hotkeyManager.resetAll()
+  // Clear all hotkeys
+  ipcMain.handle('hotkeys:clearAll', async (): Promise<{ success: boolean }> => {
+    hotkeyManager.unregisterAll()
     return { success: true }
   })
+
+  // Load hotkeys from entries
+  ipcMain.handle(
+    'hotkeys:loadEntries',
+    async (_event, entries: HotkeyEntry[]): Promise<{ success: boolean }> => {
+      hotkeyManager.registerFromEntries(entries)
+      return { success: true }
+    }
+  )
 
   // Enable/disable hotkeys
   ipcMain.handle('hotkeys:setEnabled', async (_event, enabled: boolean): Promise<{ success: boolean }> => {

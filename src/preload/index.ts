@@ -86,27 +86,27 @@ const configAPI = {
 
 // Session API for renderer
 const sessionAPI = {
-  // List sessions
+  // List sessions (legacy)
   list: (limit?: number, offset?: number) => {
     return ipcRenderer.invoke('session:list', limit, offset)
   },
 
-  // Get session by ID
+  // Get session by ID (legacy)
   get: (sessionId: number) => {
     return ipcRenderer.invoke('session:get', sessionId)
   },
 
-  // Search sessions
+  // Search sessions (legacy)
   search: (query: string, limit?: number) => {
     return ipcRenderer.invoke('session:search', query, limit)
   },
 
-  // Delete session
+  // Delete session (legacy)
   delete: (sessionId: number) => {
     return ipcRenderer.invoke('session:delete', sessionId)
   },
 
-  // Export session to markdown
+  // Export session to markdown (legacy)
   export: (sessionId: number) => {
     return ipcRenderer.invoke('session:export', sessionId)
   },
@@ -116,9 +116,17 @@ const sessionAPI = {
     return ipcRenderer.invoke('session:current')
   },
 
-  // Get session count
+  // Get session count (legacy)
   count: () => {
     return ipcRenderer.invoke('session:count')
+  }
+}
+
+// Log API for renderer
+const logAPI = {
+  // Save current terminal buffer to a log file
+  save: (description: string) => {
+    return ipcRenderer.invoke('log:save', description)
   }
 }
 
@@ -154,9 +162,19 @@ const agentAPI = {
     return ipcRenderer.invoke('agents:getPrompt', id)
   },
 
-  // Open agent file in editor
+  // Open agent file in editor (deprecated)
   openFile: (id: string) => {
     return ipcRenderer.invoke('agents:openFile', id)
+  },
+
+  // Read agent file content
+  readFile: (id: string) => {
+    return ipcRenderer.invoke('agents:readFile', id)
+  },
+
+  // Save agent file content
+  saveFile: (id: string, content: string) => {
+    return ipcRenderer.invoke('agents:saveFile', id, content)
   },
 
   // Create new agent
@@ -194,34 +212,49 @@ const hotkeyAPI = {
     return ipcRenderer.invoke('hotkeys:list')
   },
 
-  // Get default hotkeys
-  getDefaults: () => {
-    return ipcRenderer.invoke('hotkeys:getDefaults')
+  // Get available app actions
+  getAppActions: () => {
+    return ipcRenderer.invoke('hotkeys:getAppActions')
   },
 
-  // Get hotkey descriptions
-  getDescriptions: () => {
-    return ipcRenderer.invoke('hotkeys:getDescriptions')
+  // Get bindings as entries (for saving to config)
+  getEntries: () => {
+    return ipcRenderer.invoke('hotkeys:getEntries')
   },
 
-  // Get custom bindings (overrides)
-  getCustom: () => {
-    return ipcRenderer.invoke('hotkeys:getCustom')
+  // Add a new hotkey binding
+  add: (
+    accelerator: string,
+    action: { type: string; command?: string; agentId?: string; appAction?: string },
+    description: string
+  ) => {
+    return ipcRenderer.invoke('hotkeys:add', accelerator, action, description)
   },
 
-  // Update a hotkey binding
+  // Remove a hotkey binding
+  remove: (id: string) => {
+    return ipcRenderer.invoke('hotkeys:remove', id)
+  },
+
+  // Update a hotkey binding's accelerator
   update: (id: string, accelerator: string) => {
     return ipcRenderer.invoke('hotkeys:update', id, accelerator)
   },
 
-  // Reset a hotkey to default
-  reset: (id: string) => {
-    return ipcRenderer.invoke('hotkeys:reset', id)
+  // Clear all hotkeys
+  clearAll: () => {
+    return ipcRenderer.invoke('hotkeys:clearAll')
   },
 
-  // Reset all hotkeys to defaults
-  resetAll: () => {
-    return ipcRenderer.invoke('hotkeys:resetAll')
+  // Load hotkeys from entries
+  loadEntries: (
+    entries: Array<{
+      accelerator: string
+      action: { type: string; command?: string; agentId?: string; appAction?: string }
+      description: string
+    }>
+  ) => {
+    return ipcRenderer.invoke('hotkeys:loadEntries', entries)
   },
 
   // Enable/disable hotkeys
@@ -371,6 +404,44 @@ const adapterAPI = {
   }
 }
 
+// Server API for renderer
+const serverAPI = {
+  // Start the server
+  start: () => {
+    return ipcRenderer.invoke('server:start')
+  },
+
+  // Stop the server
+  stop: () => {
+    return ipcRenderer.invoke('server:stop')
+  },
+
+  // Check if server is running
+  isRunning: () => {
+    return ipcRenderer.invoke('server:isRunning')
+  },
+
+  // Get server port
+  getPort: () => {
+    return ipcRenderer.invoke('server:getPort')
+  },
+
+  // Get connected client count
+  getClientCount: () => {
+    return ipcRenderer.invoke('server:getClientCount')
+  },
+
+  // Listen for server state changes
+  onStateChanged: (callback: (state: { running: boolean; port: number; clients: number }) => void) => {
+    const handler = (
+      _event: Electron.IpcRendererEvent,
+      state: { running: boolean; port: number; clients: number }
+    ) => callback(state)
+    ipcRenderer.on('server:state-changed', handler)
+    return () => ipcRenderer.removeListener('server:state-changed', handler)
+  }
+}
+
 // MCP API for renderer
 const mcpAPI = {
   // Get project MCP servers (for McpPanel)
@@ -439,11 +510,13 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('terminal', terminalAPI)
     contextBridge.exposeInMainWorld('config', configAPI)
     contextBridge.exposeInMainWorld('session', sessionAPI)
+    contextBridge.exposeInMainWorld('log', logAPI)
     contextBridge.exposeInMainWorld('agents', agentAPI)
     contextBridge.exposeInMainWorld('hotkeys', hotkeyAPI)
     contextBridge.exposeInMainWorld('mcp', mcpAPI)
     contextBridge.exposeInMainWorld('adapters', adapterAPI)
     contextBridge.exposeInMainWorld('projects', projectAPI)
+    contextBridge.exposeInMainWorld('server', serverAPI)
   } catch (error) {
     console.error(error)
   }
@@ -457,6 +530,8 @@ if (process.contextIsolated) {
   // @ts-ignore (define in dts)
   window.session = sessionAPI
   // @ts-ignore (define in dts)
+  window.log = logAPI
+  // @ts-ignore (define in dts)
   window.agents = agentAPI
   // @ts-ignore (define in dts)
   window.hotkeys = hotkeyAPI
@@ -466,4 +541,6 @@ if (process.contextIsolated) {
   window.adapters = adapterAPI
   // @ts-ignore (define in dts)
   window.projects = projectAPI
+  // @ts-ignore (define in dts)
+  window.server = serverAPI
 }

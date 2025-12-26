@@ -1,28 +1,9 @@
 :root {
-  /* ACE Theme Colors */
-  --ace-bg-primary: #1e1e1e;
-  --ace-bg-secondary: #252526;
-  --ace-bg-tertiary: #2d2d2d;
-  --ace-bg-hover: #3d3d3d;
-  --ace-bg-active: #454545;
+  /* Claude Desktop Brand Colors - Shared */
+  --claude-crail: #C15F3C;       /* Primary accent - terracotta */
+  --claude-cloudy: #B1ADA1;      /* Secondary - warm gray */
 
-  --ace-border: #3d3d3d;
-  --ace-border-light: #4d4d4d;
-
-  --ace-text-primary: #d4d4d4;
-  --ace-text-secondary: #888888;
-  --ace-text-muted: #666666;
-
-  --ace-accent: #007acc;
-  --ace-accent-hover: #0088e5;
-  --ace-accent-light: rgba(0, 122, 204, 0.1);
-
-  --ace-success: #4ec9b0;
-  --ace-warning: #dcdcaa;
-  --ace-error: #f44747;
-  --ace-info: #569cd6;
-
-  /* Sizing */
+  /* Sizing - shared between themes */
   --ace-sidebar-width: 240px;
   --ace-sidebar-collapsed-width: 0px;
   --ace-statusbar-height: 24px;
@@ -31,30 +12,144 @@
   /* Transitions */
   --ace-transition-fast: 0.15s ease;
   --ace-transition-normal: 0.2s ease;
+}
 
-  /* Legacy variables for compatibility */
+/* ===== LIGHT THEME (Default) ===== */
+:root,
+[data-theme="light"] {
+  /* Claude Desktop Light Colors */
+  --claude-pampas: #F4F3EE;      /* Main background - warm cream */
+  --claude-white: #FFFFFF;       /* Pure white */
+  --claude-dark: #1A1A19;        /* Dark text */
+
+  /* Terminal background (stays dark even in light mode) */
+  --anthropic-dark: #1A1A19;
+  --anthropic-light: #F4F3EE;
+  --anthropic-mid-gray: #B1ADA1;
+  --anthropic-light-gray: #E8E6DC;
+  --anthropic-orange: #C15F3C;
+  --anthropic-blue: #6a9bcc;
+  --anthropic-green: #788c5d;
+
+  /* ACE Theme Colors - Light */
+  --ace-bg-primary: #F4F3EE;     /* Pampas - main background */
+  --ace-bg-secondary: #FFFFFF;   /* White - cards/panels */
+  --ace-bg-tertiary: #EBE9E3;    /* Slightly darker cream */
+  --ace-bg-hover: #E5E3DC;       /* Hover state */
+  --ace-bg-active: #DDD9D0;      /* Active/pressed state */
+
+  --ace-border: #D4D1C7;         /* Warm border color */
+  --ace-border-light: #E0DDD4;   /* Lighter border */
+
+  --ace-text-primary: #1A1A19;   /* Dark text on light bg */
+  --ace-text-secondary: #5C5A54; /* Medium gray text */
+  --ace-text-muted: #8A8780;     /* Muted/placeholder text */
+
+  --ace-accent: #C15F3C;         /* Crail - primary accent */
+  --ace-accent-hover: #A84F30;   /* Darker on hover */
+  --ace-accent-light: rgba(193, 95, 60, 0.12);
+
+  --ace-success: #5D7A45;        /* Muted green */
+  --ace-warning: #C15F3C;        /* Crail orange */
+  --ace-error: #B84040;          /* Warm red */
+  --ace-info: #4A7BA7;           /* Muted blue */
+
+  /* Overlay colors for light theme */
+  --ace-overlay-bg: rgba(26, 26, 25, 0.4);
+  --ace-shadow-color: rgba(26, 26, 25, 0.12);
+  --ace-shadow-strong: rgba(26, 26, 25, 0.18);
+
+  /* Legacy/compatibility */
   --ev-c-white: #ffffff;
-  --ev-c-white-soft: #f8f8f8;
-  --ev-c-white-mute: #f2f2f2;
+  --ev-c-white-soft: #F4F3EE;
+  --ev-c-white-mute: #EBE9E3;
+  --ev-c-black: #1A1A19;
+  --ev-c-black-soft: #2C2C2A;
+  --ev-c-black-mute: #3A3A38;
+  --ev-c-gray-1: #5C5A54;
+  --ev-c-gray-2: #8A8780;
+  --ev-c-gray-3: #B1ADA1;
+  --ev-c-text-1: rgba(26, 26, 25, 0.95);
+  --ev-c-text-2: rgba(26, 26, 25, 0.7);
+  --ev-c-text-3: rgba(26, 26, 25, 0.45);
 
-  --ev-c-black: #1b1b1f;
-  --ev-c-black-soft: #222222;
-  --ev-c-black-mute: #282828;
+  --ev-button-alt-border: var(--ace-border);
+  --ev-button-alt-text: var(--ace-text-primary);
+  --ev-button-alt-bg: var(--ace-bg-secondary);
+  --ev-button-alt-hover-border: var(--ace-border-light);
+  --ev-button-alt-hover-text: var(--ace-text-primary);
+  --ev-button-alt-hover-bg: var(--ace-bg-hover);
 
-  --ev-c-gray-1: #515c67;
-  --ev-c-gray-2: #414853;
-  --ev-c-gray-3: #32363f;
+  --color-background: var(--ace-bg-primary);
+  --color-background-soft: var(--ace-bg-secondary);
+  --color-background-mute: var(--ace-bg-tertiary);
+  --color-text: var(--ace-text-primary);
+}
 
-  --ev-c-text-1: rgba(255, 255, 245, 0.86);
-  --ev-c-text-2: rgba(235, 235, 245, 0.6);
-  --ev-c-text-3: rgba(235, 235, 245, 0.38);
+/* ===== DARK THEME ===== */
+[data-theme="dark"] {
+  /* Claude Desktop Dark Colors */
+  --claude-pampas: #262624;      /* Main dark background */
+  --claude-white: #1A1A19;       /* Near black for elevated surfaces */
+  --claude-dark: #F4F3EE;        /* Light text */
 
-  --ev-button-alt-border: transparent;
-  --ev-button-alt-text: var(--ev-c-text-1);
-  --ev-button-alt-bg: var(--ev-c-gray-3);
-  --ev-button-alt-hover-border: transparent;
-  --ev-button-alt-hover-text: var(--ev-c-text-1);
-  --ev-button-alt-hover-bg: var(--ev-c-gray-2);
+  /* Terminal background */
+  --anthropic-dark: #1A1A19;
+  --anthropic-light: #F4F3EE;
+  --anthropic-mid-gray: #90908d;
+  --anthropic-light-gray: #72726c;
+  --anthropic-orange: #C15F3C;
+  --anthropic-blue: #6a9bcc;
+  --anthropic-green: #788c5d;
+
+  /* ACE Theme Colors - Dark */
+  --ace-bg-primary: #1A1A19;     /* Deepest background */
+  --ace-bg-secondary: #262624;   /* Cards/panels */
+  --ace-bg-tertiary: #2E2E2C;    /* Elevated surfaces */
+  --ace-bg-hover: #3A3A38;       /* Hover state */
+  --ace-bg-active: #4C4C48;      /* Active/pressed state */
+
+  --ace-border: #3A3A38;         /* Subtle border */
+  --ace-border-light: #4C4C48;   /* Lighter border */
+
+  --ace-text-primary: #F4F3EE;   /* Light text on dark bg */
+  --ace-text-secondary: #B1ADA1; /* Cloudy gray */
+  --ace-text-muted: #72726c;     /* Muted gray */
+
+  --ace-accent: #C15F3C;         /* Crail - primary accent */
+  --ace-accent-hover: #D97757;   /* Lighter on hover */
+  --ace-accent-light: rgba(193, 95, 60, 0.2);
+
+  --ace-success: #788c5d;        /* Muted green */
+  --ace-warning: #C15F3C;        /* Crail orange */
+  --ace-error: #c75050;          /* Warm red */
+  --ace-info: #6a9bcc;           /* Muted blue */
+
+  /* Overlay colors for dark theme */
+  --ace-overlay-bg: rgba(0, 0, 0, 0.6);
+  --ace-shadow-color: rgba(0, 0, 0, 0.3);
+  --ace-shadow-strong: rgba(0, 0, 0, 0.5);
+
+  /* Legacy/compatibility */
+  --ev-c-white: #F4F3EE;
+  --ev-c-white-soft: #262624;
+  --ev-c-white-mute: #2E2E2C;
+  --ev-c-black: #1A1A19;
+  --ev-c-black-soft: #262624;
+  --ev-c-black-mute: #2E2E2C;
+  --ev-c-gray-1: #90908d;
+  --ev-c-gray-2: #72726c;
+  --ev-c-gray-3: #4C4C48;
+  --ev-c-text-1: rgba(244, 243, 238, 0.95);
+  --ev-c-text-2: rgba(244, 243, 238, 0.7);
+  --ev-c-text-3: rgba(244, 243, 238, 0.45);
+
+  --ev-button-alt-border: var(--ace-border);
+  --ev-button-alt-text: var(--ace-text-primary);
+  --ev-button-alt-bg: var(--ace-bg-secondary);
+  --ev-button-alt-hover-border: var(--ace-border-light);
+  --ev-button-alt-hover-text: var(--ace-text-primary);
+  --ev-button-alt-hover-bg: var(--ace-bg-hover);
 
   --color-background: var(--ace-bg-primary);
   --color-background-soft: var(--ace-bg-secondary);
@@ -79,19 +174,7 @@ body {
   color: var(--color-text);
   background: var(--color-background);
   line-height: 1.6;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
-    sans-serif;
+  font-family: 'Lora', Georgia, 'Times New Roman', serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

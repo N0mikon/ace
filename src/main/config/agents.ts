@@ -163,7 +163,7 @@ class AgentManager {
   }
 
   /**
-   * Open an agent file in the default editor
+   * Open an agent file in the default editor (deprecated, use editor window)
    */
   openFile(id: string): boolean {
     const agent = this.get(id)
@@ -173,6 +173,48 @@ class AgentManager {
       return true
     }
     return false
+  }
+
+  /**
+   * Read an agent file's raw content
+   */
+  readFile(id: string): { success: boolean; content?: string; filePath?: string; error?: string } {
+    const agent = this.get(id)
+    if (!agent) {
+      return { success: false, error: `Agent not found: ${id}` }
+    }
+
+    try {
+      const content = fs.readFileSync(agent.filePath, 'utf-8')
+      return { success: true, content, filePath: agent.filePath }
+    } catch (err) {
+      return { success: false, error: `Failed to read file: ${err}` }
+    }
+  }
+
+  /**
+   * Save content to an agent file
+   */
+  saveFile(id: string, content: string): { success: boolean; error?: string } {
+    const agent = this.get(id)
+    if (!agent) {
+      return { success: false, error: `Agent not found: ${id}` }
+    }
+
+    try {
+      // Validate TOML before saving
+      TOML.parse(content)
+
+      fs.writeFileSync(agent.filePath, content, 'utf-8')
+      this.loadAgents()
+      this.changeCallback?.()
+      return { success: true }
+    } catch (err) {
+      if (err instanceof Error && err.message.includes('Unexpected')) {
+        return { success: false, error: `Invalid TOML syntax: ${err.message}` }
+      }
+      return { success: false, error: `Failed to save file: ${err}` }
+    }
   }
 
   /**

@@ -4,6 +4,7 @@
  */
 
 import { create } from 'zustand'
+import { api } from '../api'
 
 export interface LaunchOptions {
   bypassMode: boolean
@@ -47,7 +48,7 @@ const DEFAULT_LAUNCH_OPTIONS: LaunchOptions = {
 // Helper to load project config - defined before store so it can be called
 const loadProjectConfig = async (projectPath: string): Promise<void> => {
   try {
-    const config = await window.projects.loadConfig(projectPath)
+    const config = await api.projects.loadConfig(projectPath)
     if (config?.launch) {
       useProjectStore.setState({
         launchOptions: {
@@ -91,7 +92,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
     try {
       // Save launch options to .aceproj
-      await window.projects.saveConfig(currentProject.path, {
+      await api.projects.saveConfig(currentProject.path, {
         launch: {
           bypass_mode: launchOptions.bypassMode,
           resume: launchOptions.resume,
@@ -101,7 +102,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       })
 
       // Launch terminal with project context
-      await window.projects.launch(currentProject.path, launchOptions)
+      await api.projects.launch(currentProject.path, launchOptions)
 
       set({ isLaunched: true, isLoading: false })
     } catch (error) {
@@ -112,7 +113,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   closeProject: () => {
     // Kill terminal if running
-    window.terminal?.kill()
+    api.terminal.kill()
 
     set({
       currentProject: null,
@@ -123,12 +124,12 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   loadRecentProjects: async () => {
     try {
-      const projects = await window.projects.getRecent()
+      const projects = await api.projects.getRecent()
       // Map to ProjectInfo with hasAceConfig check
       const projectInfos: ProjectInfo[] = await Promise.all(
         projects.map(async (p) => ({
           ...p,
-          hasAceConfig: await window.projects.hasConfig(p.path)
+          hasAceConfig: await api.projects.hasConfig(p.path)
         }))
       )
       set({ recentProjects: projectInfos })
@@ -139,11 +140,11 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   openFolder: async () => {
     try {
-      const path = await window.projects.openDialog()
+      const path = await api.projects.openDialog()
       if (!path) return
 
       // Check if project has .aceproj config
-      const config = await window.projects.loadConfig(path)
+      const config = await api.projects.loadConfig(path)
       const projectName = config?.project?.name || path.split(/[/\\]/).pop() || 'Project'
 
       const project: ProjectInfo = {
@@ -173,7 +174,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   initializeProject: async (path: string) => {
     try {
-      await window.projects.initializeAce(path)
+      await api.projects.initializeAce(path)
 
       const projectName = path.split(/[/\\]/).pop() || 'Project'
 
