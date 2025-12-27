@@ -28,6 +28,29 @@ export interface McpProjectConfig {
   servers: Record<string, McpServerConfig>
 }
 
+export interface SkillConfig {
+  id: string
+  name: string
+  description: string
+  category: string
+  provider: string
+  enabled: boolean
+  icon?: string
+}
+
+export interface PluginConfig {
+  id: string
+  name: string
+  version: string
+  description: string
+  author?: string
+  enabled: boolean
+  installed: boolean
+  installLocation: 'global' | 'project'
+  skills?: string[]
+  icon?: string
+}
+
 export type PanelPosition = 'top' | 'left' | 'right' | 'bottom' | 'hidden'
 
 export interface PanelConfig {
@@ -223,6 +246,28 @@ Focus on providing clear, accurate information.
         servers: remaining
       }
     })
+  }
+
+  /**
+   * Get skills configured for this project
+   * Note: This is a stub - skills are discovered from plugins
+   */
+  async getSkills(projectPath: string): Promise<SkillConfig[]> {
+    // For now, return empty array
+    // In the future, this could read from a skills section in .aceproj
+    console.log('getSkills called for', projectPath)
+    return []
+  }
+
+  /**
+   * Get plugins configured for this project
+   * Note: This is a stub - plugins will be managed via Claude Code CLI
+   */
+  async getPlugins(projectPath: string): Promise<PluginConfig[]> {
+    // For now, return empty array
+    // In the future, this could read from a plugins section in .aceproj
+    console.log('getPlugins called for', projectPath)
+    return []
   }
 
   /**

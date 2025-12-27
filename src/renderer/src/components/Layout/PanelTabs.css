@@ -91,6 +91,13 @@
   background: var(--ace-bg-hover);
 }
 
+.panel-tabs-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
 /* ===== MOBILE RESPONSIVE ===== */
 
 @media (max-width: 768px) {

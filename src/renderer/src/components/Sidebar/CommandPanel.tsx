@@ -1,4 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { api } from '../../api'
+import { useLayoutStore } from '../../stores/layoutStore'
+import { PanelSettingsButton } from '../common/PanelSettingsPopover'
+import { CreateCommandDialog } from '../common/CreateCommandDialog'
 import './CommandPanel.css'
 
 interface QuickCommand {
@@ -102,18 +106,44 @@ const COMMAND_CATEGORIES: CommandCategory[] = [
 interface CommandPanelProps {
   onCommand: (command: string) => void
   categories?: CommandCategory[]
+  isHorizontal?: boolean
 }
 
 export function CommandPanel({
   onCommand,
-  categories = COMMAND_CATEGORIES
+  categories = COMMAND_CATEGORIES,
+  isHorizontal = false
 }: CommandPanelProps): JSX.Element {
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(() => loadCollapsedState())
+  const [customCommands, setCustomCommands] = useState<QuickCommand[]>([])
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const panelSettings = useLayoutStore((state) => state.panelSettings)
+  const settings = panelSettings['commands'] || { fontSize: 1.0, preferredSize: 20 }
+
+  // Load custom commands from config
+  const loadCustomCommands = useCallback(async () => {
+    const commands = await api.config.getValue<QuickCommand[]>('quickCommands')
+    setCustomCommands(commands || [])
+  }, [])
+
+  useEffect(() => {
+    loadCustomCommands()
+  }, [loadCustomCommands])
 
   // Save collapsed state when it changes
   useEffect(() => {
     saveCollapsedState(collapsedCategories)
   }, [collapsedCategories])
+
+  // Merge built-in categories with custom commands
+  const allCategories: CommandCategory[] = [
+    ...categories,
+    ...(customCommands.length > 0 ? [{
+      id: 'custom',
+      label: 'Custom',
+      commands: customCommands
+    }] : [])
+  ]
 
   const handleClick = (command: string): void => {
     // Send command text first, then Enter separately after a small delay
@@ -136,13 +166,19 @@ export function CommandPanel({
     })
   }
 
+  const panelClass = `command-panel ${isHorizontal ? 'horizontal' : 'vertical'}`
+  const panelStyle = { '--font-scale': settings.fontSize } as React.CSSProperties
+
   return (
-    <div className="command-panel">
+    <div className={panelClass} style={panelStyle}>
       <div className="panel-header">
         <span className="panel-title">Quick Commands</span>
+        <div className="header-actions">
+          <PanelSettingsButton panelId="commands" />
+        </div>
       </div>
       <div className="command-categories">
-        {categories.map((category) => {
+        {allCategories.map((category) => {
           const isCollapsed = collapsedCategories.has(category.id)
           return (
             <div key={category.id} className={`command-category ${isCollapsed ? 'collapsed' : ''}`}>
@@ -174,6 +210,20 @@ export function CommandPanel({
           )
         })}
       </div>
+
+      <button
+        className="add-command-btn"
+        onClick={() => setShowCreateDialog(true)}
+        title="Create Command"
+      >
+        + Add Command
+      </button>
+
+      <CreateCommandDialog
+        isOpen={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        onCreated={loadCustomCommands}
+      />
     </div>
   )
 }

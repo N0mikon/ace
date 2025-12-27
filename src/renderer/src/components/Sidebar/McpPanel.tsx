@@ -1,13 +1,21 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { McpServerInfo } from '../../api/types'
 import { api } from '../../api'
+import { useLayoutStore } from '../../stores/layoutStore'
+import { PanelSettingsButton } from '../common/PanelSettingsPopover'
 import './McpPanel.css'
 
-export function McpPanel(): JSX.Element {
+interface McpPanelProps {
+  isHorizontal?: boolean
+}
+
+export function McpPanel({ isHorizontal = false }: McpPanelProps): JSX.Element {
   const [servers, setServers] = useState<McpServerInfo[]>([])
   const [configPath, setConfigPath] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
   const [expandedServer, setExpandedServer] = useState<string | null>(null)
+  const panelSettings = useLayoutStore((state) => state.panelSettings)
+  const settings = panelSettings['mcp'] || { fontSize: 1.0, preferredSize: 20 }
 
   const loadServers = useCallback(async () => {
     setIsLoading(true)
@@ -37,24 +45,19 @@ export function McpPanel(): JSX.Element {
     setExpandedServer(expandedServer === serverName ? null : serverName)
   }
 
-  const getStatusClass = (status: string): string => {
-    switch (status) {
-      case 'configured':
-        return 'configured'
-      case 'error':
-        return 'error'
-      default:
-        return 'unknown'
-    }
-  }
+  const panelClass = `mcp-panel ${isHorizontal ? 'horizontal' : 'vertical'}`
+  const panelStyle = { '--font-scale': settings.fontSize } as React.CSSProperties
 
   return (
-    <div className="mcp-panel">
+    <div className={panelClass} style={panelStyle}>
       <div className="panel-header">
         <span className="panel-title">MCP Servers</span>
-        <button className="header-button" onClick={loadServers} title="Refresh">
-          &#8635;
-        </button>
+        <div className="header-actions">
+          <PanelSettingsButton panelId="mcp" />
+          <button className="header-button" onClick={loadServers} title="Refresh">
+            &#8635;
+          </button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -73,7 +76,6 @@ export function McpPanel(): JSX.Element {
                 className="mcp-item"
                 onClick={() => toggleExpand(server.name)}
               >
-                <span className={`mcp-status ${getStatusClass(server.status)}`} />
                 <div className="mcp-info">
                   <div className="mcp-name">{server.name}</div>
                   <div className="mcp-command">{server.command}</div>
@@ -83,9 +85,6 @@ export function McpPanel(): JSX.Element {
                     </div>
                   )}
                 </div>
-                {server.toolCount !== undefined && (
-                  <span className="mcp-tool-count">{server.toolCount} tools</span>
-                )}
               </div>
             ))}
           </div>

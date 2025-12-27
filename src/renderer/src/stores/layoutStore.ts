@@ -6,15 +6,16 @@
 
 import { create } from 'zustand'
 import { api } from '../api'
-import type { LayoutConfig, PanelConfig, AreaSizes, PanelPosition } from '../api/types'
+import type { LayoutConfig, PanelConfig, AreaSizes, PanelPosition, PanelSettings } from '../api/types'
 
-export type { PanelPosition, PanelConfig, AreaSizes, LayoutConfig }
+export type { PanelPosition, PanelConfig, AreaSizes, LayoutConfig, PanelSettings }
 
 export interface LayoutState {
   panels: Record<string, PanelConfig>
   areaSizes: AreaSizes
   collapsedAreas: Record<string, boolean>
   activeTabByArea: Record<string, string>
+  panelSettings: Record<string, PanelSettings>
   terminalZoom: number // 0.5 to 2.0, default 1.0
   isMobileLayout: boolean
   isBrowserMode: boolean
@@ -30,6 +31,11 @@ export interface LayoutState {
   setMobileLayout: (isMobile: boolean) => void
   setBrowserMode: (isBrowser: boolean) => void
 
+  // Panel settings actions
+  setPanelFontSize: (panelId: string, fontSize: number) => void
+  setPanelPreferredSize: (panelId: string, preferredSize: number) => void
+  getPanelSettings: (panelId: string) => PanelSettings
+
   // Terminal zoom actions
   setTerminalZoom: (zoom: number) => void
   zoomIn: () => void
@@ -43,11 +49,13 @@ export interface LayoutState {
   applyLayoutConfig: (layout: LayoutConfig) => void
 }
 
-// NEW DEFAULT LAYOUT: MCP top, Agents left, Commands right
+// NEW DEFAULT LAYOUT: MCP top, Agents left, Commands right, Skills right, Plugins bottom
 const DEFAULT_PANELS: Record<string, PanelConfig> = {
   agents: { position: 'left', order: 0 },
   commands: { position: 'right', order: 0 },
-  mcp: { position: 'top', order: 0 }
+  mcp: { position: 'top', order: 0 },
+  skills: { position: 'right', order: 1 },
+  plugins: { position: 'bottom', order: 0 }
 }
 
 const DEFAULT_AREA_SIZES: AreaSizes = {
@@ -67,15 +75,25 @@ const DEFAULT_COLLAPSED_AREAS: Record<string, boolean> = {
 const DEFAULT_ACTIVE_TABS: Record<string, string> = {
   left: 'agents',
   right: 'commands',
-  bottom: '',
+  bottom: 'plugins',
   top: 'mcp'
+}
+
+const DEFAULT_PANEL_SETTINGS: Record<string, PanelSettings> = {
+  agents: { fontSize: 1.0, preferredSize: 25 },
+  commands: { fontSize: 1.0, preferredSize: 20 },
+  mcp: { fontSize: 1.0, preferredSize: 20 },
+  skills: { fontSize: 1.0, preferredSize: 20 },
+  plugins: { fontSize: 1.0, preferredSize: 25 }
 }
 
 // Mobile layout - all panels move to top
 const MOBILE_PANELS: Record<string, PanelConfig> = {
   agents: { position: 'top', order: 0 },
   commands: { position: 'top', order: 1 },
-  mcp: { position: 'top', order: 2 }
+  mcp: { position: 'top', order: 2 },
+  skills: { position: 'top', order: 3 },
+  plugins: { position: 'top', order: 4 }
 }
 
 const MOBILE_AREA_SIZES: AreaSizes = {
@@ -104,6 +122,7 @@ export const useLayoutStore = create<LayoutState>()((set, get) => ({
   areaSizes: { ...DEFAULT_AREA_SIZES },
   collapsedAreas: { ...DEFAULT_COLLAPSED_AREAS },
   activeTabByArea: { ...DEFAULT_ACTIVE_TABS },
+  panelSettings: { ...DEFAULT_PANEL_SETTINGS },
   terminalZoom: 1.0,
   isMobileLayout: false,
   isBrowserMode: false,
@@ -130,10 +149,16 @@ export const useLayoutStore = create<LayoutState>()((set, get) => ({
       }
     })),
 
-  setActiveTab: (area, panelId) =>
+  setActiveTab: (area, panelId) => {
+    const { panelSettings } = get()
+    const settings = panelSettings[panelId] || DEFAULT_PANEL_SETTINGS[panelId] || { fontSize: 1.0, preferredSize: 20 }
+
+    // Apply the panel's preferred size to the area when switching tabs
     set((state) => ({
-      activeTabByArea: { ...state.activeTabByArea, [area]: panelId }
-    })),
+      activeTabByArea: { ...state.activeTabByArea, [area]: panelId },
+      areaSizes: { ...state.areaSizes, [area]: settings.preferredSize }
+    }))
+  },
 
   resetLayout: () =>
     set({
@@ -141,6 +166,7 @@ export const useLayoutStore = create<LayoutState>()((set, get) => ({
       areaSizes: { ...DEFAULT_AREA_SIZES },
       collapsedAreas: { ...DEFAULT_COLLAPSED_AREAS },
       activeTabByArea: { ...DEFAULT_ACTIVE_TABS },
+      panelSettings: { ...DEFAULT_PANEL_SETTINGS },
       terminalZoom: 1.0,
       isMobileLayout: false
     }),
@@ -156,6 +182,38 @@ export const useLayoutStore = create<LayoutState>()((set, get) => ({
   setMobileLayout: (isMobile) => set({ isMobileLayout: isMobile }),
 
   setBrowserMode: (isBrowser) => set({ isBrowserMode: isBrowser }),
+
+  // Panel settings actions
+  setPanelFontSize: (panelId: string, fontSize: number) => {
+    const clamped = Math.max(0.7, Math.min(1.5, fontSize))
+    set((state) => ({
+      panelSettings: {
+        ...state.panelSettings,
+        [panelId]: {
+          ...(state.panelSettings[panelId] || DEFAULT_PANEL_SETTINGS[panelId] || { fontSize: 1.0, preferredSize: 20 }),
+          fontSize: clamped
+        }
+      }
+    }))
+  },
+
+  setPanelPreferredSize: (panelId: string, preferredSize: number) => {
+    const clamped = Math.max(10, Math.min(50, preferredSize))
+    set((state) => ({
+      panelSettings: {
+        ...state.panelSettings,
+        [panelId]: {
+          ...(state.panelSettings[panelId] || DEFAULT_PANEL_SETTINGS[panelId] || { fontSize: 1.0, preferredSize: 20 }),
+          preferredSize: clamped
+        }
+      }
+    }))
+  },
+
+  getPanelSettings: (panelId: string): PanelSettings => {
+    const { panelSettings } = get()
+    return panelSettings[panelId] || DEFAULT_PANEL_SETTINGS[panelId] || { fontSize: 1.0, preferredSize: 20 }
+  },
 
   // Terminal zoom actions
   setTerminalZoom: (zoom: number) => {
@@ -189,6 +247,7 @@ export const useLayoutStore = create<LayoutState>()((set, get) => ({
           areaSizes: layout.areaSizes || { ...DEFAULT_AREA_SIZES },
           collapsedAreas: layout.collapsedAreas || { ...DEFAULT_COLLAPSED_AREAS },
           activeTabByArea: layout.activeTabByArea || { ...DEFAULT_ACTIVE_TABS },
+          panelSettings: layout.panelSettings || { ...DEFAULT_PANEL_SETTINGS },
           terminalZoom: layout.terminalZoom ?? 1.0
         })
       } else {
@@ -198,6 +257,7 @@ export const useLayoutStore = create<LayoutState>()((set, get) => ({
           areaSizes: { ...DEFAULT_AREA_SIZES },
           collapsedAreas: { ...DEFAULT_COLLAPSED_AREAS },
           activeTabByArea: { ...DEFAULT_ACTIVE_TABS },
+          panelSettings: { ...DEFAULT_PANEL_SETTINGS },
           terminalZoom: 1.0
         })
       }
@@ -209,6 +269,7 @@ export const useLayoutStore = create<LayoutState>()((set, get) => ({
         areaSizes: { ...DEFAULT_AREA_SIZES },
         collapsedAreas: { ...DEFAULT_COLLAPSED_AREAS },
         activeTabByArea: { ...DEFAULT_ACTIVE_TABS },
+        panelSettings: { ...DEFAULT_PANEL_SETTINGS },
         terminalZoom: 1.0
       })
     }
@@ -221,7 +282,7 @@ export const useLayoutStore = create<LayoutState>()((set, get) => ({
 
   // Save layout to project config
   saveToProject: async () => {
-    const { currentProjectPath, panels, areaSizes, collapsedAreas, activeTabByArea, terminalZoom, isMobileLayout } = get()
+    const { currentProjectPath, panels, areaSizes, collapsedAreas, activeTabByArea, panelSettings, terminalZoom, isMobileLayout } = get()
 
     // Don't save if no project or if in mobile layout (mobile is temporary)
     if (!currentProjectPath || isMobileLayout) {
@@ -235,6 +296,7 @@ export const useLayoutStore = create<LayoutState>()((set, get) => ({
         areaSizes,
         collapsedAreas,
         activeTabByArea,
+        panelSettings,
         terminalZoom
       })
       console.log('Layout saved to project:', currentProjectPath)
@@ -269,6 +331,7 @@ export const useLayoutStore = create<LayoutState>()((set, get) => ({
       areaSizes: layout.areaSizes || { ...DEFAULT_AREA_SIZES },
       collapsedAreas: layout.collapsedAreas || { ...DEFAULT_COLLAPSED_AREAS },
       activeTabByArea: layout.activeTabByArea || { ...DEFAULT_ACTIVE_TABS },
+      panelSettings: layout.panelSettings || { ...DEFAULT_PANEL_SETTINGS },
       terminalZoom: layout.terminalZoom ?? 1.0
     })
   }

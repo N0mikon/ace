@@ -366,14 +366,37 @@
 .launcher-footer {
   padding: 12px 24px;
   border-top: 1px solid var(--ace-border);
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.launcher-footer p {
-  margin: 0;
+.footer-version {
   font-size: 11px;
   font-family: 'Lora', Georgia, serif;
   color: var(--ace-text-muted);
+}
+
+.footer-exit-button {
+  background: none;
+  border: 1px solid var(--ace-border);
+  border-radius: 4px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-family: 'Poppins', Arial, sans-serif;
+  color: var(--ace-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.footer-exit-button:hover {
+  background-color: var(--ace-bg-tertiary);
+  border-color: var(--ace-border-light);
+  color: var(--ace-text-primary);
+}
+
+.footer-exit-button:active {
+  transform: scale(0.98);
 }
 
 /* Scrollbar */
@@ -476,6 +499,12 @@
 
   .launcher-footer {
     padding: 14px 16px;
+  }
+
+  .footer-exit-button {
+    padding: 8px 20px;
+    font-size: 13px;
+    min-height: 36px;
   }
 }
 

@@ -32,12 +32,18 @@
 .panel-area .session-panel,
 .panel-area .mcp-panel,
 .panel-area .project-panel,
-.panel-area .command-panel {
+.panel-area .command-panel,
+.panel-area .plugins-panel,
+.panel-area .skills-panel {
   width: 100%;
   min-width: 0;
 }
 
-/* Hide redundant panel headers - tabs already show the name */
+/* In PanelArea context, hide the panel header entirely:
+   - Panel title: tabs already show the panel name
+   - Font size button (PanelSettingsButton): already in PanelTabs actions
+   - Add/refresh buttons: now moved to bottom of panel content
+*/
 .panel-area .panel-header {
   display: none;
 }

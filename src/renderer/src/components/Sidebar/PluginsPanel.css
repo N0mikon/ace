@@ -1,0 +1,292 @@
+/* Plugins Panel - follows AgentPanel pattern exactly */
+
+.plugins-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plugins-panel .panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.plugins-panel .panel-title {
+  font-size: calc(11px * var(--font-scale, 1));
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ace-text-secondary);
+}
+
+.plugins-panel .header-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.plugins-loading,
+.plugins-empty {
+  font-size: calc(12px * var(--font-scale, 1));
+  color: var(--ace-text-secondary);
+  text-align: center;
+  padding: 16px 0;
+}
+
+.plugins-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Plugin item - matches agent-item pattern */
+.plugin-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background-color: var(--ace-bg-tertiary);
+  border: 1px solid var(--ace-border);
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.plugin-item:hover {
+  background-color: var(--ace-bg-hover);
+  border-color: var(--ace-border-light);
+}
+
+.plugin-item.disabled {
+  opacity: 0.6;
+}
+
+.plugin-item.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.plugin-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: calc(14px * var(--font-scale, 1));
+}
+
+.plugin-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.plugin-name {
+  font-size: calc(12px * var(--font-scale, 1));
+  font-weight: 500;
+  color: var(--ace-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.plugin-version {
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--ace-text-muted);
+  margin-left: 6px;
+}
+
+.plugin-description {
+  font-size: calc(10px * var(--font-scale, 1));
+  color: var(--ace-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.plugin-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.plugin-toggle-btn {
+  padding: 4px 10px;
+  font-size: calc(11px * var(--font-scale, 1));
+  font-weight: 500;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.plugin-toggle-btn.on {
+  background: var(--ace-success, #4caf50);
+  color: white;
+}
+
+.plugin-toggle-btn.off {
+  background: var(--ace-bg-secondary);
+  color: var(--ace-text-muted);
+}
+
+.plugin-toggle-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.plugin-remove-btn {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--ace-text-muted);
+  cursor: pointer;
+  font-size: calc(14px * var(--font-scale, 1));
+  transition: all 0.15s ease;
+}
+
+.plugin-remove-btn:hover:not(:disabled) {
+  background: rgba(244, 67, 54, 0.1);
+  border-color: #f44336;
+  color: #f44336;
+}
+
+.plugin-remove-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+/* Add Plugin button - matches add-agent-btn */
+.add-plugin-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  margin-top: 8px;
+  background: transparent;
+  border: 1px dashed var(--ace-border, #3A3A38);
+  border-radius: 4px;
+  color: var(--ace-text-secondary, #B1ADA1);
+  font-size: calc(12px * var(--font-scale, 1));
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.add-plugin-btn:hover {
+  background: var(--ace-bg-tertiary, #2E2E2C);
+  border-color: var(--ace-accent, #C15F3C);
+  color: var(--ace-text-primary, #F4F3EE);
+}
+
+/* ===== HORIZONTAL LAYOUT ===== */
+.plugins-panel.horizontal {
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 0;
+}
+
+.plugins-panel.horizontal .panel-header {
+  flex-direction: column;
+  border-right: 1px solid var(--ace-border);
+  padding: 8px 6px;
+  min-width: fit-content;
+  gap: 6px;
+}
+
+.plugins-panel.horizontal .panel-title {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+}
+
+.plugins-panel.horizontal .header-actions {
+  flex-direction: column;
+}
+
+.plugins-panel.horizontal .plugins-list {
+  flex-direction: row;
+  gap: 6px;
+  padding: 6px;
+  overflow-x: auto;
+  flex: 1;
+}
+
+.plugins-panel.horizontal .plugin-item {
+  min-width: 140px;
+  max-width: 180px;
+  flex-shrink: 0;
+  padding: 6px 8px;
+  gap: 6px;
+}
+
+.plugins-panel.horizontal .plugin-icon {
+  width: 20px;
+  height: 20px;
+  font-size: calc(12px * var(--font-scale, 1));
+}
+
+.plugins-panel.horizontal .plugin-name {
+  font-size: calc(11px * var(--font-scale, 1));
+}
+
+.plugins-panel.horizontal .plugin-description {
+  display: none;
+}
+
+.plugins-panel.horizontal .plugin-version {
+  display: none;
+}
+
+.plugins-panel.horizontal .add-plugin-btn {
+  width: auto;
+  max-width: 120px;
+  min-width: 100px;
+  margin-top: 0;
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  font-size: calc(11px * var(--font-scale, 1));
+}
+
+.plugins-panel.horizontal .plugins-loading,
+.plugins-panel.horizontal .plugins-empty {
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: calc(11px * var(--font-scale, 1));
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  .plugins-panel {
+    gap: 12px;
+  }
+
+  .plugin-item {
+    padding: 12px;
+    min-height: 44px;
+    gap: 12px;
+  }
+
+  .plugin-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .plugin-name {
+    font-size: calc(14px * var(--font-scale, 1));
+  }
+
+  .plugin-description {
+    font-size: calc(12px * var(--font-scale, 1));
+  }
+}

@@ -7,12 +7,14 @@ import { useLayoutStore, PanelPosition } from '../../stores/layoutStore'
 import './LayoutSettings.css'
 
 const POSITIONS: PanelPosition[] = ['left', 'right', 'top', 'bottom', 'hidden']
-const PANEL_IDS = ['agents', 'commands', 'mcp']
+const PANEL_IDS = ['agents', 'commands', 'mcp', 'skills', 'plugins']
 
 const PANEL_LABELS: Record<string, string> = {
   agents: 'Agents',
   commands: 'Quick Commands',
-  mcp: 'MCP Servers'
+  mcp: 'MCP Servers',
+  skills: 'Skills',
+  plugins: 'Plugins'
 }
 
 const POSITION_LABELS: Record<PanelPosition, string> = {

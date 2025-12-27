@@ -9,10 +9,16 @@ export { mcpConfigManager } from './mcp'
 export { registerMcpIPC } from './mcpIpc'
 export { adapterManager } from './adapters'
 export { registerAdapterIpcHandlers } from './adapterIpc'
+export { skillsManager } from './skills'
+export { registerSkillsIPC } from './skillsIpc'
+export { pluginsManager } from './plugins'
+export { registerPluginsIPC } from './pluginsIpc'
 export * from './types'
 export type { Agent, AgentDefinition, AgentPrompt, AgentOptions } from './agents'
 export type { McpServerInfo, McpServerConfig, McpConfig } from './mcp'
 export type { ToolAdapter, AdapterInfo, AdapterCommands, AdapterFlags } from './adapters'
+export type { Skill, SkillCategory } from './skills'
+export type { Plugin } from './plugins'
 
 /**
  * Register config-related IPC handlers

@@ -136,7 +136,10 @@ export function ProjectLauncher(): JSX.Element {
         </main>
 
         <footer className="launcher-footer">
-          <p>v0.1.0</p>
+          <span className="footer-version">v0.1.0</span>
+          <button className="footer-exit-button" onClick={() => api.app.quit()} title="Exit ACE">
+            Exit
+          </button>
         </footer>
       </div>
 

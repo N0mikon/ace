@@ -16,7 +16,10 @@ import type {
   AdapterAPI,
   ProjectAPI,
   ServerAPI,
-  LayoutAPI
+  LayoutAPI,
+  SkillsAPI,
+  PluginsAPI,
+  AppAPI
 } from './types'
 
 // Terminal API - wraps window.terminal
@@ -199,6 +202,96 @@ const layoutApi: LayoutAPI = {
   }
 }
 
+// Skills API - wraps window.skills
+const skillsApi: SkillsAPI = {
+  list: () => {
+    if (window.skills) {
+      return window.skills.list()
+    }
+    return Promise.resolve([])
+  },
+  listGlobal: () => {
+    if (window.skills) {
+      return window.skills.listGlobal()
+    }
+    return Promise.resolve([])
+  },
+  toggle: (skillId, enabled) => {
+    if (window.skills) {
+      return window.skills.toggle(skillId, enabled)
+    }
+    return Promise.resolve({ success: false })
+  },
+  reload: () => {
+    if (window.skills) {
+      return window.skills.reload()
+    }
+    return Promise.resolve([])
+  },
+  onChanged: (callback) => {
+    if (window.skills) {
+      return window.skills.onChanged(callback)
+    }
+    return () => {}
+  }
+}
+
+// Plugins API - wraps window.plugins
+const pluginsApi: PluginsAPI = {
+  list: () => {
+    if (window.plugins) {
+      return window.plugins.list()
+    }
+    return Promise.resolve([])
+  },
+  listGlobal: () => {
+    if (window.plugins) {
+      return window.plugins.listGlobal()
+    }
+    return Promise.resolve([])
+  },
+  toggle: (pluginId, enabled) => {
+    if (window.plugins) {
+      return window.plugins.toggle(pluginId, enabled)
+    }
+    return Promise.resolve({ success: false })
+  },
+  install: (pluginId, location) => {
+    if (window.plugins) {
+      return window.plugins.install(pluginId, location)
+    }
+    return Promise.resolve({ success: false, error: 'Plugins API not available' })
+  },
+  uninstall: (pluginId) => {
+    if (window.plugins) {
+      return window.plugins.uninstall(pluginId)
+    }
+    return Promise.resolve({ success: false, error: 'Plugins API not available' })
+  },
+  reload: () => {
+    if (window.plugins) {
+      return window.plugins.reload()
+    }
+    return Promise.resolve([])
+  },
+  onChanged: (callback) => {
+    if (window.plugins) {
+      return window.plugins.onChanged(callback)
+    }
+    return () => {}
+  }
+}
+
+// App API - wraps window.app
+const appApi: AppAPI = {
+  quit: () => {
+    if (window.app) {
+      return window.app.quit()
+    }
+    return Promise.resolve()
+  }
+}
+
 // Combined IPC API
 export const ipcApi: ACEAPI = {
   terminal: terminalApi,
@@ -211,7 +304,10 @@ export const ipcApi: ACEAPI = {
   adapters: adapterApi,
   projects: projectApi,
   server: serverApi,
-  layout: layoutApi
+  layout: layoutApi,
+  skills: skillsApi,
+  plugins: pluginsApi,
+  app: appApi
 }
 
 export default ipcApi

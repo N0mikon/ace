@@ -3,6 +3,7 @@
  * Tab bar for switching between multiple panels in the same area
  */
 
+import { PanelSettingsButton } from '../common/PanelSettingsPopover'
 import './PanelTabs.css'
 
 interface PanelTabsProps {
@@ -18,7 +19,9 @@ const PANEL_LABELS: Record<string, string> = {
   agents: 'Agents',
   commands: 'Commands',
   mcp: 'MCP',
-  sessions: 'Sessions'
+  sessions: 'Sessions',
+  skills: 'Skills',
+  plugins: 'Plugins'
 }
 
 const PANEL_ICONS: Record<string, string> = {
@@ -26,7 +29,9 @@ const PANEL_ICONS: Record<string, string> = {
   agents: '\u{1F916}', // robot
   commands: '\u{2318}', // command
   mcp: '\u{1F50C}', // plug
-  sessions: '\u{1F4CB}' // clipboard
+  sessions: '\u{1F4CB}', // clipboard
+  skills: '\u{2728}', // sparkles
+  plugins: '\u{1F9E9}' // puzzle piece
 }
 
 export function PanelTabs({
@@ -53,13 +58,16 @@ export function PanelTabs({
           </button>
         ))}
       </div>
-      <button
-        className="panel-collapse-btn"
-        onClick={onCollapse}
-        title="Collapse panel area"
-      >
-        {position === 'left' ? '\u25C0' : position === 'right' ? '\u25B6' : '\u25BC'}
-      </button>
+      <div className="panel-tabs-actions">
+        <PanelSettingsButton panelId={activePanel} />
+        <button
+          className="panel-collapse-btn"
+          onClick={onCollapse}
+          title="Collapse panel area"
+        >
+          {position === 'left' ? '\u25C0' : position === 'right' ? '\u25B6' : '\u25BC'}
+        </button>
+      </div>
     </div>
   )
 }

@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* --font-scale is set via inline style for dynamic scaling */
 }
 
 .panel-header {
@@ -12,34 +13,66 @@
 }
 
 .panel-title {
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale, 1));
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--ace-text-secondary);
 }
 
-.header-actions {
+.agent-panel .header-actions {
   display: flex;
   gap: 4px;
 }
 
-.header-button {
-  background: none;
-  border: none;
-  color: var(--ace-text-secondary);
-  font-size: 14px;
+/* Add/Refresh buttons in header */
+.agent-panel .add-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ace-bg-tertiary, #2E2E2C);
+  border: 1px solid var(--ace-border, #3A3A38);
+  border-radius: 4px;
+  color: var(--ace-text-secondary, #B1ADA1);
   cursor: pointer;
-  padding: 2px 4px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.15s ease;
 }
 
-.header-button:hover {
-  color: var(--ace-text-primary);
+.agent-panel .add-btn:hover {
+  background: var(--ace-bg-hover, #3A3A38);
+  color: var(--ace-text-primary, #F4F3EE);
+  border-color: var(--ace-border-light, #4C4C48);
+}
+
+.agent-panel .header-button {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ace-bg-tertiary, #2E2E2C);
+  border: 1px solid var(--ace-border, #3A3A38);
+  border-radius: 4px;
+  color: var(--ace-text-secondary, #B1ADA1);
+  cursor: pointer;
+  font-size: calc(14px * var(--font-scale, 1));
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.agent-panel .header-button:hover {
+  background: var(--ace-bg-hover, #3A3A38);
+  color: var(--ace-text-primary, #F4F3EE);
+  border-color: var(--ace-border-light, #4C4C48);
 }
 
 .agent-loading,
 .agent-empty {
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale, 1));
   color: var(--ace-text-secondary);
   text-align: center;
   padding: 16px 0;
@@ -47,7 +80,7 @@
 
 .agent-empty .hint {
   font-family: 'Lora', Georgia, serif;
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale, 1));
   margin-top: 4px;
   opacity: 0.8;
 }
@@ -56,6 +89,30 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/* Add Agent button at bottom of list */
+.add-agent-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  margin-top: 8px;
+  background: transparent;
+  border: 1px dashed var(--ace-border, #3A3A38);
+  border-radius: 4px;
+  color: var(--ace-text-secondary, #B1ADA1);
+  font-size: calc(12px * var(--font-scale, 1));
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.add-agent-btn:hover {
+  background: var(--ace-bg-tertiary, #2E2E2C);
+  border-color: var(--ace-accent, #C15F3C);
+  color: var(--ace-text-primary, #F4F3EE);
 }
 
 .agent-item {
@@ -94,7 +151,7 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  font-size: 14px;
+  font-size: calc(14px * var(--font-scale, 1));
   color: var(--ace-accent);
 }
 
@@ -103,17 +160,18 @@
   min-width: 0;
 }
 
-.agent-name {
-  font-size: 12px;
+.agent-panel .agent-name {
+  font-size: calc(12px * var(--font-scale, 1));
   font-weight: 500;
+  font-family: 'Poppins', Arial, sans-serif;
   color: var(--ace-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.agent-description {
-  font-size: 10px;
+.agent-panel .agent-description {
+  font-size: calc(10px * var(--font-scale, 1));
   font-family: 'Lora', Georgia, serif;
   color: var(--ace-text-secondary);
   white-space: nowrap;
@@ -122,7 +180,7 @@
 }
 
 .agent-hotkey {
-  font-size: 10px;
+  font-size: calc(10px * var(--font-scale, 1));
   color: var(--ace-text-secondary);
   background-color: var(--ace-bg-secondary);
   border: 1px solid var(--ace-border);
@@ -242,14 +300,10 @@
     padding: 0 8px;
   }
 
-  .header-button {
-    padding: 8px;
+  .agent-panel .header-button {
+    width: 44px;
+    height: 44px;
     font-size: 18px;
-    min-width: 44px;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
   .agent-item {
@@ -264,16 +318,16 @@
     font-size: 18px;
   }
 
-  .agent-name {
-    font-size: 14px;
+  .agent-panel .agent-name {
+    font-size: calc(14px * var(--font-scale, 1));
   }
 
-  .agent-description {
-    font-size: 12px;
+  .agent-panel .agent-description {
+    font-size: calc(12px * var(--font-scale, 1));
   }
 
   .agent-hotkey {
-    font-size: 11px;
+    font-size: calc(11px * var(--font-scale, 1));
     padding: 4px 8px;
   }
 
@@ -319,4 +373,102 @@
   .agent-hotkey {
     display: none; /* Hide hotkey hints on small mobile */
   }
+}
+
+/* ===== HORIZONTAL LAYOUT (top/bottom panels) ===== */
+.agent-panel.horizontal {
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 0;
+}
+
+.agent-panel.horizontal .panel-header {
+  flex-direction: column;
+  border-right: 1px solid var(--ace-border);
+  padding: 8px 6px;
+  min-width: fit-content;
+  gap: 6px;
+}
+
+.agent-panel.horizontal .panel-title {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+}
+
+.agent-panel.horizontal .header-actions {
+  flex-direction: column;
+}
+
+.agent-panel.horizontal .agent-list {
+  flex-direction: row;
+  gap: 6px;
+  padding: 6px;
+  overflow-x: auto;
+  flex: 1;
+}
+
+.agent-panel.horizontal .agent-item {
+  flex-direction: row;
+  min-width: 120px;
+  max-width: 160px;
+  flex-shrink: 0;
+  padding: 6px 8px;
+  gap: 6px;
+}
+
+.agent-panel.horizontal .agent-icon {
+  width: 20px;
+  height: 20px;
+  font-size: calc(12px * var(--font-scale, 1));
+}
+
+.agent-panel.horizontal .agent-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.agent-panel.horizontal .agent-name {
+  font-size: calc(11px * var(--font-scale, 1));
+}
+
+.agent-panel.horizontal .agent-description {
+  font-size: calc(9px * var(--font-scale, 1));
+  display: none;
+}
+
+.agent-panel.horizontal .agent-hotkey {
+  display: none;
+}
+
+.agent-panel.horizontal .agent-actions {
+  display: none;
+}
+
+.agent-panel.horizontal .create-agent-form {
+  min-width: 200px;
+  max-width: 250px;
+  flex-shrink: 0;
+  padding: 6px;
+}
+
+.agent-panel.horizontal .add-agent-btn {
+  width: auto;
+  max-width: 120px;
+  min-width: 100px;
+  margin-top: 0;
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  font-size: calc(11px * var(--font-scale, 1));
+}
+
+.agent-panel.horizontal .agent-loading,
+.agent-panel.horizontal .agent-empty {
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: calc(11px * var(--font-scale, 1));
 }

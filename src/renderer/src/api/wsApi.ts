@@ -17,6 +17,9 @@ import type {
   ProjectAPI,
   ServerAPI,
   LayoutAPI,
+  SkillsAPI,
+  PluginsAPI,
+  AppAPI,
   TerminalExitInfo,
   HotkeyTriggerData,
   LayoutChangedData
@@ -449,6 +452,36 @@ const layoutApi: LayoutAPI = {
   onChanged: (callback) => connection.on('layout:changed', (data) => callback(data as LayoutChangedData))
 }
 
+// Skills API via WebSocket
+const skillsApi: SkillsAPI = {
+  list: () => connection.invoke('skills:list'),
+  listGlobal: () => connection.invoke('skills:listGlobal'),
+  toggle: (skillId, enabled) => connection.invoke('skills:toggle', skillId, enabled),
+  reload: () => connection.invoke('skills:reload'),
+  onChanged: (callback) => connection.on('skills:changed', callback)
+}
+
+// Plugins API via WebSocket
+const pluginsApi: PluginsAPI = {
+  list: () => connection.invoke('plugins:list'),
+  listGlobal: () => connection.invoke('plugins:listGlobal'),
+  toggle: (pluginId, enabled) => connection.invoke('plugins:toggle', pluginId, enabled),
+  install: (pluginId, location) => connection.invoke('plugins:install', pluginId, location),
+  uninstall: (pluginId) => connection.invoke('plugins:uninstall', pluginId),
+  reload: () => connection.invoke('plugins:reload'),
+  onChanged: (callback) => connection.on('plugins:changed', callback)
+}
+
+// App API via WebSocket (browser mode - quit is a no-op, just close the tab)
+const appApi: AppAPI = {
+  quit: () => {
+    // In browser mode, can't quit the Electron app
+    // The user can close the browser tab instead
+    console.log('App quit requested from browser mode - close the browser tab')
+    return Promise.resolve()
+  }
+}
+
 // Combined WebSocket API
 export const wsApi: ACEAPI = {
   terminal: terminalApi,
@@ -461,7 +494,10 @@ export const wsApi: ACEAPI = {
   adapters: adapterApi,
   projects: projectApi,
   server: serverApi,
-  layout: layoutApi
+  layout: layoutApi,
+  skills: skillsApi,
+  plugins: pluginsApi,
+  app: appApi
 }
 
 export default wsApi

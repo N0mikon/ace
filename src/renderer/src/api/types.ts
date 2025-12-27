@@ -349,6 +349,51 @@ export interface ServerAPI {
   onStateChanged: (callback: (state: ServerState) => void) => () => void
 }
 
+// Skills API Types
+export type SkillCategory = 'research' | 'coding' | 'testing' | 'devops' | 'collaboration' | 'custom'
+
+export interface Skill {
+  id: string
+  name: string
+  description: string
+  category: SkillCategory
+  provider: string // Plugin that provides it, or 'builtin'
+  enabled: boolean
+  icon?: string
+}
+
+export interface SkillsAPI {
+  list: () => Promise<Skill[]>
+  listGlobal: () => Promise<Skill[]>
+  toggle: (skillId: string, enabled: boolean) => Promise<{ success: boolean }>
+  reload: () => Promise<Skill[]>
+  onChanged: (callback: () => void) => () => void
+}
+
+// Plugins API Types
+export interface Plugin {
+  id: string
+  name: string
+  version: string
+  description: string
+  author?: string
+  enabled: boolean
+  installed: boolean
+  installLocation: 'global' | 'project'
+  skills?: string[] // IDs of skills this plugin provides
+  icon?: string
+}
+
+export interface PluginsAPI {
+  list: () => Promise<Plugin[]>
+  listGlobal: () => Promise<Plugin[]>
+  toggle: (pluginId: string, enabled: boolean) => Promise<{ success: boolean }>
+  install: (pluginId: string, location: 'global' | 'project') => Promise<{ success: boolean; error?: string }>
+  uninstall: (pluginId: string) => Promise<{ success: boolean; error?: string }>
+  reload: () => Promise<Plugin[]>
+  onChanged: (callback: () => void) => () => void
+}
+
 // Layout API Types (per-project layout storage)
 export type PanelPosition = 'top' | 'left' | 'right' | 'bottom' | 'hidden'
 
@@ -364,12 +409,18 @@ export interface AreaSizes {
   right: number
 }
 
+export interface PanelSettings {
+  fontSize: number // 0.7 to 1.5, default 1.0
+  preferredSize: number // Preferred area size when this panel is active
+}
+
 export interface LayoutConfig {
   panels: Record<string, PanelConfig>
   areaSizes: AreaSizes
   collapsedAreas: Record<string, boolean>
   activeTabByArea: Record<string, string>
   terminalZoom?: number // 0.5 to 2.0, default 1.0
+  panelSettings?: Record<string, PanelSettings> // Per-panel font size and preferred area size
 }
 
 export interface LayoutChangedData {
@@ -381,6 +432,11 @@ export interface LayoutAPI {
   load: (projectPath: string) => Promise<LayoutConfig | null>
   save: (projectPath: string, layout: LayoutConfig) => Promise<{ success: boolean }>
   onChanged: (callback: (data: LayoutChangedData) => void) => () => void
+}
+
+// App API Types
+export interface AppAPI {
+  quit: () => Promise<void>
 }
 
 // Combined API interface
@@ -396,4 +452,7 @@ export interface ACEAPI {
   projects: ProjectAPI
   server: ServerAPI
   layout: LayoutAPI
+  skills: SkillsAPI
+  plugins: PluginsAPI
+  app: AppAPI
 }

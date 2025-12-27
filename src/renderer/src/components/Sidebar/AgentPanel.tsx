@@ -1,26 +1,28 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Agent } from '../../api/types'
 import { api } from '../../api'
+import { useLayoutStore } from '../../stores/layoutStore'
 import { AgentEditor } from '../Editor/AgentEditor'
 import { AgentPromptDialog } from '../Agent/AgentPromptDialog'
+import { CreateAgentDialog } from '../common/CreateAgentDialog'
+import { PanelSettingsButton } from '../common/PanelSettingsPopover'
 import './AgentPanel.css'
 
 interface AgentPanelProps {
   onInjectPrompt: (prompt: string) => void
+  isHorizontal?: boolean
 }
 
-export function AgentPanel({ onInjectPrompt }: AgentPanelProps): JSX.Element {
+export function AgentPanel({ onInjectPrompt, isHorizontal = false }: AgentPanelProps): JSX.Element {
   const [agents, setAgents] = useState<Agent[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [showCreateForm, setShowCreateForm] = useState(false)
-  const [newAgent, setNewAgent] = useState({
-    name: '',
-    description: '',
-    prompt: ''
-  })
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editingAgent, setEditingAgent] = useState<{ id: string; name: string } | null>(null)
   const [promptDialogOpen, setPromptDialogOpen] = useState(false)
   const [selectedAgentForPrompt, setSelectedAgentForPrompt] = useState<Agent | null>(null)
+
+  const panelSettings = useLayoutStore((state) => state.panelSettings)
+  const settings = panelSettings['agents'] || { fontSize: 1.0, preferredSize: 25 }
 
   const loadAgents = useCallback(async () => {
     setIsLoading(true)
@@ -63,24 +65,6 @@ export function AgentPanel({ onInjectPrompt }: AgentPanelProps): JSX.Element {
     setEditingAgent({ id: agent.id, name: agent.agent.name })
   }
 
-  const handleCreateAgent = async (): Promise<void> => {
-    if (!newAgent.name.trim() || !newAgent.prompt.trim()) {
-      return
-    }
-
-    const result = await api.agents.create(
-      newAgent.name.trim(),
-      newAgent.description.trim(),
-      newAgent.prompt.trim()
-    )
-
-    if (result?.success) {
-      setNewAgent({ name: '', description: '', prompt: '' })
-      setShowCreateForm(false)
-      loadAgents()
-    }
-  }
-
   const getAgentIcon = (icon?: string): string => {
     // Map icon names to unicode characters
     const iconMap: Record<string, string> = {
@@ -96,65 +80,20 @@ export function AgentPanel({ onInjectPrompt }: AgentPanelProps): JSX.Element {
     return iconMap[icon || 'default'] || iconMap.default
   }
 
+  const panelClass = `agent-panel ${isHorizontal ? 'horizontal' : 'vertical'}`
+  // Set CSS custom property for font scaling - used by CSS calc() rules
+  const panelStyle = {
+    '--font-scale': settings.fontSize
+  } as React.CSSProperties
+
   return (
-    <div className="agent-panel">
+    <div className={panelClass} style={panelStyle}>
       <div className="panel-header">
         <span className="panel-title">Agents</span>
         <div className="header-actions">
-          <button
-            className="header-button"
-            onClick={() => setShowCreateForm(!showCreateForm)}
-            title="Create Agent"
-          >
-            +
-          </button>
-          <button className="header-button" onClick={loadAgents} title="Refresh">
-            &#8635;
-          </button>
+          <PanelSettingsButton panelId="agents" />
         </div>
       </div>
-
-      {showCreateForm && (
-        <div className="create-agent-form">
-          <div className="form-group">
-            <label className="form-label">Name</label>
-            <input
-              type="text"
-              className="form-input"
-              value={newAgent.name}
-              onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
-              placeholder="Agent name..."
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Description</label>
-            <input
-              type="text"
-              className="form-input"
-              value={newAgent.description}
-              onChange={(e) => setNewAgent({ ...newAgent, description: e.target.value })}
-              placeholder="Brief description..."
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Prompt</label>
-            <textarea
-              className="form-textarea"
-              value={newAgent.prompt}
-              onChange={(e) => setNewAgent({ ...newAgent, prompt: e.target.value })}
-              placeholder="Agent prompt text..."
-            />
-          </div>
-          <div className="form-actions">
-            <button className="form-button" onClick={() => setShowCreateForm(false)}>
-              Cancel
-            </button>
-            <button className="form-button primary" onClick={handleCreateAgent}>
-              Create
-            </button>
-          </div>
-        </div>
-      )}
 
       {isLoading ? (
         <div className="agent-loading">Loading agents...</div>
@@ -201,6 +140,14 @@ export function AgentPanel({ onInjectPrompt }: AgentPanelProps): JSX.Element {
         </div>
       )}
 
+      <button
+        className="add-agent-btn"
+        onClick={() => setShowCreateDialog(true)}
+        title="Create Agent"
+      >
+        + Add Agent
+      </button>
+
       {editingAgent && (
         <AgentEditor
           isOpen={true}
@@ -217,6 +164,12 @@ export function AgentPanel({ onInjectPrompt }: AgentPanelProps): JSX.Element {
         selectedAgent={selectedAgentForPrompt}
         onRun={handlePromptDialogRun}
         onCancel={handlePromptDialogCancel}
+      />
+
+      <CreateAgentDialog
+        isOpen={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        onCreated={loadAgents}
       />
     </div>
   )

@@ -9,6 +9,8 @@ import { PanelTabs } from './PanelTabs'
 import { AgentPanel } from '../Sidebar/AgentPanel'
 import { McpPanel } from '../Sidebar/McpPanel'
 import { CommandPanel } from '../Sidebar/CommandPanel'
+import { SkillsPanel } from '../Sidebar/SkillsPanel'
+import { PluginsPanel } from '../Sidebar/PluginsPanel'
 import './PanelArea.css'
 
 interface PanelAreaProps {
@@ -46,15 +48,22 @@ export function PanelArea({ position }: PanelAreaProps): JSX.Element {
   const storedActivePanel = activeTabByArea[position]
   const activePanel = areaPanels.includes(storedActivePanel) ? storedActivePanel : areaPanels[0]
 
+  // Determine layout orientation based on position
+  const isHorizontal = position === 'top' || position === 'bottom'
+
   // Render the active panel component
   const renderPanel = (panelId: string): JSX.Element | null => {
     switch (panelId) {
       case 'agents':
-        return <AgentPanel onInjectPrompt={handleInjectPrompt} />
+        return <AgentPanel onInjectPrompt={handleInjectPrompt} isHorizontal={isHorizontal} />
       case 'commands':
-        return <CommandPanel onCommand={handleCommand} />
+        return <CommandPanel onCommand={handleCommand} isHorizontal={isHorizontal} />
       case 'mcp':
-        return <McpPanel />
+        return <McpPanel isHorizontal={isHorizontal} />
+      case 'skills':
+        return <SkillsPanel isHorizontal={isHorizontal} />
+      case 'plugins':
+        return <PluginsPanel isHorizontal={isHorizontal} />
       default:
         return null
     }

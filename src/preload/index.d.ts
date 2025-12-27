@@ -385,6 +385,56 @@ export interface LayoutAPI {
   onChanged: (callback: (data: LayoutChangedData) => void) => () => void
 }
 
+// Skills API types
+export type SkillCategory = 'research' | 'coding' | 'testing' | 'devops' | 'collaboration' | 'custom'
+
+export interface Skill {
+  id: string
+  name: string
+  description: string
+  category: SkillCategory
+  provider: string
+  enabled: boolean
+  icon?: string
+}
+
+export interface SkillsAPI {
+  list: () => Promise<Skill[]>
+  listGlobal: () => Promise<Skill[]>
+  toggle: (skillId: string, enabled: boolean) => Promise<{ success: boolean }>
+  reload: () => Promise<Skill[]>
+  onChanged: (callback: () => void) => () => void
+}
+
+// Plugins API types
+export interface Plugin {
+  id: string
+  name: string
+  version: string
+  description: string
+  author?: string
+  enabled: boolean
+  installed: boolean
+  installLocation: 'global' | 'project'
+  skills?: string[]
+  icon?: string
+}
+
+export interface PluginsAPI {
+  list: () => Promise<Plugin[]>
+  listGlobal: () => Promise<Plugin[]>
+  toggle: (pluginId: string, enabled: boolean) => Promise<{ success: boolean }>
+  install: (pluginId: string, location: 'global' | 'project') => Promise<{ success: boolean; error?: string }>
+  uninstall: (pluginId: string) => Promise<{ success: boolean; error?: string }>
+  reload: () => Promise<Plugin[]>
+  onChanged: (callback: () => void) => () => void
+}
+
+// App API types
+export interface AppAPI {
+  quit: () => Promise<void>
+}
+
 declare global {
   interface Window {
     electron: ElectronAPI
@@ -399,6 +449,9 @@ declare global {
     projects: ProjectAPI
     server: ServerAPI
     layout: LayoutAPI
+    skills: SkillsAPI
+    plugins: PluginsAPI
+    app: AppAPI
     api: unknown
   }
 }

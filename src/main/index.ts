@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -11,7 +11,11 @@ import {
   mcpConfigManager,
   registerMcpIPC,
   adapterManager,
-  registerAdapterIpcHandlers
+  registerAdapterIpcHandlers,
+  skillsManager,
+  registerSkillsIPC,
+  pluginsManager,
+  registerPluginsIPC
 } from './config'
 import { databaseManager, registerSessionIPC } from './storage'
 import { hotkeyManager, registerHotkeyIPC, type HotkeyEntry } from './hotkeys'
@@ -68,8 +72,17 @@ function createWindow(): void {
   // Register MCP IPC handlers
   registerMcpIPC(mainWindow)
 
+  // Register skills and plugins IPC handlers
+  registerSkillsIPC(mainWindow)
+  registerPluginsIPC(mainWindow)
+
   // Register project IPC handlers
   registerProjectIPC(mainWindow)
+
+  // Register app IPC handlers
+  ipcMain.handle('app:quit', () => {
+    app.quit()
+  })
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
@@ -106,6 +119,10 @@ app.whenReady().then(() => {
   // Initialize tool adapter manager
   adapterManager.initialize()
   registerAdapterIpcHandlers()
+
+  // Initialize skills and plugins managers
+  skillsManager.init()
+  pluginsManager.init()
 
   // Initialize project manager
   projectManager.init()

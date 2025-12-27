@@ -465,6 +465,84 @@ const layoutAPI = {
   }
 }
 
+// Skills API for renderer
+const skillsAPI = {
+  // Get project skills (for SkillsPanel)
+  list: () => {
+    return ipcRenderer.invoke('skills:list')
+  },
+
+  // Get all global skills (for wizard selection)
+  listGlobal: () => {
+    return ipcRenderer.invoke('skills:listGlobal')
+  },
+
+  // Toggle a skill's enabled state
+  toggle: (skillId: string, enabled: boolean) => {
+    return ipcRenderer.invoke('skills:toggle', skillId, enabled)
+  },
+
+  // Reload skills
+  reload: () => {
+    return ipcRenderer.invoke('skills:reload')
+  },
+
+  // Listen for skill changes
+  onChanged: (callback: () => void) => {
+    const handler = () => callback()
+    ipcRenderer.on('skills:changed', handler)
+    return () => ipcRenderer.removeListener('skills:changed', handler)
+  }
+}
+
+// App API for renderer
+const appAPI = {
+  // Quit the application
+  quit: () => {
+    return ipcRenderer.invoke('app:quit')
+  }
+}
+
+// Plugins API for renderer
+const pluginsAPI = {
+  // Get all installed plugins (for PluginsPanel)
+  list: () => {
+    return ipcRenderer.invoke('plugins:list')
+  },
+
+  // Get all global plugins (for wizard selection)
+  listGlobal: () => {
+    return ipcRenderer.invoke('plugins:listGlobal')
+  },
+
+  // Toggle a plugin's enabled state
+  toggle: (pluginId: string, enabled: boolean) => {
+    return ipcRenderer.invoke('plugins:toggle', pluginId, enabled)
+  },
+
+  // Install a plugin
+  install: (pluginId: string, location: 'global' | 'project') => {
+    return ipcRenderer.invoke('plugins:install', pluginId, location)
+  },
+
+  // Uninstall a plugin
+  uninstall: (pluginId: string) => {
+    return ipcRenderer.invoke('plugins:uninstall', pluginId)
+  },
+
+  // Reload plugins
+  reload: () => {
+    return ipcRenderer.invoke('plugins:reload')
+  },
+
+  // Listen for plugin changes
+  onChanged: (callback: () => void) => {
+    const handler = () => callback()
+    ipcRenderer.on('plugins:changed', handler)
+    return () => ipcRenderer.removeListener('plugins:changed', handler)
+  }
+}
+
 // MCP API for renderer
 const mcpAPI = {
   // Get project MCP servers (for McpPanel)
@@ -541,6 +619,9 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('projects', projectAPI)
     contextBridge.exposeInMainWorld('server', serverAPI)
     contextBridge.exposeInMainWorld('layout', layoutAPI)
+    contextBridge.exposeInMainWorld('skills', skillsAPI)
+    contextBridge.exposeInMainWorld('plugins', pluginsAPI)
+    contextBridge.exposeInMainWorld('app', appAPI)
   } catch (error) {
     console.error(error)
   }
@@ -569,4 +650,10 @@ if (process.contextIsolated) {
   window.server = serverAPI
   // @ts-ignore (define in dts)
   window.layout = layoutAPI
+  // @ts-ignore (define in dts)
+  window.skills = skillsAPI
+  // @ts-ignore (define in dts)
+  window.plugins = pluginsAPI
+  // @ts-ignore (define in dts)
+  window.app = appAPI
 }
