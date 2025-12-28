@@ -503,6 +503,14 @@ const appAPI = {
   }
 }
 
+// Project Commands API for renderer
+const projectCommandsAPI = {
+  // List project commands from .claude/commands/
+  list: () => {
+    return ipcRenderer.invoke('projectCommands:list')
+  }
+}
+
 // Plugins API for renderer
 const pluginsAPI = {
   // Get all installed plugins (for PluginsPanel)
@@ -622,6 +630,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('skills', skillsAPI)
     contextBridge.exposeInMainWorld('plugins', pluginsAPI)
     contextBridge.exposeInMainWorld('app', appAPI)
+    contextBridge.exposeInMainWorld('projectCommands', projectCommandsAPI)
   } catch (error) {
     console.error(error)
   }
@@ -656,4 +665,6 @@ if (process.contextIsolated) {
   window.plugins = pluginsAPI
   // @ts-ignore (define in dts)
   window.app = appAPI
+  // @ts-ignore (define in dts)
+  window.projectCommands = projectCommandsAPI
 }

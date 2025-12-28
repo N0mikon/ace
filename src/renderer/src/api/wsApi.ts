@@ -20,6 +20,7 @@ import type {
   SkillsAPI,
   PluginsAPI,
   AppAPI,
+  ProjectCommandsAPI,
   TerminalExitInfo,
   HotkeyTriggerData,
   LayoutChangedData
@@ -482,6 +483,11 @@ const appApi: AppAPI = {
   }
 }
 
+// Project Commands API via WebSocket
+const projectCommandsApi: ProjectCommandsAPI = {
+  list: () => connection.invoke('projectCommands:list')
+}
+
 // Combined WebSocket API
 export const wsApi: ACEAPI = {
   terminal: terminalApi,
@@ -497,7 +503,8 @@ export const wsApi: ACEAPI = {
   layout: layoutApi,
   skills: skillsApi,
   plugins: pluginsApi,
-  app: appApi
+  app: appApi,
+  projectCommands: projectCommandsApi
 }
 
 export default wsApi

@@ -19,7 +19,8 @@ import type {
   LayoutAPI,
   SkillsAPI,
   PluginsAPI,
-  AppAPI
+  AppAPI,
+  ProjectCommandsAPI
 } from './types'
 
 // Terminal API - wraps window.terminal
@@ -292,6 +293,16 @@ const appApi: AppAPI = {
   }
 }
 
+// Project Commands API - wraps window.projectCommands
+const projectCommandsApi: ProjectCommandsAPI = {
+  list: () => {
+    if (window.projectCommands) {
+      return window.projectCommands.list()
+    }
+    return Promise.resolve([])
+  }
+}
+
 // Combined IPC API
 export const ipcApi: ACEAPI = {
   terminal: terminalApi,
@@ -307,7 +318,8 @@ export const ipcApi: ACEAPI = {
   layout: layoutApi,
   skills: skillsApi,
   plugins: pluginsApi,
-  app: appApi
+  app: appApi,
+  projectCommands: projectCommandsApi
 }
 
 export default ipcApi

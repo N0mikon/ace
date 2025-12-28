@@ -15,7 +15,8 @@ import {
   skillsManager,
   registerSkillsIPC,
   pluginsManager,
-  registerPluginsIPC
+  registerPluginsIPC,
+  registerProjectCommandsIpc
 } from './config'
 import { databaseManager, registerSessionIPC } from './storage'
 import { hotkeyManager, registerHotkeyIPC, type HotkeyEntry } from './hotkeys'
@@ -126,6 +127,9 @@ app.whenReady().then(() => {
 
   // Initialize project manager
   projectManager.init()
+
+  // Register project commands IPC (for .claude/commands/ workflows)
+  registerProjectCommandsIpc()
 
   // Initialize server for browser access
   initServer().then(() => {

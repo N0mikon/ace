@@ -110,12 +110,5 @@ export const DEFAULT_CONFIG: AceConfig = {
     enabled: true,
     port: 3456
   },
-  quickCommands: [
-    { name: 'Exit', command: '/exit', icon: '⏹' },
-    { name: 'Compact', command: '/compact', icon: '📦' },
-    { name: 'Clear', command: '/clear', icon: '🗑' },
-    { name: 'Help', command: '/help', icon: '❓' },
-    { name: 'Cost', command: '/cost', icon: '💰' },
-    { name: 'Retry', command: '/retry', icon: '🔄' }
-  ]
+  quickCommands: []
 }

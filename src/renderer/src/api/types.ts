@@ -445,6 +445,18 @@ export interface AppAPI {
   quit: () => Promise<void>
 }
 
+// Project Commands API Types
+export interface ProjectCommand {
+  name: string
+  command: string
+  description: string
+  icon: string
+}
+
+export interface ProjectCommandsAPI {
+  list: () => Promise<ProjectCommand[]>
+}
+
 // Combined API interface
 export interface ACEAPI {
   terminal: TerminalAPI
@@ -461,4 +473,5 @@ export interface ACEAPI {
   skills: SkillsAPI
   plugins: PluginsAPI
   app: AppAPI
+  projectCommands: ProjectCommandsAPI
 }

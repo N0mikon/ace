@@ -435,6 +435,18 @@ export interface AppAPI {
   quit: () => Promise<void>
 }
 
+// Project Commands API types
+export interface ProjectCommand {
+  name: string
+  command: string
+  description: string
+  icon: string
+}
+
+export interface ProjectCommandsAPI {
+  list: () => Promise<ProjectCommand[]>
+}
+
 declare global {
   interface Window {
     electron: ElectronAPI
@@ -452,6 +464,7 @@ declare global {
     skills: SkillsAPI
     plugins: PluginsAPI
     app: AppAPI
+    projectCommands: ProjectCommandsAPI
     api: unknown
   }
 }

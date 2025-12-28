@@ -45,11 +45,9 @@ const COMMAND_CATEGORIES: CommandCategory[] = [
     id: 'session',
     label: 'Session',
     commands: [
-      { name: 'Exit', command: '/exit', icon: '⏹', description: 'Exit Claude Code' },
       { name: 'Clear', command: '/clear', icon: '🗑', description: 'Clear conversation' },
       { name: 'Compact', command: '/compact', icon: '📦', description: 'Compact context' },
-      { name: 'Resume', command: '/resume', icon: '▶', description: 'Resume previous session' },
-      { name: 'Retry', command: '/retry', icon: '🔄', description: 'Retry last message' }
+      { name: 'Resume', command: '/resume', icon: '▶', description: 'Resume previous session' }
     ]
   },
   {
@@ -57,10 +55,7 @@ const COMMAND_CATEGORIES: CommandCategory[] = [
     label: 'Info',
     commands: [
       { name: 'Help', command: '/help', icon: '❓', description: 'Show help' },
-      { name: 'Cost', command: '/cost', icon: '💰', description: 'Show token cost' },
-      { name: 'Status', command: '/status', icon: '📊', description: 'Show status' },
-      { name: 'Doctor', command: '/doctor', icon: '🩺', description: 'Run diagnostics' },
-      { name: 'Config', command: '/config', icon: '⚙', description: 'Show configuration' }
+      { name: 'Cost', command: '/cost', icon: '💰', description: 'Show token cost' }
     ]
   },
   {
@@ -68,37 +63,16 @@ const COMMAND_CATEGORIES: CommandCategory[] = [
     label: 'Context',
     commands: [
       { name: 'Context', command: '/context', icon: '📎', description: 'Add context files' },
-      { name: 'Memory', command: '/memory', icon: '🧠', description: 'Memory commands' },
-      { name: 'MCP', command: '/mcp', icon: '🔌', description: 'MCP server commands' }
+      { name: 'Memory', command: '/memory', icon: '🧠', description: 'Memory commands' }
     ]
   },
   {
-    id: 'code',
-    label: 'Code',
+    id: 'tools',
+    label: 'Tools',
     commands: [
       { name: 'Review', command: '/review', icon: '👁', description: 'Review code' },
-      { name: 'PR Comments', command: '/pr-comments', icon: '💬', description: 'Get PR comments' },
-      { name: 'Init', command: '/init', icon: '🚀', description: 'Initialize project' }
-    ]
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    commands: [
       { name: 'Model', command: '/model', icon: '🤖', description: 'Change model' },
-      { name: 'Vim', command: '/vim', icon: '⌨', description: 'Toggle vim mode' },
-      { name: 'Theme', command: '/theme', icon: '🎨', description: 'Change theme' },
-      { name: 'Permissions', command: '/permissions', icon: '🔐', description: 'Manage permissions' },
-      { name: 'Terminal', command: '/terminal-setup', icon: '💻', description: 'Setup terminal' }
-    ]
-  },
-  {
-    id: 'account',
-    label: 'Account',
-    commands: [
-      { name: 'Login', command: '/login', icon: '🔑', description: 'Log in to Anthropic' },
-      { name: 'Logout', command: '/logout', icon: '🚪', description: 'Log out' },
-      { name: 'Bug', command: '/bug', icon: '🐛', description: 'Report a bug' }
+      { name: 'Doctor', command: '/doctor', icon: '🩺', description: 'Run diagnostics' }
     ]
   }
 ]
@@ -116,6 +90,7 @@ export function CommandPanel({
 }: CommandPanelProps): JSX.Element {
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(() => loadCollapsedState())
   const [customCommands, setCustomCommands] = useState<QuickCommand[]>([])
+  const [projectCommands, setProjectCommands] = useState<QuickCommand[]>([])
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const panelSettings = useLayoutStore((state) => state.panelSettings)
   const settings = panelSettings['commands'] || { fontSize: 1.0, preferredSize: 20 }
@@ -126,18 +101,30 @@ export function CommandPanel({
     setCustomCommands(commands || [])
   }, [])
 
+  // Load project commands (workflows) from .claude/commands/
+  const loadProjectCommands = useCallback(async () => {
+    const commands = await api.projectCommands?.list?.() ?? []
+    setProjectCommands(commands)
+  }, [])
+
   useEffect(() => {
     loadCustomCommands()
-  }, [loadCustomCommands])
+    loadProjectCommands()
+  }, [loadCustomCommands, loadProjectCommands])
 
   // Save collapsed state when it changes
   useEffect(() => {
     saveCollapsedState(collapsedCategories)
   }, [collapsedCategories])
 
-  // Merge built-in categories with custom commands
+  // Merge built-in categories with workflows and custom commands
   const allCategories: CommandCategory[] = [
     ...categories,
+    ...(projectCommands.length > 0 ? [{
+      id: 'workflows',
+      label: 'Workflows',
+      commands: projectCommands
+    }] : []),
     ...(customCommands.length > 0 ? [{
       id: 'custom',
       label: 'Custom',
