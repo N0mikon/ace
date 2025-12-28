@@ -72,7 +72,10 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  font-size: calc(14px * var(--font-scale, 1));
+}
+
+.plugin-icon svg {
+  color: var(--ace-text-secondary);
 }
 
 .plugin-info {

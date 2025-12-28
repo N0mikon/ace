@@ -35,17 +35,22 @@
   background: var(--ace-bg-tertiary, #2E2E2C);
   border: 1px solid var(--ace-border, #3A3A38);
   border-radius: 4px;
-  color: var(--ace-text-secondary, #B1ADA1);
   cursor: pointer;
-  font-size: calc(14px * var(--font-scale, 1));
-  font-weight: 600;
   transition: all 0.15s ease;
+}
+
+.mcp-panel .header-button svg {
+  color: var(--ace-text-secondary, #B1ADA1);
+  transition: color var(--ace-transition-fast);
 }
 
 .mcp-panel .header-button:hover {
   background: var(--ace-bg-hover, #3A3A38);
-  color: var(--ace-text-primary, #F4F3EE);
   border-color: var(--ace-border-light, #4C4C48);
+}
+
+.mcp-panel .header-button:hover svg {
+  color: var(--ace-text-primary, #F4F3EE);
 }
 
 .mcp-loading,

@@ -4,6 +4,7 @@
  */
 
 import { PanelSettingsButton } from '../common/PanelSettingsPopover'
+import { PanelIcons, ChevronLeft, ChevronRight, ChevronDown, ICON_SIZE } from '../common/icons'
 import './PanelTabs.css'
 
 interface PanelTabsProps {
@@ -24,15 +25,6 @@ const PANEL_LABELS: Record<string, string> = {
   plugins: 'Plugins'
 }
 
-const PANEL_ICONS: Record<string, string> = {
-  project: '\u{1F4C1}', // folder
-  agents: '\u{1F916}', // robot
-  commands: '\u{2318}', // command
-  mcp: '\u{1F50C}', // plug
-  sessions: '\u{1F4CB}', // clipboard
-  skills: '\u{2728}', // sparkles
-  plugins: '\u{1F9E9}' // puzzle piece
-}
 
 export function PanelTabs({
   panels,
@@ -46,17 +38,22 @@ export function PanelTabs({
   return (
     <div className={`panel-tabs ${isVertical ? 'vertical' : 'horizontal'}`}>
       <div className="panel-tabs-list">
-        {panels.map((id) => (
-          <button
-            key={id}
-            className={`panel-tab ${id === activePanel ? 'active' : ''}`}
-            onClick={() => onSelectPanel(id)}
-            title={PANEL_LABELS[id] || id}
-          >
-            <span className="panel-tab-icon">{PANEL_ICONS[id] || '\u{1F4E6}'}</span>
-            <span className="panel-tab-label">{PANEL_LABELS[id] || id}</span>
-          </button>
-        ))}
+        {panels.map((id) => {
+          const IconComponent = PanelIcons[id] || PanelIcons.default
+          return (
+            <button
+              key={id}
+              className={`panel-tab ${id === activePanel ? 'active' : ''}`}
+              onClick={() => onSelectPanel(id)}
+              title={PANEL_LABELS[id] || id}
+            >
+              <span className="panel-tab-icon">
+                <IconComponent size={ICON_SIZE.md} />
+              </span>
+              <span className="panel-tab-label">{PANEL_LABELS[id] || id}</span>
+            </button>
+          )
+        })}
       </div>
       <div className="panel-tabs-actions">
         <PanelSettingsButton panelId={activePanel} />
@@ -65,7 +62,13 @@ export function PanelTabs({
           onClick={onCollapse}
           title="Collapse panel area"
         >
-          {position === 'left' ? '\u25C0' : position === 'right' ? '\u25B6' : '\u25BC'}
+          {position === 'left' ? (
+            <ChevronLeft size={ICON_SIZE.sm} />
+          ) : position === 'right' ? (
+            <ChevronRight size={ICON_SIZE.sm} />
+          ) : (
+            <ChevronDown size={ICON_SIZE.sm} />
+          )}
         </button>
       </div>
     </div>

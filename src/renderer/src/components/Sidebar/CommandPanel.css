@@ -132,10 +132,14 @@
 }
 
 .category-arrow {
-  font-size: calc(8px * var(--font-scale, 1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+}
+
+.category-arrow svg {
   color: var(--ace-text-muted);
-  width: 10px;
-  text-align: center;
 }
 
 .category-label {
@@ -193,10 +197,14 @@
 }
 
 .command-icon {
-  font-size: calc(14px * var(--font-scale, 1));
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  color: var(--anthropic-blue);
+}
+
+.command-icon svg {
+  color: var(--ace-text-secondary);
 }
 
 .command-name {

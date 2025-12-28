@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { api } from '../../api'
+import { AgentIcons, AGENT_ICON_OPTIONS, ICON_SIZE } from './icons'
 import './FormDialog.css'
 
 interface CreateAgentDialogProps {
@@ -7,21 +8,6 @@ interface CreateAgentDialogProps {
   onClose: () => void
   onCreated: () => void
 }
-
-const AGENT_ICONS = [
-  { value: 'default', icon: '🤖' },
-  { value: 'search', icon: '🔍' },
-  { value: 'code', icon: '💻' },
-  { value: 'edit', icon: '✏️' },
-  { value: 'bug', icon: '🐛' },
-  { value: 'test', icon: '✅' },
-  { value: 'docs', icon: '📝' },
-  { value: 'review', icon: '👁️' },
-  { value: 'build', icon: '🔨' },
-  { value: 'deploy', icon: '🚀' },
-  { value: 'security', icon: '🔒' },
-  { value: 'data', icon: '📊' }
-]
 
 export function CreateAgentDialog({
   isOpen,
@@ -82,7 +68,12 @@ export function CreateAgentDialog({
     <div className="form-dialog-overlay" onClick={onClose}>
       <div className="form-dialog" onClick={(e) => e.stopPropagation()} onKeyDown={handleKeyDown}>
         <div className="form-dialog-header">
-          <span className="form-dialog-icon">🤖</span>
+          <span className="form-dialog-icon">
+            {(() => {
+              const HeaderIcon = AgentIcons[icon] || AgentIcons.default
+              return <HeaderIcon size={ICON_SIZE.lg} />
+            })()}
+          </span>
           <h3 className="form-dialog-title">Create New Agent</h3>
         </div>
 
@@ -118,17 +109,20 @@ export function CreateAgentDialog({
             <div className="form-dialog-field">
               <label className="form-dialog-label">Icon</label>
               <div className="icon-picker">
-                {AGENT_ICONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    className={`icon-option ${icon === opt.value ? 'selected' : ''}`}
-                    onClick={() => setIcon(opt.value)}
-                    title={opt.value}
-                  >
-                    {opt.icon}
-                  </button>
-                ))}
+                {AGENT_ICON_OPTIONS.map((opt) => {
+                  const IconComponent = AgentIcons[opt.value]
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      className={`icon-option ${icon === opt.value ? 'selected' : ''}`}
+                      onClick={() => setIcon(opt.value)}
+                      title={opt.label}
+                    >
+                      <IconComponent size={ICON_SIZE.lg} />
+                    </button>
+                  )
+                })}
               </div>
             </div>
 

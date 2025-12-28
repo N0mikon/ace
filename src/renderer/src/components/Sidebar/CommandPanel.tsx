@@ -3,6 +3,11 @@ import { api } from '../../api'
 import { useLayoutStore } from '../../stores/layoutStore'
 import { PanelSettingsButton } from '../common/PanelSettingsPopover'
 import { CreateCommandDialog } from '../common/CreateCommandDialog'
+import {
+  BuiltInCommandIcons, getCommandIcon, ChevronRight, ChevronDown,
+  ICON_SIZE
+} from '../common/icons'
+import type { LucideIcon } from 'lucide-react'
 import './CommandPanel.css'
 
 interface QuickCommand {
@@ -45,37 +50,43 @@ const COMMAND_CATEGORIES: CommandCategory[] = [
     id: 'session',
     label: 'Session',
     commands: [
-      { name: 'Clear', command: '/clear', icon: '🗑', description: 'Clear conversation' },
-      { name: 'Compact', command: '/compact', icon: '📦', description: 'Compact context' },
-      { name: 'Resume', command: '/resume', icon: '▶', description: 'Resume previous session' }
+      { name: 'Clear', command: '/clear', icon: 'clear', description: 'Clear conversation' },
+      { name: 'Compact', command: '/compact', icon: 'compact', description: 'Compact context' },
+      { name: 'Resume', command: '/resume', icon: 'resume', description: 'Resume previous session' }
     ]
   },
   {
     id: 'info',
     label: 'Info',
     commands: [
-      { name: 'Help', command: '/help', icon: '❓', description: 'Show help' },
-      { name: 'Cost', command: '/cost', icon: '💰', description: 'Show token cost' }
+      { name: 'Help', command: '/help', icon: 'help', description: 'Show help' },
+      { name: 'Cost', command: '/cost', icon: 'cost', description: 'Show token cost' }
     ]
   },
   {
     id: 'context',
     label: 'Context',
     commands: [
-      { name: 'Context', command: '/context', icon: '📎', description: 'Add context files' },
-      { name: 'Memory', command: '/memory', icon: '🧠', description: 'Memory commands' }
+      { name: 'Context', command: '/context', icon: 'context', description: 'Add context files' },
+      { name: 'Memory', command: '/memory', icon: 'memory', description: 'Memory commands' }
     ]
   },
   {
     id: 'tools',
     label: 'Tools',
     commands: [
-      { name: 'Review', command: '/review', icon: '👁', description: 'Review code' },
-      { name: 'Model', command: '/model', icon: '🤖', description: 'Change model' },
-      { name: 'Doctor', command: '/doctor', icon: '🩺', description: 'Run diagnostics' }
+      { name: 'Review', command: '/review', icon: 'review', description: 'Review code' },
+      { name: 'Model', command: '/model', icon: 'model', description: 'Change model' },
+      { name: 'Doctor', command: '/doctor', icon: 'doctor', description: 'Run diagnostics' }
     ]
   }
 ]
+
+// Helper to get icon component for a command
+const getCommandIconComponent = (iconKey?: string): LucideIcon | null => {
+  if (!iconKey) return null
+  return BuiltInCommandIcons[iconKey] || getCommandIcon(iconKey)
+}
 
 interface CommandPanelProps {
   onCommand: (command: string) => void
@@ -103,8 +114,16 @@ export function CommandPanel({
 
   // Load project commands (workflows) from .claude/commands/
   const loadProjectCommands = useCallback(async () => {
-    const commands = await api.projectCommands?.list?.() ?? []
-    setProjectCommands(commands)
+    const commands = await api.commands?.list?.() ?? []
+    // Map Command type to QuickCommand format
+    setProjectCommands(
+      commands.map((cmd) => ({
+        name: cmd.name,
+        command: '/' + cmd.id,
+        icon: cmd.icon,
+        description: cmd.description
+      }))
+    )
   }, [])
 
   useEffect(() => {
@@ -174,23 +193,36 @@ export function CommandPanel({
                 onClick={() => toggleCategory(category.id)}
                 aria-expanded={!isCollapsed}
               >
-                <span className="category-arrow">{isCollapsed ? '▶' : '▼'}</span>
+                <span className="category-arrow">
+                  {isCollapsed ? (
+                    <ChevronRight size={ICON_SIZE.sm} />
+                  ) : (
+                    <ChevronDown size={ICON_SIZE.sm} />
+                  )}
+                </span>
                 <span className="category-label">{category.label}</span>
                 <span className="category-count">{category.commands.length}</span>
               </button>
               {!isCollapsed && (
                 <div className="command-grid">
-                  {category.commands.map((cmd) => (
-                    <button
-                      key={cmd.name}
-                      className="command-button"
-                      onClick={() => handleClick(cmd.command)}
-                      title={cmd.description}
-                    >
-                      {cmd.icon && <span className="command-icon">{cmd.icon}</span>}
-                      <span className="command-name">{cmd.name}</span>
-                    </button>
-                  ))}
+                  {category.commands.map((cmd) => {
+                    const IconComponent = getCommandIconComponent(cmd.icon)
+                    return (
+                      <button
+                        key={cmd.name}
+                        className="command-button"
+                        onClick={() => handleClick(cmd.command)}
+                        title={cmd.description}
+                      >
+                        {IconComponent && (
+                          <span className="command-icon">
+                            <IconComponent size={ICON_SIZE.sm} />
+                          </span>
+                        )}
+                        <span className="command-name">{cmd.name}</span>
+                      </button>
+                    )
+                  })}
                 </div>
               )}
             </div>

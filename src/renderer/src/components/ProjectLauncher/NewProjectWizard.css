@@ -48,13 +48,19 @@
   background: transparent;
   border: none;
   color: var(--ace-text-secondary);
-  font-size: 24px;
   cursor: pointer;
-  padding: 0 4px;
-  line-height: 1;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.close-button:hover {
+.close-button svg {
+  color: var(--ace-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.close-button:hover svg {
   color: var(--ace-text-primary);
 }
 
@@ -189,7 +195,12 @@
 }
 
 .button-icon {
-  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-icon svg {
   color: var(--ace-accent);
 }
 
@@ -204,8 +215,13 @@
 }
 
 .folder-icon {
-  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+}
+
+.folder-icon svg {
   color: var(--ace-accent);
 }
 

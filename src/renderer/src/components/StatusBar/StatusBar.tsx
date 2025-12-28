@@ -4,6 +4,7 @@ import { useLayoutStore } from '../../stores/layoutStore'
 import { InputDialog } from '../common/InputDialog'
 import { ConfirmDialog } from '../common/ConfirmDialog'
 import { api, isElectronMode } from '../../api'
+import { Clock, Bot, Plug, Minus, Plus, Save, Check, X, Settings, ICON_SIZE } from '../common/icons'
 import './StatusBar.css'
 
 const SKIP_CLOSE_CONFIRM_KEY = 'ace-skip-close-confirm'
@@ -231,14 +232,14 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
       </div>
       <div className="status-center">
         <span className="status-item">
-          <span className="status-icon">&#128337;</span>
+          <span className="status-icon"><Clock size={ICON_SIZE.sm} /></span>
           <span className="status-value">{sessionTime}</span>
         </span>
         {agentCount > 0 && (
           <>
             <span className="status-divider">|</span>
             <span className="status-item" title={`${agentCount} agents available`}>
-              <span className="status-icon">&#129302;</span>
+              <span className="status-icon"><Bot size={ICON_SIZE.sm} /></span>
               <span className="status-value">{agentCount}</span>
             </span>
           </>
@@ -247,7 +248,7 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
           <>
             <span className="status-divider">|</span>
             <span className="status-item" title={`${mcpCount} MCP servers`}>
-              <span className="status-icon">&#128268;</span>
+              <span className="status-icon"><Plug size={ICON_SIZE.sm} /></span>
               <span className="status-value">{mcpCount}</span>
             </span>
           </>
@@ -262,7 +263,7 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
             title="Zoom out (Ctrl+-)"
             aria-label="Zoom out terminal"
           >
-            &#8722;
+            <Minus size={ICON_SIZE.sm} />
           </button>
           <button
             className="status-zoom-btn status-zoom-level"
@@ -278,7 +279,7 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
             title="Zoom in (Ctrl+=)"
             aria-label="Zoom in terminal"
           >
-            +
+            <Plus size={ICON_SIZE.sm} />
           </button>
         </div>
         {sidebarCollapsed && (
@@ -313,7 +314,7 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
           aria-label="Save Log"
           disabled={saveStatus === 'saving'}
         >
-          {saveStatus === 'saving' ? '...' : saveStatus === 'saved' ? '\u2713' : saveStatus === 'error' ? '!' : '\uD83D\uDCBE'}
+          {saveStatus === 'saving' ? '...' : saveStatus === 'saved' ? <Check size={ICON_SIZE.sm} /> : saveStatus === 'error' ? '!' : <Save size={ICON_SIZE.sm} />}
         </button>
         <button
           className="status-action-btn"
@@ -321,7 +322,7 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
           title="Close Project"
           aria-label="Close Project"
         >
-          &#10006;
+          <X size={ICON_SIZE.sm} />
         </button>
         {onOpenSettings && (
           <button
@@ -330,7 +331,7 @@ export function StatusBar({ terminalReady, sidebarCollapsed, onOpenSettings }: S
             title="Settings (Ctrl+,)"
             aria-label="Open Settings"
           >
-            &#9881;
+            <Settings size={ICON_SIZE.sm} />
           </button>
         )}
         <span className="status-brand">ACE</span>

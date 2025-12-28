@@ -9,6 +9,7 @@ import { api } from '../../api'
 import { RecentProjects } from './RecentProjects'
 import { LaunchOptions } from './LaunchOptions'
 import { NewProjectWizard } from './NewProjectWizard'
+import { Plus, FolderOpen, Play, ICON_SIZE } from '../common/icons'
 import './ProjectLauncher.css'
 
 export function ProjectLauncher(): JSX.Element {
@@ -100,11 +101,11 @@ export function ProjectLauncher(): JSX.Element {
 
           <div className="launcher-actions">
             <button className="action-button" onClick={handleNewProject}>
-              <span className="action-icon">+</span>
+              <span className="action-icon"><Plus size={ICON_SIZE.md} /></span>
               <span>New Project</span>
             </button>
             <button className="action-button" onClick={openFolder}>
-              <span className="action-icon">📁</span>
+              <span className="action-icon"><FolderOpen size={ICON_SIZE.md} /></span>
               <span>Open Folder...</span>
             </button>
           </div>
@@ -128,7 +129,7 @@ export function ProjectLauncher(): JSX.Element {
                   disabled={isLoading}
                 >
                   {isLoading ? 'Launching...' : 'Launch'}
-                  {!isLoading && <span className="launch-icon">▶</span>}
+                  {!isLoading && <span className="launch-icon"><Play size={ICON_SIZE.sm} /></span>}
                 </button>
               </div>
             </>

@@ -3,6 +3,7 @@ import type { McpServerInfo } from '../../api/types'
 import { api } from '../../api'
 import { useLayoutStore } from '../../stores/layoutStore'
 import { PanelSettingsButton } from '../common/PanelSettingsPopover'
+import { RefreshCw, ICON_SIZE } from '../common/icons'
 import './McpPanel.css'
 
 interface McpPanelProps {
@@ -55,7 +56,7 @@ export function McpPanel({ isHorizontal = false }: McpPanelProps): JSX.Element {
         <div className="header-actions">
           <PanelSettingsButton panelId="mcp" />
           <button className="header-button" onClick={loadServers} title="Refresh">
-            &#8635;
+            <RefreshCw size={ICON_SIZE.sm} />
           </button>
         </div>
       </div>

@@ -49,7 +49,12 @@
 }
 
 .form-dialog-icon {
-  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-dialog-icon svg {
   color: var(--ace-accent);
 }
 
@@ -214,9 +219,13 @@
   background-color: var(--ace-bg-tertiary);
   border: 1px solid var(--ace-border);
   border-radius: 4px;
-  font-size: 18px;
   cursor: pointer;
   transition: all 0.15s ease;
+}
+
+.icon-option svg {
+  color: var(--ace-text-secondary);
+  transition: color 0.15s ease;
 }
 
 .icon-option:hover {
@@ -224,9 +233,17 @@
   border-color: var(--ace-border-light);
 }
 
+.icon-option:hover svg {
+  color: var(--ace-text-primary);
+}
+
 .icon-option.selected {
   background-color: var(--ace-accent-light);
   border-color: var(--ace-accent);
+}
+
+.icon-option.selected svg {
+  color: var(--ace-accent);
 }
 
 /* Mobile responsive */

@@ -156,8 +156,13 @@
 }
 
 .project-icon {
-  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+}
+
+.project-icon svg {
   color: var(--ace-accent);
 }
 
@@ -232,7 +237,12 @@
 }
 
 .action-icon {
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-icon svg {
   color: var(--ace-accent);
 }
 
@@ -359,7 +369,13 @@
 }
 
 .launch-icon {
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.launch-icon svg {
+  color: #FFFFFF;
 }
 
 /* Footer */

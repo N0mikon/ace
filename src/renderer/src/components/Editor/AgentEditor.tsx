@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { api } from '../../api'
+import { FileText, ICON_SIZE } from '../common/icons'
 import './AgentEditor.css'
 
 interface AgentEditorProps {
@@ -105,7 +106,7 @@ export function AgentEditor({
       <div className="agent-editor" onClick={(e) => e.stopPropagation()} onKeyDown={handleKeyDown}>
         <div className="agent-editor-header">
           <div className="agent-editor-title">
-            <span className="agent-editor-icon">&#128221;</span>
+            <span className="agent-editor-icon"><FileText size={ICON_SIZE.md} /></span>
             <span>Edit Agent: {agentName}</span>
             {hasChanges && <span className="agent-editor-modified">*</span>}
           </div>

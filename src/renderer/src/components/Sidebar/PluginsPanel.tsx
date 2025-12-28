@@ -8,6 +8,7 @@ import { api } from '../../api'
 import { Plugin } from '../../api/types'
 import { useLayoutStore } from '../../stores/layoutStore'
 import { PanelSettingsButton } from '../common/PanelSettingsPopover'
+import { Plug, ICON_SIZE } from '../common/icons'
 import './PluginsPanel.css'
 
 interface PluginsPanelProps {
@@ -107,7 +108,9 @@ export function PluginsPanel({ isHorizontal = false }: PluginsPanelProps): JSX.E
               key={plugin.id}
               className={`plugin-item ${plugin.enabled ? 'enabled' : 'disabled'} ${actionInProgress === plugin.id ? 'loading' : ''}`}
             >
-              <span className="plugin-icon">{plugin.icon || '🔌'}</span>
+              <span className="plugin-icon">
+                <Plug size={ICON_SIZE.md} />
+              </span>
               <div className="plugin-info">
                 <div className="plugin-name">
                   {plugin.name}

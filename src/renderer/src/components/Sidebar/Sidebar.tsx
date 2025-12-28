@@ -2,6 +2,7 @@ import { CommandPanel } from './CommandPanel'
 import { AgentPanel } from './AgentPanel'
 import { McpPanel } from './McpPanel'
 import { api } from '../../api'
+import { Settings, ICON_SIZE } from '../common/icons'
 import './Sidebar.css'
 
 interface SidebarProps {
@@ -32,7 +33,9 @@ export function Sidebar({
       </div>
       <div className="sidebar-footer">
         <button className="settings-button" onClick={onOpenSettings} title="Settings (Ctrl+,)">
-          <span className="settings-icon">&#9881;</span>
+          <span className="settings-icon">
+            <Settings size={ICON_SIZE.md} />
+          </span>
           <span>Settings</span>
         </button>
       </div>

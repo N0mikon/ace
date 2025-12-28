@@ -6,6 +6,7 @@ import { AgentEditor } from '../Editor/AgentEditor'
 import { AgentPromptDialog } from '../Agent/AgentPromptDialog'
 import { CreateAgentDialog } from '../common/CreateAgentDialog'
 import { PanelSettingsButton } from '../common/PanelSettingsPopover'
+import { getAgentIcon, Pencil, ICON_SIZE } from '../common/icons'
 import './AgentPanel.css'
 
 interface AgentPanelProps {
@@ -65,21 +66,6 @@ export function AgentPanel({ onInjectPrompt, isHorizontal = false }: AgentPanelP
     setEditingAgent({ id: agent.id, name: agent.agent.name })
   }
 
-  const getAgentIcon = (icon?: string): string => {
-    // Map icon names to unicode characters
-    const iconMap: Record<string, string> = {
-      search: '\u{1F50D}',
-      code: '\u{1F4BB}',
-      edit: '\u{270F}',
-      bug: '\u{1F41B}',
-      test: '\u{2705}',
-      docs: '\u{1F4DD}',
-      review: '\u{1F440}',
-      default: '\u{1F916}'
-    }
-    return iconMap[icon || 'default'] || iconMap.default
-  }
-
   const panelClass = `agent-panel ${isHorizontal ? 'horizontal' : 'vertical'}`
   // Set CSS custom property for font scaling - used by CSS calc() rules
   const panelStyle = {
@@ -123,7 +109,12 @@ export function AgentPanel({ onInjectPrompt, isHorizontal = false }: AgentPanelP
               tabIndex={0}
               aria-label={`${agent.agent.name}: ${agent.agent.description}`}
             >
-              <span className="agent-icon">{getAgentIcon(agent.agent.icon)}</span>
+              <span className="agent-icon">
+                {(() => {
+                  const IconComponent = getAgentIcon(agent.agent.icon)
+                  return <IconComponent size={ICON_SIZE.md} />
+                })()}
+              </span>
               <div className="agent-info">
                 <div className="agent-name">{agent.agent.name}</div>
                 <div className="agent-description">{agent.agent.description}</div>
@@ -145,7 +136,7 @@ export function AgentPanel({ onInjectPrompt, isHorizontal = false }: AgentPanelP
                   onClick={(e) => handleEditAgent(agent, e)}
                   title="Edit agent file"
                 >
-                  &#9998;
+                  <Pencil size={ICON_SIZE.sm} />
                 </button>
               </div>
             </div>

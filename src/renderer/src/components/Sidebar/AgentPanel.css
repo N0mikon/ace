@@ -151,7 +151,9 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  font-size: calc(14px * var(--font-scale, 1));
+}
+
+.agent-icon svg {
   color: var(--ace-accent);
 }
 
@@ -216,16 +218,25 @@
 .agent-action-button {
   background: none;
   border: none;
-  color: var(--ace-text-secondary);
-  font-size: 12px;
   cursor: pointer;
   padding: 2px 4px;
   border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agent-action-button svg {
+  color: var(--ace-text-secondary);
+  transition: color var(--ace-transition-fast);
 }
 
 .agent-action-button:hover {
-  color: var(--ace-text-primary);
   background-color: var(--ace-bg-active);
+}
+
+.agent-action-button:hover svg {
+  color: var(--ace-text-primary);
 }
 
 .create-agent-form {

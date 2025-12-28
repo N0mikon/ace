@@ -4,8 +4,9 @@
  */
 
 import { useState, useEffect } from 'react'
-import type { Agent, McpServerInfo } from '../../api/types'
+import type { Agent, McpServerInfo, Command } from '../../api/types'
 import { api } from '../../api'
+import { FolderOpen, X, ICON_SIZE } from '../common/icons'
 import './NewProjectWizard.css'
 
 interface NewProjectWizardProps {
@@ -13,7 +14,7 @@ interface NewProjectWizardProps {
   onCancel: () => void
 }
 
-type WizardStep = 'folder' | 'agents' | 'mcp' | 'confirm'
+type WizardStep = 'folder' | 'agents' | 'commands' | 'mcp' | 'confirm'
 
 export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps): JSX.Element {
   const [step, setStep] = useState<WizardStep>('folder')
@@ -21,23 +22,28 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
   const [projectName, setProjectName] = useState<string>('')
   const [availableAgents, setAvailableAgents] = useState<Agent[]>([])
   const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set())
+  const [availableCommands, setAvailableCommands] = useState<Command[]>([])
+  const [selectedCommands, setSelectedCommands] = useState<Set<string>>(new Set())
   const [mcpServers, setMcpServers] = useState<McpServerInfo[]>([])
   const [selectedMcpServers, setSelectedMcpServers] = useState<Set<string>>(new Set())
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Load available agents (global + defaults) and global MCP servers
+  // Load available agents, commands, and global MCP servers
   useEffect(() => {
     const loadData = async (): Promise<void> => {
       try {
         // Use listAllAvailable to get global + default agents for selection
         const agents = await api.agents.listAllAvailable()
+        // Use listAllAvailable to get default commands for selection
+        const commands = await api.commands.listAllAvailable()
         // Use getGlobalServers to get globally configured MCP servers
         const servers = await api.mcp.getGlobalServers()
         setAvailableAgents(agents)
+        setAvailableCommands(commands)
         setMcpServers(servers)
       } catch (err) {
-        console.error('Failed to load agents/MCP:', err)
+        console.error('Failed to load agents/commands/MCP:', err)
       }
     }
     loadData()
@@ -94,6 +100,26 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
     setSelectedMcpServers(new Set())
   }
 
+  const handleToggleCommand = (commandId: string): void => {
+    setSelectedCommands((prev) => {
+      const next = new Set(prev)
+      if (next.has(commandId)) {
+        next.delete(commandId)
+      } else {
+        next.add(commandId)
+      }
+      return next
+    })
+  }
+
+  const handleSelectAllCommands = (): void => {
+    setSelectedCommands(new Set(availableCommands.map((c) => c.id)))
+  }
+
+  const handleDeselectAllCommands = (): void => {
+    setSelectedCommands(new Set())
+  }
+
   const handleCreate = async (): Promise<void> => {
     if (!projectPath) return
 
@@ -109,6 +135,14 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         const result = await api.agents.copyToProject(agentId, projectPath)
         if (!result.success) {
           console.warn(`Failed to copy agent ${agentId}: ${result.error}`)
+        }
+      }
+
+      // Copy selected commands to project
+      for (const commandId of selectedCommands) {
+        const result = await api.commands.copyToProject(commandId, projectPath)
+        if (!result.success) {
+          console.warn(`Failed to copy command ${commandId}: ${result.error}`)
         }
       }
 
@@ -140,7 +174,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
       <div className="step-content">
         {projectPath ? (
           <div className="folder-selected">
-            <span className="folder-icon">&#128193;</span>
+            <span className="folder-icon"><FolderOpen size={ICON_SIZE.lg} /></span>
             <div className="folder-info">
               <span className="folder-name">{projectName}</span>
               <span className="folder-path">{projectPath}</span>
@@ -151,7 +185,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           </div>
         ) : (
           <button className="select-folder-button" onClick={handleSelectFolder}>
-            <span className="button-icon">&#128193;</span>
+            <span className="button-icon"><FolderOpen size={ICON_SIZE.lg} /></span>
             <span>Choose Folder...</span>
           </button>
         )}
@@ -226,6 +260,66 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         <button className="wizard-button secondary" onClick={() => setStep('folder')}>
           Back
         </button>
+        <button className="wizard-button primary" onClick={() => setStep('commands')}>
+          Next
+        </button>
+      </div>
+    </div>
+  )
+
+  const renderCommandsStep = (): JSX.Element => (
+    <div className="wizard-step">
+      <div className="step-header">
+        <h3 className="step-title">Import Commands</h3>
+        <p className="step-description">
+          Select commands to copy to your project. These will be available locally in{' '}
+          <code>.claude/commands/</code>
+        </p>
+      </div>
+
+      <div className="step-content">
+        <div className="agents-header">
+          <span className="agents-count">
+            {selectedCommands.size} of {availableCommands.length} selected
+          </span>
+          <div className="agents-actions">
+            <button className="text-button" onClick={handleSelectAllCommands}>
+              Select All
+            </button>
+            <span className="divider">|</span>
+            <button className="text-button" onClick={handleDeselectAllCommands}>
+              None
+            </button>
+          </div>
+        </div>
+
+        <div className="agents-list">
+          {availableCommands.length === 0 ? (
+            <div className="agents-empty">
+              <p>No commands available.</p>
+            </div>
+          ) : (
+            availableCommands.map((command) => (
+              <label key={command.id} className="agent-item">
+                <input
+                  type="checkbox"
+                  checked={selectedCommands.has(command.id)}
+                  onChange={() => handleToggleCommand(command.id)}
+                />
+                <div className="agent-info">
+                  <span className="agent-name">{command.name}</span>
+                  <span className="agent-description">{command.description}</span>
+                </div>
+              </label>
+            ))
+          )}
+        </div>
+      </div>
+
+      <div className="step-actions">
+        <button className="wizard-button secondary" onClick={() => setStep('agents')}>
+          Back
+        </button>
         <button className="wizard-button primary" onClick={() => setStep('mcp')}>
           Next
         </button>
@@ -286,7 +380,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
       </div>
 
       <div className="step-actions">
-        <button className="wizard-button secondary" onClick={() => setStep('agents')}>
+        <button className="wizard-button secondary" onClick={() => setStep('commands')}>
           Back
         </button>
         <button className="wizard-button primary" onClick={() => setStep('confirm')}>
@@ -307,7 +401,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         <div className="confirm-section">
           <h4 className="confirm-label">Project Location</h4>
           <div className="confirm-value">
-            <span className="folder-icon">&#128193;</span>
+            <span className="folder-icon"><FolderOpen size={ICON_SIZE.lg} /></span>
             <div>
               <strong>{projectName}</strong>
               <span className="path">{projectPath}</span>
@@ -324,9 +418,17 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             <li>
               <code>.claude/agents/</code> - Local agents directory
             </li>
+            <li>
+              <code>.claude/commands/</code> - Local commands directory
+            </li>
             {selectedAgents.size > 0 && (
               <li>
                 {selectedAgents.size} agent file{selectedAgents.size !== 1 ? 's' : ''} copied
+              </li>
+            )}
+            {selectedCommands.size > 0 && (
+              <li>
+                {selectedCommands.size} command file{selectedCommands.size !== 1 ? 's' : ''} copied
               </li>
             )}
           </ul>
@@ -341,6 +443,21 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
                 .map((agent) => (
                   <span key={agent.id} className="agent-tag">
                     {agent.agent.name}
+                  </span>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {selectedCommands.size > 0 && (
+          <div className="confirm-section">
+            <h4 className="confirm-label">Commands to Import ({selectedCommands.size})</h4>
+            <div className="selected-agents">
+              {availableCommands
+                .filter((c) => selectedCommands.has(c.id))
+                .map((command) => (
+                  <span key={command.id} className="agent-tag">
+                    {command.name}
                   </span>
                 ))}
             </div>
@@ -386,7 +503,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         <div className="wizard-header">
           <h2 className="wizard-title">New Project</h2>
           <button className="close-button" onClick={onCancel} title="Cancel">
-            &times;
+            <X size={ICON_SIZE.md} />
           </button>
         </div>
 
@@ -401,13 +518,18 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             <span className="step-label">Agents</span>
           </div>
           <div className="step-line" />
-          <div className={`step-indicator ${step === 'mcp' ? 'active' : ''}`}>
+          <div className={`step-indicator ${step === 'commands' ? 'active' : ''}`}>
             <span className="step-number">3</span>
+            <span className="step-label">Commands</span>
+          </div>
+          <div className="step-line" />
+          <div className={`step-indicator ${step === 'mcp' ? 'active' : ''}`}>
+            <span className="step-number">4</span>
             <span className="step-label">MCP</span>
           </div>
           <div className="step-line" />
           <div className={`step-indicator ${step === 'confirm' ? 'active' : ''}`}>
-            <span className="step-number">4</span>
+            <span className="step-number">5</span>
             <span className="step-label">Confirm</span>
           </div>
         </div>
@@ -415,6 +537,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         <div className="wizard-body">
           {step === 'folder' && renderFolderStep()}
           {step === 'agents' && renderAgentsStep()}
+          {step === 'commands' && renderCommandsStep()}
           {step === 'mcp' && renderMcpStep()}
           {step === 'confirm' && renderConfirmStep()}
         </div>

@@ -72,5 +72,16 @@
 }
 
 .settings-icon {
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-icon svg {
+  color: var(--ace-text-secondary);
+  transition: color var(--ace-transition-fast);
+}
+
+.settings-button:hover .settings-icon svg {
+  color: var(--ace-accent);
 }

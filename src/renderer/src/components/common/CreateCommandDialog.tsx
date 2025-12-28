@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { api } from '../../api'
+import { CommandIcons, COMMAND_ICON_OPTIONS, ICON_SIZE } from './icons'
 import './FormDialog.css'
 
 interface CreateCommandDialogProps {
@@ -7,21 +8,6 @@ interface CreateCommandDialogProps {
   onClose: () => void
   onCreated: () => void
 }
-
-const COMMAND_ICONS = [
-  { value: '⚡', label: 'Lightning' },
-  { value: '🔧', label: 'Wrench' },
-  { value: '📋', label: 'Clipboard' },
-  { value: '🎯', label: 'Target' },
-  { value: '💡', label: 'Idea' },
-  { value: '🔄', label: 'Sync' },
-  { value: '📤', label: 'Upload' },
-  { value: '📥', label: 'Download' },
-  { value: '🏃', label: 'Run' },
-  { value: '⏱️', label: 'Timer' },
-  { value: '🔗', label: 'Link' },
-  { value: '📌', label: 'Pin' }
-]
 
 export function CreateCommandDialog({
   isOpen,
@@ -31,7 +17,7 @@ export function CreateCommandDialog({
   const [name, setName] = useState('')
   const [command, setCommand] = useState('')
   const [description, setDescription] = useState('')
-  const [icon, setIcon] = useState('⚡')
+  const [icon, setIcon] = useState('zap')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const nameInputRef = useRef<HTMLInputElement>(null)
 
@@ -41,7 +27,7 @@ export function CreateCommandDialog({
       setName('')
       setCommand('')
       setDescription('')
-      setIcon('⚡')
+      setIcon('zap')
       setIsSubmitting(false)
       // Focus name input
       setTimeout(() => nameInputRef.current?.focus(), 50)
@@ -94,7 +80,12 @@ export function CreateCommandDialog({
     <div className="form-dialog-overlay" onClick={onClose}>
       <div className="form-dialog" onClick={(e) => e.stopPropagation()} onKeyDown={handleKeyDown}>
         <div className="form-dialog-header">
-          <span className="form-dialog-icon">⚡</span>
+          <span className="form-dialog-icon">
+            {(() => {
+              const HeaderIcon = CommandIcons[icon] || CommandIcons.zap
+              return <HeaderIcon size={ICON_SIZE.lg} />
+            })()}
+          </span>
           <h3 className="form-dialog-title">Create Quick Command</h3>
         </div>
 
@@ -144,17 +135,20 @@ export function CreateCommandDialog({
             <div className="form-dialog-field">
               <label className="form-dialog-label">Icon</label>
               <div className="icon-picker">
-                {COMMAND_ICONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    className={`icon-option ${icon === opt.value ? 'selected' : ''}`}
-                    onClick={() => setIcon(opt.value)}
-                    title={opt.label}
-                  >
-                    {opt.value}
-                  </button>
-                ))}
+                {COMMAND_ICON_OPTIONS.map((opt) => {
+                  const IconComponent = CommandIcons[opt.value]
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      className={`icon-option ${icon === opt.value ? 'selected' : ''}`}
+                      onClick={() => setIcon(opt.value)}
+                      title={opt.label}
+                    >
+                      <IconComponent size={ICON_SIZE.lg} />
+                    </button>
+                  )
+                })}
               </div>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type { Agent } from '../../../../preload/index.d'
+import { ChevronDown, ChevronRight, ICON_SIZE } from '../common/icons'
 import './AgentPromptDialog.css'
 
 interface AgentPromptDialogProps {
@@ -180,7 +181,8 @@ export function AgentPromptDialog({
               className="agent-prompt-preview-btn"
               onClick={() => setShowPreview(!showPreview)}
             >
-              {showPreview ? '▼' : '▶'} Preview XML
+              {showPreview ? <ChevronDown size={ICON_SIZE.sm} /> : <ChevronRight size={ICON_SIZE.sm} />}
+              <span>Preview XML</span>
             </button>
           </div>
 

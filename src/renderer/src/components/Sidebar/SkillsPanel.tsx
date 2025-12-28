@@ -9,16 +9,17 @@ import { api } from '../../api'
 import { Skill, SkillCategory } from '../../api/types'
 import { useLayoutStore } from '../../stores/layoutStore'
 import { PanelSettingsButton } from '../common/PanelSettingsPopover'
+import { SkillCategoryIcons, ChevronRight, Sparkles, Circle, ICON_SIZE } from '../common/icons'
 import './SkillsPanel.css'
 
-// Category display names and order
-const CATEGORY_INFO: Record<SkillCategory, { label: string; icon: string }> = {
-  research: { label: 'Research', icon: '🔍' },
-  coding: { label: 'Coding', icon: '💻' },
-  testing: { label: 'Testing', icon: '🧪' },
-  devops: { label: 'DevOps', icon: '🔧' },
-  collaboration: { label: 'Collaboration', icon: '👥' },
-  custom: { label: 'Custom', icon: '⚡' }
+// Category display names
+const CATEGORY_LABELS: Record<SkillCategory, string> = {
+  research: 'Research',
+  coding: 'Coding',
+  testing: 'Testing',
+  devops: 'DevOps',
+  collaboration: 'Collaboration',
+  custom: 'Custom'
 }
 
 const CATEGORY_ORDER: SkillCategory[] = [
@@ -142,20 +143,22 @@ export function SkillsPanel({ isHorizontal = false }: SkillsPanelProps): JSX.Ele
         {activeCategories.map((category) => {
           const categorySkills = skillsByCategory[category] || []
           const isExpanded = expandedCategories.has(category)
-          const info = CATEGORY_INFO[category]
-
+          const IconComponent = SkillCategoryIcons[category]
+          const label = CATEGORY_LABELS[category]
           return (
             <div key={category} className="skills-category">
               <button
                 className="skills-category-header"
                 onClick={() => toggleCategory(category)}
-                title={`${isExpanded ? 'Collapse' : 'Expand'} ${info.label}`}
+                title={`${isExpanded ? 'Collapse' : 'Expand'} ${label}`}
               >
-                <span className="skills-category-icon">{info.icon}</span>
-                <span className="skills-category-name">{info.label}</span>
+                <span className="skills-category-icon">
+                  {IconComponent && <IconComponent size={ICON_SIZE.md} />}
+                </span>
+                <span className="skills-category-name">{label}</span>
                 <span className="skills-category-count">{categorySkills.length}</span>
                 <span className={`skills-category-chevron ${isExpanded ? 'expanded' : ''}`}>
-                  &#9654;
+                  <ChevronRight size={ICON_SIZE.sm} />
                 </span>
               </button>
               {isExpanded && (
@@ -166,7 +169,7 @@ export function SkillsPanel({ isHorizontal = false }: SkillsPanelProps): JSX.Ele
                       className={`skill-item ${skill.enabled ? 'enabled' : 'disabled'}`}
                       title={skill.description}
                     >
-                      <span className="skill-icon">{skill.icon || '●'}</span>
+                      <span className="skill-icon">{skill.icon || <Sparkles size={ICON_SIZE.sm} />}</span>
                       <div className="skill-info">
                         <span className="skill-name">{skill.name}</span>
                         {skill.provider !== 'builtin' && (
@@ -177,7 +180,7 @@ export function SkillsPanel({ isHorizontal = false }: SkillsPanelProps): JSX.Ele
                         className={`skill-status ${skill.enabled ? 'active' : 'inactive'}`}
                         title={skill.enabled ? 'Active' : 'Inactive'}
                       >
-                        {skill.enabled ? '●' : '○'}
+                        <Circle size={ICON_SIZE.xs} fill={skill.enabled ? 'currentColor' : 'none'} />
                       </span>
                     </div>
                   ))}

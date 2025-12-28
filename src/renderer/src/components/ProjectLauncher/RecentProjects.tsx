@@ -3,6 +3,8 @@
  * Displays list of recently opened projects
  */
 
+import { Folder, ICON_SIZE } from '../common/icons'
+
 interface RecentProject {
   name: string
   path: string
@@ -54,7 +56,7 @@ export function RecentProjects({
           className={`project-item ${selectedPath === project.path ? 'selected' : ''}`}
           onClick={() => onSelect(project)}
         >
-          <span className="project-icon">📁</span>
+          <span className="project-icon"><Folder size={ICON_SIZE.md} /></span>
           <div className="project-info">
             <span className="project-name">{project.name}</span>
             <span className="project-path">{project.path}</span>

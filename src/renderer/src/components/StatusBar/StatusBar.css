@@ -85,7 +85,13 @@
 }
 
 .status-icon {
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-icon svg {
+  color: var(--ace-text-muted);
 }
 
 .status-divider {
@@ -136,9 +142,18 @@
   transition: color var(--ace-transition-fast), background-color var(--ace-transition-fast);
 }
 
+.status-zoom-btn svg {
+  color: var(--ace-text-secondary);
+  transition: color var(--ace-transition-fast);
+}
+
 .status-zoom-btn:hover {
   color: var(--ace-text-primary);
   background-color: var(--ace-bg-active);
+}
+
+.status-zoom-btn:hover svg {
+  color: var(--ace-text-primary);
 }
 
 .status-zoom-btn:active {
@@ -174,12 +189,26 @@
   border-radius: 3px;
   transition: color var(--ace-transition-fast), background-color var(--ace-transition-fast);
   margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-action-btn svg,
+.status-settings-btn svg {
+  color: var(--ace-text-secondary);
+  transition: color var(--ace-transition-fast);
 }
 
 .status-action-btn:hover,
 .status-settings-btn:hover {
   color: var(--ace-text-primary);
   background-color: var(--ace-bg-hover);
+}
+
+.status-action-btn:hover svg,
+.status-settings-btn:hover svg {
+  color: var(--ace-text-primary);
 }
 
 .status-action-btn:active,
@@ -203,7 +232,15 @@
   color: var(--ace-success);
 }
 
+.status-save-saved svg {
+  color: var(--ace-success);
+}
+
 .status-save-error {
+  color: var(--ace-error);
+}
+
+.status-save-error svg {
   color: var(--ace-error);
 }
 

@@ -84,9 +84,14 @@
 }
 
 .skills-category-icon {
-  font-size: calc(14px * var(--font-scale, 1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 20px;
-  text-align: center;
+}
+
+.skills-category-icon svg {
+  color: var(--ace-text-secondary);
 }
 
 .skills-category-name {
@@ -103,9 +108,14 @@
 }
 
 .skills-category-chevron {
-  font-size: calc(10px * var(--font-scale, 1));
-  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.2s ease;
+}
+
+.skills-category-chevron svg {
+  color: var(--text-muted);
 }
 
 .skills-category-chevron.expanded {
