@@ -161,21 +161,14 @@ export class ProjectConfigManager {
       fs.mkdirSync(claudeAgentsDir, { recursive: true })
 
       // Create a sample agent file
-      const sampleAgentPath = path.join(claudeAgentsDir, 'example.toml')
-      const sampleAgent = `# Example Project Agent
-# Project-specific agents live in .claude/agents/
-# Global agents are in ACE's app data directory
+      const sampleAgentPath = path.join(claudeAgentsDir, 'example.md')
+      const sampleAgent = `---
+name: Project Helper
+description: A helpful agent for this project
+---
 
-[agent]
-name = "Project Helper"
-description = "A helpful agent for this project"
-# hotkey = "Ctrl+1"  # Uncomment to assign a hotkey
-
-[prompt]
-text = """
 You are a helpful assistant for this project.
 Focus on providing clear, accurate information.
-"""
 `
       fs.writeFileSync(sampleAgentPath, sampleAgent, 'utf-8')
     }

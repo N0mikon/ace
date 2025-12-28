@@ -108,6 +108,9 @@ export function AgentPanel({ onInjectPrompt, isHorizontal = false }: AgentPanelP
             <div
               key={agent.id}
               className="agent-item"
+              style={
+                agent.agent.color ? { borderLeftColor: agent.agent.color, borderLeftWidth: 3 } : undefined
+              }
               onClick={() => handleAgentClick(agent)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -124,6 +127,16 @@ export function AgentPanel({ onInjectPrompt, isHorizontal = false }: AgentPanelP
               <div className="agent-info">
                 <div className="agent-name">{agent.agent.name}</div>
                 <div className="agent-description">{agent.agent.description}</div>
+                {agent.agent.tools && (
+                  <div className="agent-tools">
+                    <span className="agent-tools-label">Tools:</span> {agent.agent.tools}
+                  </div>
+                )}
+                {agent.agent.model && (
+                  <div className="agent-model">
+                    <span className="agent-model-label">Model:</span> {agent.agent.model}
+                  </div>
+                )}
               </div>
               {agent.agent.hotkey && <span className="agent-hotkey">{agent.agent.hotkey}</span>}
               <div className="agent-actions">

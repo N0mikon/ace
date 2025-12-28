@@ -1,12 +1,62 @@
 /**
  * Agent system for ACE
- * Loads, parses, and watches agent TOML files
+ * Loads, parses, and watches agent Markdown files with YAML frontmatter
  */
 
 import * as fs from 'fs'
 import * as path from 'path'
-import * as TOML from '@iarna/toml'
 import { app } from 'electron'
+
+// Markdown agent file structure (with YAML frontmatter)
+interface MdAgentFile {
+  name: string
+  description: string
+  tools?: string
+  model?: string
+  color?: string
+  hotkey?: string
+  icon?: string
+  prompt: string
+}
+
+/**
+ * Parse a markdown agent file with YAML frontmatter
+ */
+function parseMdAgentFile(content: string): MdAgentFile | null {
+  // Match YAML frontmatter between --- delimiters
+  const frontmatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
+
+  if (!frontmatterMatch) {
+    return null
+  }
+
+  const frontmatter = frontmatterMatch[1]
+  const body = frontmatterMatch[2].trim()
+
+  // Parse YAML frontmatter (simple key: value parsing)
+  const fields: Record<string, string> = {}
+  for (const line of frontmatter.split(/\r?\n/)) {
+    const match = line.match(/^(\w+):\s*(.*)$/)
+    if (match) {
+      fields[match[1]] = match[2].trim()
+    }
+  }
+
+  if (!fields.name || !fields.description) {
+    return null
+  }
+
+  return {
+    name: fields.name,
+    description: fields.description,
+    tools: fields.tools,
+    model: fields.model,
+    color: fields.color,
+    hotkey: fields.hotkey,
+    icon: fields.icon,
+    prompt: body
+  }
+}
 
 // Agent definition types
 export interface AgentPrompt {
@@ -16,6 +66,9 @@ export interface AgentPrompt {
 export interface AgentOptions {
   suggestedTools?: string[]
   contextNotes?: string
+  tools?: string // Comma-separated tool list from MD
+  model?: string // Model preference (sonnet, opus, haiku)
+  color?: string // UI color hint
 }
 
 export interface AgentDefinition {
@@ -23,6 +76,9 @@ export interface AgentDefinition {
   description: string
   hotkey?: string
   icon?: string
+  tools?: string // Comma-separated tool list from MD
+  model?: string // Model preference (sonnet, opus, haiku)
+  color?: string // UI color hint
 }
 
 export interface Agent {
@@ -202,17 +258,20 @@ class AgentManager {
     }
 
     try {
-      // Validate TOML before saving
-      TOML.parse(content)
+      // Validate MD format before saving
+      const parsed = parseMdAgentFile(content)
+      if (!parsed) {
+        return {
+          success: false,
+          error: 'Invalid markdown format: missing frontmatter or required fields (name, description)'
+        }
+      }
 
       fs.writeFileSync(agent.filePath, content, 'utf-8')
       this.loadAgents()
       this.changeCallback?.()
       return { success: true }
     } catch (err) {
-      if (err instanceof Error && err.message.includes('Unexpected')) {
-        return { success: false, error: `Invalid TOML syntax: ${err.message}` }
-      }
       return { success: false, error: `Failed to save file: ${err}` }
     }
   }
@@ -221,7 +280,7 @@ class AgentManager {
    * Create a new agent file from template
    */
   createAgent(name: string, description: string, promptText: string): string | null {
-    const fileName = this.sanitizeFileName(name) + '.toml'
+    const fileName = this.sanitizeFileName(name) + '.md'
     const filePath = path.join(this.globalDirectory, fileName)
 
     if (fs.existsSync(filePath)) {
@@ -229,22 +288,12 @@ class AgentManager {
       return null
     }
 
-    const content = `# Agent: ${name}
+    const content = `---
+name: ${name}
+description: ${description}
+---
 
-[agent]
-name = "${name}"
-description = "${description}"
-# hotkey = "Ctrl+1"
-# icon = "default"
-
-[prompt]
-text = """
 ${promptText}
-"""
-
-[options]
-# suggested_tools = ["web_search"]
-# context_notes = ""
 `
 
     try {
@@ -363,7 +412,7 @@ ${promptText}
   private loadAgentsIntoMap(dir: string, targetMap: Map<string, Agent>): void {
     if (!fs.existsSync(dir)) return
 
-    const files = fs.readdirSync(dir).filter((f) => f.endsWith('.toml'))
+    const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'))
 
     for (const file of files) {
       const filePath = path.join(dir, file)
@@ -377,34 +426,36 @@ ${promptText}
   private parseAgentFile(filePath: string): Agent | null {
     try {
       const content = fs.readFileSync(filePath, 'utf-8')
-      const parsed = TOML.parse(content) as unknown as AgentFile
+      const parsed = parseMdAgentFile(content)
 
-      if (!parsed.agent || !parsed.prompt) {
-        console.warn(`Invalid agent file (missing agent or prompt): ${filePath}`)
+      if (!parsed) {
+        console.warn(`Invalid agent file (missing frontmatter or required fields): ${filePath}`)
         return null
       }
 
-      // Generate ID from filename
-      const id = path.basename(filePath, '.toml')
-
-      // Handle snake_case to camelCase conversion for options
-      const options: AgentOptions | undefined = parsed.options
-        ? {
-            suggestedTools: (parsed.options as Record<string, unknown>).suggested_tools as
-              | string[]
-              | undefined,
-            contextNotes: (parsed.options as Record<string, unknown>).context_notes as
-              | string
-              | undefined
-          }
-        : undefined
+      // Generate ID from filename (remove .md extension)
+      const id = path.basename(filePath, '.md')
 
       return {
         id,
         filePath,
-        agent: parsed.agent,
-        prompt: parsed.prompt,
-        options
+        agent: {
+          name: parsed.name,
+          description: parsed.description,
+          hotkey: parsed.hotkey,
+          icon: parsed.icon,
+          tools: parsed.tools,
+          model: parsed.model,
+          color: parsed.color
+        },
+        prompt: {
+          text: parsed.prompt
+        },
+        options: {
+          tools: parsed.tools,
+          model: parsed.model,
+          color: parsed.color
+        }
       }
     } catch (err) {
       console.error(`Failed to parse agent file ${filePath}:`, err)
@@ -419,7 +470,7 @@ ${promptText}
     // Watch global directory
     if (fs.existsSync(this.globalDirectory)) {
       const watcher = fs.watch(this.globalDirectory, (_eventType, filename) => {
-        if (filename?.endsWith('.toml')) {
+        if (filename?.endsWith('.md')) {
           console.log(`Agent file changed: ${filename}`)
           this.loadAgents()
           this.changeCallback?.()
@@ -431,7 +482,7 @@ ${promptText}
     // Watch project directory
     if (this.projectDirectory && fs.existsSync(this.projectDirectory)) {
       const watcher = fs.watch(this.projectDirectory, (_eventType, filename) => {
-        if (filename?.endsWith('.toml')) {
+        if (filename?.endsWith('.md')) {
           console.log(`Project agent file changed: ${filename}`)
           this.loadAgents()
           this.changeCallback?.()

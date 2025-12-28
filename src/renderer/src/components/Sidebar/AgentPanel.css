@@ -179,6 +179,19 @@
   text-overflow: ellipsis;
 }
 
+.agent-tools,
+.agent-model {
+  font-size: calc(9px * var(--font-scale, 1));
+  color: var(--ace-text-muted, #7A7770);
+  margin-top: 2px;
+}
+
+.agent-tools-label,
+.agent-model-label {
+  color: var(--ace-text-secondary);
+  font-weight: 500;
+}
+
 .agent-hotkey {
   font-size: calc(10px * var(--font-scale, 1));
   color: var(--ace-text-secondary);

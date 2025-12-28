@@ -120,6 +120,9 @@ export interface AgentDefinition {
   description: string
   hotkey?: string
   icon?: string
+  tools?: string
+  model?: string
+  color?: string
 }
 
 export interface AgentPrompt {
@@ -129,6 +132,9 @@ export interface AgentPrompt {
 export interface AgentOptions {
   suggestedTools?: string[]
   contextNotes?: string
+  tools?: string
+  model?: string
+  color?: string
 }
 
 export interface Agent {
